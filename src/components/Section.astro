@@ -1,0 +1,50 @@
+---
+import Container from './Container.astro';
+
+/*
+  Vertical rhythm plus an optional surface change. Sections are the only place
+  vertical page spacing is decided, so the page doesn't accumulate one-off
+  margins.
+*/
+
+interface Props {
+  id?: string;
+  surface?: 'base' | 'sunken' | 'raised' | 'none';
+  width?: 'measure' | 'content' | 'wide';
+  size?: 'default' | 'compact';
+  /** Stagger any [data-reveal] children together rather than one at a time. */
+  revealGroup?: boolean;
+  class?: string;
+}
+
+const {
+  id,
+  surface = 'base',
+  width = 'content',
+  size = 'default',
+  revealGroup = false,
+  class: className = '',
+} = Astro.props;
+
+const surfaces = {
+  base: 'bg-surface',
+  sunken: 'bg-surface-sunken',
+  raised: 'bg-surface-raised',
+  none: '',
+} as const;
+
+const sizes = {
+  default: 'py-section-sm md:py-section',
+  compact: 'py-section-sm',
+} as const;
+---
+
+<section
+  id={id}
+  class:list={[surfaces[surface], sizes[size], className]}
+  data-reveal-group={revealGroup ? '' : undefined}
+>
+  <Container width={width}>
+    <slot />
+  </Container>
+</section>

@@ -1,0 +1,150 @@
+---
+import Container from './Container.astro';
+import { NAV, SITE } from '../config';
+
+/*
+  Site navigation.
+
+  The mobile panel is plain CSS and a handful of lines of vanilla JS rather
+  than anything from the motion module — navigation has to work whether or not
+  GSAP loaded, and it has to work identically under reduced motion.
+*/
+
+const path = Astro.url.pathname;
+const isCurrent = (href: string) => path === href || path === href.replace(/\/$/, '');
+---
+
+<!--
+  Not persisted across view transitions on purpose: a persisted header keeps
+  the DOM it was rendered with, which would leave aria-current pointing at the
+  page you just left.
+-->
+<header class="sticky top-0 z-50 border-b border-edge/60 bg-surface/85 backdrop-blur-md">
+  <Container width="wide">
+    <nav class="flex h-16 items-center justify-between gap-6" aria-label="Main">
+      <a
+        href="/"
+        class="transition-soft font-display text-lg tracking-tighter text-fg-bright hover:text-accent"
+      >
+        {SITE.name}
+      </a>
+
+      <ul class="hidden items-center gap-8 md:flex">
+        {
+          NAV.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                aria-current={isCurrent(item.href) ? 'page' : undefined}
+                class="transition-soft text-sm tracking-wide text-fg-muted hover:text-fg-bright aria-[current=page]:text-accent"
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <button
+        type="button"
+        class="transition-soft -mr-2 flex h-10 w-10 items-center justify-center rounded-card text-fg-muted hover:text-fg-bright md:hidden"
+        aria-expanded="false"
+        aria-controls="mobile-nav"
+        data-nav-toggle
+      >
+        <span class="sr-only">Menu</span>
+        <svg
+          width="20"
+          height="14"
+          viewBox="0 0 20 14"
+          fill="none"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path d="M0 1h20M0 7h20M0 13h20" stroke="currentColor" stroke-width="1.5" />
+        </svg>
+      </button>
+    </nav>
+  </Container>
+
+  <div
+    id="mobile-nav"
+    hidden
+    class="border-t border-edge bg-surface-raised md:hidden"
+    data-nav-panel
+  >
+    <Container width="wide">
+      <ul class="flex flex-col py-4">
+        {
+          NAV.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                aria-current={isCurrent(item.href) ? 'page' : undefined}
+                class="transition-soft block py-3 text-lg text-fg hover:text-accent aria-[current=page]:text-accent"
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </Container>
+  </div>
+</header>
+
+<script>
+  /*
+    Deliberately independent of the motion module. If GSAP fails to load, the
+    menu still opens. Re-runs on every view transition because the header is
+    persisted but its listeners are not re-attached by Astro.
+  */
+  const current = () => ({
+    toggle: document.querySelector<HTMLButtonElement>('[data-nav-toggle]'),
+    panel: document.querySelector<HTMLElement>('[data-nav-panel]'),
+  });
+
+  const setOpen = (open: boolean) => {
+    const { toggle, panel } = current();
+    if (!toggle || !panel) return;
+    toggle.setAttribute('aria-expanded', String(open));
+    panel.hidden = !open;
+  };
+
+  const setupNav = () => {
+    const { toggle } = current();
+    if (!toggle) return;
+
+    /*
+      Bind once per button. `astro:page-load` also fires on the very first
+      load, so without this guard the initial page gets two click listeners —
+      the first opens the panel and the second immediately closes it again,
+      which looks exactly like a dead button.
+    */
+    if (toggle.dataset.navReady === 'true') return;
+    toggle.dataset.navReady = 'true';
+
+    toggle.addEventListener('click', () => {
+      setOpen(toggle.getAttribute('aria-expanded') !== 'true');
+    });
+  };
+
+  /*
+    Document-level listeners are bound exactly once. This script is a module,
+    so it executes once per session while setupNav runs again on every view
+    transition — binding these inside setupNav would stack a fresh listener on
+    every navigation.
+  */
+  document.addEventListener('keydown', (event) => {
+    const { toggle } = current();
+    if (event.key !== 'Escape' || toggle?.getAttribute('aria-expanded') !== 'true') return;
+    setOpen(false);
+    toggle.focus();
+  });
+
+  /* Close before navigating, so the panel isn't left open over the new page. */
+  document.addEventListener('astro:before-swap', () => setOpen(false));
+
+  setupNav();
+  document.addEventListener('astro:page-load', setupNav);
+</script>

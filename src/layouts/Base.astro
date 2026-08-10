@@ -1,0 +1,95 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { FONTS, SITE } from '../config';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Page-specific social image. Per-study OG images land in Phase 6. */
+  ogImage?: string;
+}
+
+const { title, description = SITE.description, ogImage } = Astro.props;
+
+const pageTitle = title ? `${title} — ${SITE.name}` : SITE.title;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url);
+const ogUrl = ogImage ? new URL(ogImage, Astro.site ?? SITE.url) : undefined;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical.href} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical.href} />
+    <meta name="twitter:card" content={ogUrl ? 'summary_large_image' : 'summary'} />
+    {ogUrl && <meta property="og:image" content={ogUrl.href} />}
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    {
+      /* Only emitted once real font files exist. Preloading a missing file is
+         a 404 on every page load and a warning in every audit. */
+      FONTS.enabled &&
+        FONTS.preload.map((href) => (
+          <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />
+        ))
+    }
+
+    <ClientRouter />
+
+    <script is:inline>
+      /*
+        Runs before first paint. Two jobs:
+
+        1. Add .motion-ok so elements that animate in can start hidden without
+           a flash of content. Reduced-motion users never get the class, so
+           their content is visible from the first frame.
+
+        2. Arm a failsafe. If the motion module fails to load — a bad deploy, a
+           blocked bundle, an error in a dependency — nothing would ever remove
+           the hidden state and the page would render blank. The timeout
+           guarantees content appears regardless. initMotion() disarms it.
+      */
+      (function () {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        document.documentElement.classList.add('motion-ok');
+        window.__motionFailsafe = window.setTimeout(function () {
+          document.documentElement.classList.remove('motion-ok');
+        }, 3000);
+      })();
+    </script>
+  </head>
+
+  <body class="min-h-screen">
+    <a href="#main" class="skip-link bg-surface-raised px-4 py-3 text-sm text-fg-bright">
+      Skip to content
+    </a>
+
+    <Nav />
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <Footer />
+
+    <script>
+      import { initMotion } from '../scripts/motion';
+
+      initMotion();
+    </script>
+  </body>
+</html>

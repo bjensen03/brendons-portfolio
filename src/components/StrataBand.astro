@@ -1,0 +1,76 @@
+---
+/*
+  The strata band — layered sediment used as a section divider, and the same
+  idea the Phase 2 hero builds on at full scale.
+
+  Purely decorative, so it's hidden from the accessibility tree and ignores
+  pointer events. Each layer drifts at a different rate via [data-parallax];
+  the motion module skips all of it under reduced motion, and the band still
+  reads as an intentional geological edge when it's static.
+*/
+
+interface Props {
+  /** 'down' sits at the foot of a section, 'up' caps the top of the next one. */
+  facing?: 'down' | 'up';
+  size?: 'sm' | 'md' | 'lg';
+  /** Thin amber line along one seam — the light catching an edge. */
+  seam?: boolean;
+  class?: string;
+}
+
+const { facing = 'down', size = 'md', seam = true, class: className = '' } = Astro.props;
+
+const heights = {
+  sm: 'h-16 md:h-24',
+  md: 'h-24 md:h-40',
+  lg: 'h-32 md:h-56',
+} as const;
+
+/* Back layers travel further than front layers, which is what reads as depth.
+   Values are pixels across the band's full scroll range. */
+const layers = [
+  { d: 'M0,110 C240,84 480,146 720,116 C960,86 1200,138 1440,104 L1440,200 L0,200 Z', fill: 'var(--color-sandstone-700)', drift: -44 },
+  { d: 'M0,142 C300,116 520,174 780,142 C1020,114 1240,164 1440,136 L1440,200 L0,200 Z', fill: 'var(--color-sandstone-800)', drift: -28 },
+  { d: 'M0,168 C260,148 540,192 820,166 C1080,142 1260,184 1440,160 L1440,200 L0,200 Z', fill: 'var(--color-sandstone-900)', drift: -14 },
+  { d: 'M0,187 C320,173 600,201 900,185 C1140,172 1300,196 1440,183 L1440,200 L0,200 Z', fill: 'var(--color-sandstone-950)', drift: -6 },
+];
+
+const seamPath = 'M0,110 C240,84 480,146 720,116 C960,86 1200,138 1440,104';
+---
+
+<div
+  aria-hidden="true"
+  class:list={[
+    'pointer-events-none w-full overflow-hidden select-none',
+    heights[size],
+    facing === 'up' && 'rotate-180',
+    className,
+  ]}
+>
+  <svg
+    viewBox="0 0 1440 200"
+    preserveAspectRatio="none"
+    class="h-full w-full"
+    role="presentation"
+    focusable="false"
+  >
+    {
+      layers.map((layer, index) => (
+        <g data-parallax={String(layer.drift)}>
+          <path d={layer.d} fill={layer.fill} />
+          {/* The seam rides inside the back layer's group so it drifts with the
+              edge it traces instead of sliding off it. */}
+          {seam && index === 0 && (
+            <path
+              d={seamPath}
+              fill="none"
+              stroke="var(--color-amber-600)"
+              stroke-width="1.5"
+              opacity="0.5"
+            />
+          )}
+        </g>
+      ))
+    }
+  </svg>
+</div>
