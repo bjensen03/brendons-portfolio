@@ -1,0 +1,47 @@
+---
+import Section from './Section.astro';
+
+/*
+  The positioning statement.
+
+  First thing after the hero, and the sentence that has to do the most work on
+  the whole site: it's what a hiring manager or a client reads before deciding
+  whether to keep scrolling.
+
+  PHASE 0: this copy is my best guess at Brendon's positioning, not his own
+  words. It's here so the section can be built and judged — replace it. The
+  shape to keep is a plain claim about outcomes, not a list of technologies.
+
+  The headline is split per character by the motion module. It carries an
+  aria-label automatically, so screen readers get the sentence rather than
+  thirty-one separate letters.
+*/
+---
+
+<Section surface="base" width="content" revealGroup>
+  <p class="font-body text-2xs tracking-widest text-fg-faint uppercase" data-reveal>
+    What I actually do
+  </p>
+
+  <h2
+    class="mt-8 max-w-[18ch] font-display text-5xl leading-[0.92] uppercase md:text-7xl"
+    style="letter-spacing: var(--tracking-display);"
+    data-split
+  >
+    Websites that hold up after launch.
+  </h2>
+
+  <div class="mt-12 grid gap-10 md:grid-cols-2">
+    <p class="max-w-measure font-body text-lg text-fg md:text-xl" data-reveal>
+      Most sites I inherit were built to look finished on launch day and not much further.
+      I build the other kind — fast, accessible, and structured so the next change doesn't
+      break the last one.
+    </p>
+
+    <p class="max-w-measure font-body text-base text-fg-muted" data-reveal>
+      I work mostly with marketing teams and small businesses, which means the brief usually
+      arrives as a number rather than a page. That suits me: it's easier to tell whether the
+      work succeeded.
+    </p>
+  </div>
+</Section>

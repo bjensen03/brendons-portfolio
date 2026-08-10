@@ -1,0 +1,57 @@
+---
+import Section from './Section.astro';
+import { PROOF } from '../config';
+
+/*
+  Proof strip.
+
+  Numbers come from config.ts, which is empty until real ones exist. The
+  placeholders below are visibly marked and use obviously fake values — a
+  plausible-looking invented number is the one thing this section must never
+  ship, because a client or an interviewer may well ask where it came from.
+*/
+
+const placeholders = [
+  { value: '00', label: 'Your metric here', source: 'placeholder' },
+  { value: '00%', label: 'Your metric here', source: 'placeholder' },
+  { value: '0.0s', label: 'Your metric here', source: 'placeholder' },
+];
+
+const usingPlaceholders = PROOF.length === 0;
+const stats = usingPlaceholders ? placeholders : PROOF;
+---
+
+<Section surface="base" width="wide" size="compact" revealGroup>
+  <div class="flex flex-wrap items-baseline justify-between gap-4">
+    <h2 class="font-body text-2xs tracking-widest text-fg-faint uppercase" data-reveal>
+      What it added up to
+    </h2>
+    {
+      usingPlaceholders && (
+        <p class="font-body text-2xs tracking-widest text-signal uppercase" data-reveal>
+          Placeholder — real numbers only, see PROOF in config.ts
+        </p>
+      )
+    }
+  </div>
+
+  <dl class="mt-10 grid gap-px border border-edge bg-edge sm:grid-cols-3">
+    {
+      stats.map((stat) => (
+        <div class="flex flex-col gap-2 bg-surface p-7 md:p-9" data-reveal>
+          <dt class="font-body text-2xs tracking-widest text-fg-faint uppercase">{stat.label}</dt>
+          <dd
+            class:list={[
+              'font-display text-5xl md:text-6xl',
+              usingPlaceholders ? 'text-fg-faint' : 'text-fg-bright',
+            ]}
+            style="letter-spacing: var(--tracking-display);"
+          >
+            {stat.value}
+          </dd>
+          <p class="font-body text-2xs text-fg-faint">{stat.source}</p>
+        </div>
+      ))
+    }
+  </dl>
+</Section>

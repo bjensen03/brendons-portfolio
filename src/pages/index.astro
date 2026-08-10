@@ -1,80 +1,27 @@
 ---
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
-import Section from '../components/Section.astro';
+import Positioning from '../components/Positioning.astro';
+import SelectedWork from '../components/SelectedWork.astro';
+import Lenses from '../components/Lenses.astro';
+import Proof from '../components/Proof.astro';
+import ContactCta from '../components/ContactCta.astro';
 
 /*
   Home page.
 
-  The hero is real. Everything below it is still scaffolding: the selected-work
-  rows are placeholders until Phase 0 content exists, and the lenses strip,
-  proof strip and hover video previews are Phase 2 proper.
+  Structure is Phase 2 complete. Two sections render marked placeholders until
+  Phase 0 content exists: selected work fills itself from the projects
+  collection, and the proof strip fills from PROOF in config.ts. Neither
+  invents anything.
 */
-
-const work = [
-  { client: 'ProLook Sports', outcome: 'Rebuilt the marketing front end', year: '2026' },
-  { client: 'Lincoln Academy', outcome: 'Full site revamp for a K–9 charter', year: '2026' },
-  { client: 'Third study', outcome: 'Still to be chosen', year: '2025' },
-];
 ---
 
 <Base>
   <Hero />
-
-  <Section surface="base" width="wide" revealGroup>
-    <div class="flex flex-wrap items-baseline justify-between gap-4">
-      <h2
-        class="font-display text-4xl uppercase md:text-5xl"
-        style="letter-spacing: var(--tracking-display);"
-        data-split
-      >
-        Selected work
-      </h2>
-      <p class="font-body text-2xs tracking-widest text-fg-faint uppercase" data-reveal>
-        Placeholder — awaiting real case studies
-      </p>
-    </div>
-
-    <ul class="mt-10 divide-y divide-edge border-y border-edge">
-      {
-        work.map((item) => (
-          <li data-reveal>
-            <a
-              href="/work/"
-              class="transition-soft group grid gap-2 py-6 sm:grid-cols-[1fr_2fr_auto] sm:items-baseline sm:gap-8"
-            >
-              <span class="font-body text-lg text-fg-bright group-hover:text-signal">
-                {item.client}
-              </span>
-              <span class="font-body text-base text-fg-muted">{item.outcome}</span>
-              <span class="font-body text-2xs tracking-widest text-fg-faint uppercase">
-                {item.year}
-              </span>
-            </a>
-          </li>
-        ))
-      }
-    </ul>
-
-    <div class="mt-14 grid gap-10 md:grid-cols-2">
-      <p class="max-w-measure font-body text-lg text-fg-muted" data-reveal>
-        Near-black rock, bone type, and one colour reserved for anything you can interact
-        with. The hero holds no colour at all — light through a slot canyon is just light.
-      </p>
-      <div class="flex flex-wrap items-start gap-3 md:justify-end" data-reveal>
-        <a
-          href="/work/"
-          class="transition-soft inline-flex items-center rounded-full bg-signal px-6 py-3 font-body text-sm text-surface hover:bg-signal-bright"
-        >
-          See the work
-        </a>
-        <a
-          href="/contact/"
-          class="transition-soft inline-flex items-center rounded-full border border-edge-strong px-6 py-3 font-body text-sm text-fg hover:border-signal hover:text-signal"
-        >
-          Get in touch
-        </a>
-      </div>
-    </div>
-  </Section>
+  <Positioning />
+  <SelectedWork />
+  <Lenses />
+  <Proof />
+  <ContactCta />
 </Base>

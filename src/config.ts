@@ -31,3 +31,17 @@ export const NAV = [
   { href: '/lab/', label: 'Lab' },
   { href: '/contact/', label: 'Contact' },
 ] as const;
+
+/*
+  The proof strip.
+
+  REAL NUMBERS ONLY. Every entry needs a source you could produce if a client
+  or a hiring manager asked — analytics, a form-submission count, a sales
+  figure, a ranking. If a project has no honest number, write the qualitative
+  result into the case study instead and leave it out of here.
+
+  Empty on purpose. The home page renders clearly-marked placeholders while this
+  is empty so the layout can be judged, and switches to real content the moment
+  entries are added. Do not fill it with estimates.
+*/
+export const PROOF: Array<{ value: string; label: string; source: string }> = [];

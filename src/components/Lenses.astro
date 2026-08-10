@@ -1,0 +1,94 @@
+---
+import Section from './Section.astro';
+
+/*
+  The three lenses.
+
+  Development is deliberately first and largest. The site has to work for two
+  audiences at once, and of the two, hiring managers are the ones who will
+  bounce if the developer claim looks like an afterthought behind "design" and
+  "marketing". Contract clients read the whole page anyway.
+*/
+
+const lenses = [
+  {
+    name: 'Development',
+    weight: 'primary',
+    line: 'The part I am actually hired for.',
+    body: 'Astro, WordPress, plain PHP and whatever the project already runs on. Fast pages, sane markup, and code the next person can read.',
+    items: ['Astro & static sites', 'WordPress themes', 'ACF & custom fields', 'Performance & accessibility'],
+  },
+  {
+    name: 'Design',
+    weight: 'secondary',
+    line: 'Enough to be dangerous, and to take a handoff properly.',
+    body: 'I work from Figma daily and can carry a design the last mile without losing what made it good — or design the thing myself when there is no designer.',
+    items: ['Figma handoff', 'Design systems', 'Layout & type'],
+  },
+  {
+    name: 'Marketing',
+    weight: 'secondary',
+    line: 'Why the site exists in the first place.',
+    body: 'Most of my work is for marketing teams, so the brief is usually a number rather than a page. Landing pages, campaigns, and the analytics to tell whether it worked.',
+    items: ['Landing pages', 'Campaign builds', 'Analytics & SEO'],
+  },
+];
+---
+
+<Section surface="sunken" width="wide" revealGroup>
+  <h2
+    class="font-display text-4xl uppercase md:text-6xl"
+    style="letter-spacing: var(--tracking-display);"
+    data-split
+  >
+    Three lenses
+  </h2>
+
+  <p class="mt-6 max-w-measure font-body text-lg text-fg-muted" data-reveal>
+    One person, three angles on the same problem. Most projects need at least two of them.
+  </p>
+
+  {/* Emphasis on the primary lens comes from colour, type size and the Primary
+      label — not from a grid span, which only invents an empty second row. */}
+  <div class="mt-14 grid gap-px border border-edge bg-edge md:grid-cols-3">
+    {
+      lenses.map((lens) => (
+        <article class="flex flex-col gap-4 bg-surface p-7 md:p-9" data-reveal>
+          <div class="flex items-baseline justify-between gap-3">
+            <h3
+              class:list={[
+                'font-display uppercase',
+                lens.weight === 'primary' ? 'text-3xl text-signal md:text-4xl' : 'text-2xl md:text-3xl',
+              ]}
+              style="letter-spacing: var(--tracking-display);"
+            >
+              {lens.name}
+            </h3>
+            {lens.weight === 'primary' && (
+              <span class="font-body text-2xs tracking-widest text-fg-faint uppercase">
+                Primary
+              </span>
+            )}
+          </div>
+
+          <p
+            class:list={[
+              'font-body',
+              lens.weight === 'primary' ? 'text-lg text-fg-bright' : 'text-base text-fg',
+            ]}
+          >
+            {lens.line}
+          </p>
+
+          <p class="font-body text-sm text-fg-muted">{lens.body}</p>
+
+          <ul class="mt-auto flex flex-wrap gap-x-4 gap-y-2 pt-4">
+            {lens.items.map((item) => (
+              <li class="font-body text-2xs tracking-widest text-fg-faint uppercase">{item}</li>
+            ))}
+          </ul>
+        </article>
+      ))
+    }
+  </div>
+</Section>
