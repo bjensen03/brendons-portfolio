@@ -110,3 +110,41 @@ html[data-direction='beta'] {
   --tracking-display: 0em;
   color-scheme: dark;
 }
+
+/* ---------------------------------------------------------------------------
+   Accent variants for the Slot direction.
+
+   Prototype only — once an accent is chosen, its two values move into the
+   `slot` block above and this section is deleted. Ratios measured against the
+   Slot surface (#08090B); all clear AA.
+   --------------------------------------------------------------------------- */
+
+html[data-accent='bone'] {
+  --color-accent: #f2f0ea; /* 17.48 — no colour at all, the light is just light */
+  --color-accent-bright: #ffffff;
+  --color-accent-secondary: #9aa0ab;
+}
+
+html[data-accent='sun'] {
+  --color-accent: #ffd9a0; /* 14.88 — daylight through a gap, warm without brown */
+  --color-accent-bright: #ffeccb;
+  --color-accent-secondary: #b9a88f;
+}
+
+html[data-accent='ice'] {
+  --color-accent: #6ed8ff; /* 12.26 — cold light, high altitude */
+  --color-accent-bright: #a8e9ff;
+  --color-accent-secondary: #f2f0ea;
+}
+
+html[data-accent='cobalt'] {
+  --color-accent: #5c7cff; /* 5.48 */
+  --color-accent-bright: #93a8ff;
+  --color-accent-secondary: #f2f0ea;
+}
+
+html[data-accent='vermilion'] {
+  --color-accent: #ff5232; /* 6.17 — the one warm option that is nowhere near brown */
+  --color-accent-bright: #ff8b74;
+  --color-accent-secondary: #f2f0ea;
+}

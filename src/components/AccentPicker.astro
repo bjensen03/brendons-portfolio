@@ -1,0 +1,102 @@
+---
+/*
+  Prototype-only accent switcher.
+
+  Exists so the accent can be chosen by looking at it rather than by reading
+  hex codes. Delete this component, its route usage and the [data-accent]
+  blocks in directions.css once a colour is picked.
+
+  Swatches are pure buttons with real labels — even a throwaway tool shouldn't
+  be keyboard-hostile, and it takes no longer to do it properly.
+*/
+
+const ACCENTS = [
+  { id: 'lime', label: 'Lime', swatch: '#d6f84c', note: 'current' },
+  { id: 'bone', label: 'Bone', swatch: '#f2f0ea', note: 'no colour' },
+  { id: 'sun', label: 'Sun', swatch: '#ffd9a0', note: 'daylight' },
+  { id: 'ice', label: 'Ice', swatch: '#6ed8ff', note: 'cold' },
+  { id: 'cobalt', label: 'Cobalt', swatch: '#5c7cff', note: 'electric' },
+  { id: 'vermilion', label: 'Vermilion', swatch: '#ff5232', note: 'hot' },
+];
+---
+
+<aside
+  class="fixed right-4 bottom-4 z-50 rounded-full border border-edge bg-surface-raised/95 px-3 py-2 backdrop-blur-md"
+  data-accent-picker
+>
+  <div class="flex items-center gap-3">
+    <p class="hidden font-body text-2xs tracking-widest text-fg-faint uppercase sm:block">
+      Accent
+    </p>
+    <ul class="flex items-center gap-1.5">
+      {
+        ACCENTS.map((accent) => (
+          <li>
+            <button
+              type="button"
+              data-accent-choice={accent.id}
+              title={`${accent.label} — ${accent.note}`}
+              class="block h-7 w-7 rounded-full border-2 border-transparent transition-soft hover:scale-110 aria-[pressed=true]:border-fg-bright"
+              style={`background:${accent.swatch}`}
+              aria-pressed="false"
+            >
+              <span class="sr-only">
+                {accent.label} — {accent.note}
+              </span>
+            </button>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</aside>
+
+<script>
+  /*
+    Sets [data-accent] on <html>, which the variant blocks in directions.css
+    hang off. Choice persists across navigation so comparing the hero against
+    the section below it doesn't reset the colour.
+  */
+  const KEY = 'prototype-accent';
+
+  const apply = (id: string) => {
+    const root = document.documentElement;
+    if (id === 'lime') root.removeAttribute('data-accent');
+    else root.setAttribute('data-accent', id);
+
+    document.querySelectorAll<HTMLButtonElement>('[data-accent-choice]').forEach((button) => {
+      button.setAttribute('aria-pressed', String(button.dataset.accentChoice === id));
+    });
+
+    try {
+      sessionStorage.setItem(KEY, id);
+    } catch {
+      /* Private browsing. The picker still works, it just won't persist. */
+    }
+  };
+
+  const setup = () => {
+    const picker = document.querySelector('[data-accent-picker]');
+    if (!picker || picker.hasAttribute('data-ready')) return;
+    picker.setAttribute('data-ready', '');
+
+    picker.addEventListener('click', (event) => {
+      const button = (event.target as HTMLElement).closest<HTMLElement>('[data-accent-choice]');
+      if (button?.dataset.accentChoice) apply(button.dataset.accentChoice);
+    });
+  };
+
+  const restore = () => {
+    let saved = 'lime';
+    try {
+      saved = sessionStorage.getItem(KEY) ?? 'lime';
+    } catch {
+      /* ignore */
+    }
+    apply(saved);
+    setup();
+  };
+
+  restore();
+  document.addEventListener('astro:page-load', restore);
+</script>

@@ -2,12 +2,14 @@
 import Base from '../../layouts/Base.astro';
 import SlotHero from '../../components/heroes/SlotHero.astro';
 import DirectionScaffold from '../../components/DirectionScaffold.astro';
+import AccentPicker from '../../components/AccentPicker.astro';
 ---
 
 <Base title="Direction — Slot" direction="slot" bare>
   <SlotHero />
   <DirectionScaffold
     name="Slot"
-    idea="The canyon as geometry and light, not rock colour. Near-black walls, bone type, one acid accent."
+    idea="The canyon as geometry and light, not rock colour. Near-black walls, bone type, one accent — use the picker to choose it."
   />
+  <AccentPicker />
 </Base>
