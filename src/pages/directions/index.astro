@@ -1,0 +1,81 @@
+---
+import Base from '../../layouts/Base.astro';
+import Section from '../../components/Section.astro';
+
+/*
+  Comparison index. Deliberately plain — it's a chooser, not a design.
+*/
+
+const directions = [
+  {
+    slug: 'slot',
+    name: 'Slot',
+    line: 'Near-black, bone, acid lime',
+    idea: 'The canyon kept, the brown thrown out. Walls close in as you scroll and a shaft of light runs between them. Canyoneering as shape and light rather than rock colour.',
+    motion: 'Walls part on load, narrow on scroll, light tracks the cursor',
+    swatches: ['#08090b', '#f2f0ea', '#d6f84c', '#6ee7f9'],
+  },
+  {
+    slug: 'topo',
+    name: 'Topo',
+    line: 'Bone paper, ink, ultramarine',
+    idea: 'Light instead of dark, which is the cheapest way to not look generated — nearly all of those are dark. Contour lines carry the outdoors with no earth tones at all.',
+    motion: 'Contours draw outward, breathe continuously, lean toward the cursor',
+    swatches: ['#f4f2ed', '#14161a', '#2b2be0', '#c73d26'],
+  },
+  {
+    slug: 'beta',
+    name: 'Beta',
+    line: 'Black, cream, your photographs',
+    idea: 'The UI holds almost no colour because the imagery supplies it. The one direction that cannot look generated, because it runs on photos nobody else has. Frames are placeholders.',
+    motion: 'Type wipes up, frames drift against the scroll at different rates',
+    swatches: ['#0a0a0a', '#ede8dd', '#cd5142', '#444444'],
+  },
+];
+---
+
+<Base title="Design directions">
+  <Section width="content">
+    <p class="text-2xs tracking-widest text-accent uppercase">Pick one</p>
+    <h1 class="mt-6 font-display text-3xl tracking-tightest md:text-4xl">Three directions</h1>
+    <p class="mt-6 max-w-measure text-lg text-fg-muted">
+      Same content, same components, same motion system — only the tokens and the hero change.
+      Open each one and scroll it; the motion is most of the argument and doesn't survive a
+      screenshot.
+    </p>
+  </Section>
+
+  <Section width="content" surface="sunken" revealGroup>
+    <ul class="grid gap-6">
+      {
+        directions.map((direction) => (
+          <li data-reveal>
+            <a
+              href={`/directions/${direction.slug}/`}
+              class="transition-soft group block rounded-card border border-edge bg-surface-raised p-6 hover:border-accent md:p-8"
+            >
+              <div class="flex flex-wrap items-baseline justify-between gap-3">
+                <h2 class="font-display text-2xl text-fg-bright group-hover:text-accent">
+                  {direction.name}
+                </h2>
+                <p class="text-2xs tracking-widest text-fg-faint uppercase">{direction.line}</p>
+              </div>
+
+              <div class="mt-5 flex gap-2" aria-hidden="true">
+                {direction.swatches.map((swatch) => (
+                  <span
+                    class="h-8 w-8 rounded-full border border-edge"
+                    style={`background:${swatch}`}
+                  />
+                ))}
+              </div>
+
+              <p class="mt-5 max-w-measure text-base text-fg-muted">{direction.idea}</p>
+              <p class="mt-4 text-sm text-accent-secondary">{direction.motion}</p>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </Section>
+</Base>

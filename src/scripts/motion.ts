@@ -519,10 +519,25 @@ export const initMotion = (): void => {
     stopLenis();
   });
 
-  /* Build the first page ourselves rather than waiting for `astro:page-load`,
-     which may already have fired. buildPage is idempotent, so if the event is
-     still to come it costs one rebuild rather than leaving a duplicate. */
-  buildPage();
+  /*
+    ClientRouter fires `astro:page-load` for the initial document as well as
+    after every swap, so building here unconditionally would build the first
+    page twice — harmless for triggers, since buildPage tears down first, but
+    it restarts intro animations mid-flight and runs teardown against elements
+    the user is currently looking at.
+
+    So: build directly only when the router is absent, and keep a frame-later
+    safety net for the case where the event never arrives at all.
+  */
+  const routed = document.querySelector('meta[name="astro-view-transitions-enabled"]');
+
+  if (!routed) {
+    buildPage();
+  } else {
+    requestAnimationFrame(() => {
+      if (!built) buildPage();
+    });
+  }
 };
 
 declare global {

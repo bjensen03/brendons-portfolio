@@ -31,14 +31,3 @@ export const NAV = [
   { href: '/lab/', label: 'Lab' },
   { href: '/contact/', label: 'Contact' },
 ] as const;
-
-/*
-  Self-hosted fonts are off until the faces are licensed and subsetted. While
-  this is false, no preload link is emitted — a preload pointing at a missing
-  file is a 404 on every page load and a console warning on every audit.
-  See src/styles/fonts.css for the switch-on steps.
-*/
-export const FONTS = {
-  enabled: false,
-  preload: ['/fonts/display-600.woff2'],
-} as const;

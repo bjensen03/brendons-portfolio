@@ -1,0 +1,184 @@
+---
+/*
+  TOPO — bone paper, ink, ultramarine.
+
+  Light, which is the single cheapest way to not look like a generated
+  portfolio: almost all of those are dark. The outdoors idea is carried by
+  contour lines rather than earth colour, which also happens to be the most
+  honest metaphor for the work — reading a map, then finding the route.
+
+  The contours ripple continuously and lean toward the cursor. Everything here
+  is SVG, so it stays sharp and costs no images.
+*/
+
+const LINES = 13;
+
+/* Nested contour rings, each slightly larger and offset — a plausible-looking
+   topographic map rather than a stack of identical ellipses. */
+const contours = Array.from({ length: LINES }, (_, index) => {
+  const t = index / (LINES - 1);
+  return {
+    rx: 120 + t * 470,
+    ry: 74 + t * 300,
+    rotate: -14 + t * 9,
+    opacity: 0.14 + (1 - t) * 0.5,
+    drift: 6 + t * 30,
+    delay: t * 0.9,
+  };
+});
+---
+
+<section
+  class="topo-hero relative isolate flex min-h-[100svh] flex-col justify-between overflow-hidden bg-surface px-gutter py-8"
+  data-topo-hero
+>
+  <svg
+    class="pointer-events-none absolute inset-0 -z-10 h-full w-full"
+    viewBox="0 0 1440 900"
+    preserveAspectRatio="xMidYMid slice"
+    aria-hidden="true"
+    focusable="false"
+    data-topo-svg
+  >
+    <g data-topo-group>
+      {
+        contours.map((c) => (
+          <ellipse
+            cx="720"
+            cy="470"
+            rx={c.rx}
+            ry={c.ry}
+            transform={`rotate(${c.rotate} 720 470)`}
+            fill="none"
+            stroke="var(--color-accent)"
+            stroke-width="1.15"
+            opacity={c.opacity}
+            data-topo-line={c.drift}
+            data-topo-delay={c.delay}
+          />
+        ))
+      }
+    </g>
+  </svg>
+
+  <header class="flex items-start justify-between gap-6">
+    <p class="font-body text-2xs tracking-widest text-fg-muted uppercase">Brendon Jensen</p>
+    <p class="font-body text-2xs tracking-widest text-fg-muted uppercase">Available for work</p>
+  </header>
+
+  <div class="mx-auto w-full max-w-wide">
+    <h1
+      class="font-display leading-[0.88] font-extrabold text-fg-bright"
+      style="font-size: clamp(2.75rem, 9.5vw, 8.5rem); letter-spacing: var(--tracking-display);"
+      data-topo-title
+    >
+      <span class="block overflow-hidden"><span class="block" data-topo-line-in>Frontend developer</span></span>
+      <span class="block overflow-hidden"
+        ><span class="block text-accent" data-topo-line-in>who finishes the route.</span></span
+      >
+    </h1>
+
+    <div class="mt-10 grid gap-8 sm:grid-cols-2 sm:items-end">
+      <p class="max-w-measure font-body text-lg text-fg-muted" data-topo-fade>
+        Websites that load fast, read clearly and hold up after launch. Most of my work is for
+        small teams who need the thing to earn its keep.
+      </p>
+      <div class="flex gap-3 sm:justify-end" data-topo-fade>
+        <a
+          href="/work/"
+          class="transition-soft inline-flex items-center rounded-full bg-accent px-6 py-3 font-body text-sm text-surface-raised hover:bg-accent-bright"
+        >
+          See the work
+        </a>
+        <a
+          href="/contact/"
+          class="transition-soft inline-flex items-center rounded-full border border-edge-strong px-6 py-3 font-body text-sm text-fg hover:border-accent hover:text-accent"
+        >
+          Get in touch
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="flex items-end justify-between gap-6">
+    <p class="font-body text-2xs tracking-widest text-fg-faint uppercase">Scroll</p>
+    <p class="font-body text-2xs tracking-widest text-fg-faint uppercase">Est. 2016</p>
+  </footer>
+</section>
+
+<script>
+  import gsap from 'gsap';
+  import { registerMotion, prefersReducedMotion, ease, duration } from '../../scripts/motion';
+
+  registerMotion(() => {
+    const hero = document.querySelector<HTMLElement>('[data-topo-hero]');
+    if (!hero || prefersReducedMotion()) return;
+
+    const lines = hero.querySelectorAll<SVGEllipseElement>('[data-topo-line]');
+    const group = hero.querySelector<SVGGElement>('[data-topo-group]');
+    const headlines = hero.querySelectorAll<HTMLElement>('[data-topo-line-in]');
+    const fades = hero.querySelectorAll<HTMLElement>('[data-topo-fade]');
+
+    const intro = gsap.timeline();
+
+    /* Contours draw outward from the centre, like a map filling in. */
+    intro
+      .from(lines, {
+        scale: 0.72,
+        opacity: 0,
+        transformOrigin: '720px 470px',
+        duration: duration.slow * 1.3,
+        stagger: 0.045,
+        ease: ease.outStrata,
+      })
+      .from(
+        headlines,
+        { yPercent: 110, duration: duration.slow, stagger: 0.08, ease: ease.outStrata },
+        '-=1',
+      )
+      .from(fades, { opacity: 0, y: 16, duration: duration.base, stagger: 0.08, ease: ease.outSoft }, '-=0.6');
+
+    /* Each ring breathes at its own rate, so the map never sits still. */
+    const loops = Array.from(lines).map((line) => {
+      const drift = Number(line.dataset.topoLine) || 12;
+      return gsap.to(line, {
+        attr: { ry: `+=${drift * 0.5}`, rx: `+=${drift * 0.28}` },
+        duration: 4.5 + drift * 0.08,
+        delay: Number(line.dataset.topoDelay) || 0,
+        repeat: -1,
+        yoyo: true,
+        ease: ease.inOutSoft,
+      });
+    });
+
+    /* The whole map leans toward the cursor — parallax without a background
+       image, and it makes the page feel alive on a still hero. */
+    const fine = matchMedia('(hover: hover) and (pointer: fine)');
+    let onMove: ((event: PointerEvent) => void) | null = null;
+
+    if (fine.matches && group) {
+      const quickX = gsap.quickTo(group, 'x', { duration: 1.1, ease: ease.outSoft });
+      const quickY = gsap.quickTo(group, 'y', { duration: 1.1, ease: ease.outSoft });
+      onMove = (event: PointerEvent) => {
+        quickX((event.clientX / window.innerWidth - 0.5) * 70);
+        quickY((event.clientY / window.innerHeight - 0.5) * 46);
+      };
+      window.addEventListener('pointermove', onMove);
+    }
+
+    const drift = gsap.to(group, {
+      yPercent: -12,
+      ease: 'none',
+      scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: 0.5 },
+    });
+
+    return () => {
+      intro.kill();
+      loops.forEach((loop) => loop.kill());
+      drift.scrollTrigger?.kill();
+      drift.kill();
+      if (onMove) window.removeEventListener('pointermove', onMove);
+      gsap.set([...lines, group, ...headlines, ...fades], { clearProps: 'transform,opacity' });
+    };
+  });
+</script>

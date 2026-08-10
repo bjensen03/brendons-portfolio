@@ -1,6 +1,5 @@
 @import 'tailwindcss';
 @import 'lenis/dist/lenis.css';
-@import './fonts.css';
 
 /*
   Design tokens. This is the only file in the project that defines a colour,
@@ -93,6 +92,11 @@
   --text-6xl: 5.625rem;
   --text-6xl--line-height: 1;
 
+  /* Tracking for the oversized display type. Each direction overrides it —
+     a condensed face and a wide grotesque want very different values — but it
+     needs a default so components using it never emit an invalid declaration. */
+  --tracking-display: -0.02em;
+
   --tracking-tightest: -0.04em;
   --tracking-tighter: -0.02em;
   --tracking-wide: 0.04em;
@@ -128,12 +132,14 @@
     /* Lenis drives scrolling. Native smooth scroll would fight it. */
     scroll-behavior: auto;
     background-color: var(--color-surface-sunken);
+    /* Overridden per direction — the light direction needs light form controls
+       and scrollbars, and this is the property that decides them. */
     color-scheme: dark;
   }
 
   body {
     background-color: var(--color-surface);
-    color: var(--color-text);
+    color: var(--color-fg);
     font-family: var(--font-body);
     font-size: var(--text-base);
     -webkit-font-smoothing: antialiased;
@@ -145,7 +151,7 @@
   h3,
   h4 {
     font-family: var(--font-display);
-    color: var(--color-text-bright);
+    color: var(--color-fg-bright);
     letter-spacing: var(--tracking-tighter);
     text-wrap: balance;
   }
@@ -162,9 +168,11 @@
     border-radius: 2px;
   }
 
+  /* Semantic tokens, not ramp values — the direction palettes redefine these
+     and would otherwise be stuck with an amber selection highlight. */
   ::selection {
-    background-color: var(--color-amber-500);
-    color: var(--color-sandstone-950);
+    background-color: var(--color-accent);
+    color: var(--color-surface);
   }
 }
 
