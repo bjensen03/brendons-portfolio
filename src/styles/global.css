@@ -222,3 +222,58 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Signal colour candidates — TEMPORARY.
+
+   Everything else in the palette is settled. This is choosing the one colour
+   the site carries, used only for interaction: hover, focus, active nav,
+   buttons and selection.
+
+   Ratios are against rock-900 (#08090B) and hold in both directions, since the
+   colour is used as text on the surface AND as a button background with
+   surface-coloured text on top. All clear AA on rock-800 as well.
+
+   Once chosen, its two values move into the @theme block above as --color-signal
+   and --color-signal-bright, and this section plus SignalPicker.astro are
+   deleted.
+   --------------------------------------------------------------------------- */
+html[data-signal='cobalt'] {
+  --color-signal: #5c7cff; /* 5.48 — electric blue */
+  --color-signal-bright: #8da3ff; /* 8.36 */
+}
+
+html[data-signal='azure'] {
+  --color-signal: #3d9bff; /* 6.95 — bright sky blue */
+  --color-signal-bright: #77b9ff; /* 9.64 */
+}
+
+html[data-signal='ice'] {
+  --color-signal: #6ed8ff; /* 12.26 — cold cyan */
+  --color-signal-bright: #9ae4ff; /* 14.15 */
+}
+
+html[data-signal='violet'] {
+  --color-signal: #9b6bff; /* 5.64 — electric purple */
+  --color-signal-bright: #b997ff; /* 8.47 */
+}
+
+html[data-signal='orchid'] {
+  --color-signal: #ff5cc8; /* 7.23 — hot pink */
+  --color-signal-bright: #ff8dd9; /* 9.55 */
+}
+
+html[data-signal='periwinkle'] {
+  --color-signal: #a5b4ff; /* 10.03 — pale blue-violet */
+  --color-signal-bright: #c0cbff; /* 12.55 */
+}
+
+html[data-signal='steel'] {
+  --color-signal: #93a7c4; /* 8.12 — quiet blue-grey */
+  --color-signal-bright: #b3c1d6; /* 10.92 */
+}
+
+html[data-signal='bone'] {
+  --color-signal: #ffffff; /* 19.92 — no colour at all */
+  --color-signal-bright: #ffffff; /* 19.92 */
+}
