@@ -18,9 +18,9 @@ export default defineConfig({
     @font-face block and the size-adjust values that would otherwise have to be
     measured by hand.
 
-    Three families here because three design directions are being prototyped.
-    Once one is chosen, delete the other two — the font payload should be one
-    display face and one text face, not six.
+    Two families: one display face and one text face. Big Shoulders Display is
+    ultra-condensed and only reads at very large sizes; Space Grotesk carries
+    everything else.
   */
   fonts: [
     {
@@ -30,16 +30,6 @@ export default defineConfig({
       weights: ['400 900'],
       subsets: ['latin'],
       fallbacks: ['Impact', 'sans-serif'],
-      optimizedFallbacks: true,
-      display: 'swap',
-    },
-    {
-      name: 'Bricolage Grotesque',
-      cssVariable: '--font-bricolage',
-      provider: fontProviders.google(),
-      weights: ['400 800'],
-      subsets: ['latin'],
-      fallbacks: ['Helvetica Neue', 'sans-serif'],
       optimizedFallbacks: true,
       display: 'swap',
     },

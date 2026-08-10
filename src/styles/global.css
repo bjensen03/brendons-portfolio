@@ -6,74 +6,74 @@
   a duration or an easing curve. Everything downstream references a token —
   if you find yourself typing a hex value in a component, add a token instead.
 
-  Contrast is measured, not guessed. Ratios below are against sandstone-900
-  (the default page surface), computed with the WCAG 2.1 formula:
+  The palette is monochrome by design: near-black rock, bone type, and exactly
+  one colour. The hero holds no colour at all, because light through a slot
+  canyon is just light. Vermilion is Utah sandstone at full saturation and is
+  reserved for interaction — hover, focus, buttons, selection — so it stays
+  meaningful. If everything is highlighted, nothing is.
 
-    ink-50      16.81  AAA
-    ink-200     12.96  AAA   body copy
-    ink-400      7.46  AAA   muted copy
-    ink-500      5.11  AA    metadata only
-    amber-500    7.68  AAA   accent text — safe at any size
-    amber-600    5.34  AA    borders / large text
-    teal-400     8.42  AAA   secondary accent text
-    teal-500     5.89  AA    borders / large text
+  Contrast is measured, not guessed. Ratios against rock-900 (#08090B), the
+  default page surface, computed with the WCAG 2.1 formula:
 
-  On sandstone-700, ink-500 (4.02) and amber-600 (4.20) drop to large-text
-  only. Use ink-400 and amber-500 on raised surfaces.
+    bone-100    17.48  AAA   body copy and the display type
+    bone-50     18.90  AAA
+    bone-300     7.58  AAA   muted copy
+    bone-500     4.55  AA    metadata only, never body text
+    flare-500    6.17  AA    interaction — also passes inverted, as a button
+                             background carrying surface-coloured text
+    flare-400    8.62  AAA   interaction, hovered
 */
 
 @theme {
-  /* Sandstone — warm dark surfaces, deepest to lightest */
-  --color-sandstone-950: #120e0b;
-  --color-sandstone-900: #1a1410;
-  --color-sandstone-800: #241c16;
-  --color-sandstone-700: #33281f;
-  --color-sandstone-600: #4a3a2d;
-  --color-sandstone-500: #6b5544;
+  /* Rock — the surfaces, deepest to lightest */
+  --color-rock-950: #000000;
+  --color-rock-900: #08090b;
+  --color-rock-800: #121419;
+  --color-rock-700: #23262e;
+  --color-rock-600: #3a3f4a;
 
-  /* Ink — warm neutrals for text on dark */
-  --color-ink-50: #faf5ee;
-  --color-ink-200: #e2d8cb;
-  --color-ink-400: #b3a395;
-  --color-ink-500: #96856f;
+  /* Bone — the type */
+  --color-bone-50: #ffffff;
+  --color-bone-100: #f2f0ea;
+  --color-bone-300: #9aa0ab;
+  --color-bone-500: #727986;
 
-  /* Amber — the light shaft. Primary accent. */
-  --color-amber-300: #f2c879;
-  --color-amber-400: #edb253;
-  --color-amber-500: #e09a34;
-  --color-amber-600: #c07c22;
-
-  /* Teal — secondary accent, the cool counterweight */
-  --color-teal-300: #7fd9cc;
-  --color-teal-400: #4fc2b2;
-  --color-teal-500: #2fa394;
+  /* Flare — the one colour */
+  --color-flare-400: #ff8b74;
+  --color-flare-500: #ff5232;
 
   /* Semantic aliases. Components use these; raw ramps are for exceptions.
      Named `fg` rather than `text` so the generated utility reads `text-fg-muted`
      instead of `text-text-muted`. */
-  --color-surface: var(--color-sandstone-900);
-  --color-surface-sunken: var(--color-sandstone-950);
-  --color-surface-raised: var(--color-sandstone-800);
-  --color-edge: var(--color-sandstone-700);
-  --color-edge-strong: var(--color-sandstone-600);
-  --color-fg: var(--color-ink-200);
-  --color-fg-bright: var(--color-ink-50);
-  --color-fg-muted: var(--color-ink-400);
-  --color-fg-faint: var(--color-ink-500);
-  --color-accent: var(--color-amber-500);
-  --color-accent-bright: var(--color-amber-300);
-  --color-accent-secondary: var(--color-teal-400);
+  --color-surface: var(--color-rock-900);
+  --color-surface-sunken: var(--color-rock-950);
+  --color-surface-raised: var(--color-rock-800);
+  --color-edge: var(--color-rock-700);
+  --color-edge-strong: var(--color-rock-600);
+  --color-fg: var(--color-bone-100);
+  --color-fg-bright: var(--color-bone-50);
+  --color-fg-muted: var(--color-bone-300);
+  --color-fg-faint: var(--color-bone-500);
+
+  /* Accent is bone on purpose — the display type and the light shaft carry no
+     colour. Kept as its own token so the hero can be recoloured later without
+     touching every component. */
+  --color-accent: var(--color-bone-100);
+  --color-accent-bright: var(--color-bone-50);
+  --color-accent-secondary: var(--color-bone-300);
 
   /* Signal — the interaction colour, and only that: hover, focus, active nav,
-     buttons, selection. Kept separate from --color-accent so a monochrome
-     palette still has something that reads as clickable. Defaults to the accent
-     so palettes that don't want a distinct interaction colour need do nothing. */
-  --color-signal: var(--color-accent);
-  --color-signal-bright: var(--color-accent-bright);
+     buttons, selection. Separate from the accent so a monochrome palette still
+     has something that reads as clickable, and so a bone focus ring can't
+     vanish into bone text. */
+  --color-signal: var(--color-flare-500);
+  --color-signal-bright: var(--color-flare-400);
 
-  /* Type */
-  --font-display: 'Display', 'Display Fallback', ui-serif, Georgia, serif;
-  --font-body: 'Text', 'Text Fallback', ui-sans-serif, system-ui, sans-serif;
+  /* Type. Both faces are self-hosted by Astro's fonts API — see astro.config.mjs.
+     Big Shoulders Display is ultra-condensed and only works very large; anything
+     under about 2rem should use the body face. */
+  --font-display: var(--font-condensed), Impact, sans-serif;
+  --font-body: var(--font-grotesk), 'Helvetica Neue', ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, monospace;
 
   --text-2xs: 0.6875rem;
@@ -99,10 +99,8 @@
   --text-6xl: 5.625rem;
   --text-6xl--line-height: 1;
 
-  /* Tracking for the oversized display type. Each direction overrides it —
-     a condensed face and a wide grotesque want very different values — but it
-     needs a default so components using it never emit an invalid declaration. */
-  --tracking-display: -0.02em;
+  /* Tracking for the oversized condensed display type. */
+  --tracking-display: -0.01em;
 
   --tracking-tightest: -0.04em;
   --tracking-tighter: -0.02em;
@@ -139,8 +137,6 @@
     /* Lenis drives scrolling. Native smooth scroll would fight it. */
     scroll-behavior: auto;
     background-color: var(--color-surface-sunken);
-    /* Overridden per direction — the light direction needs light form controls
-       and scrollbars, and this is the property that decides them. */
     color-scheme: dark;
   }
 
@@ -175,8 +171,6 @@
     border-radius: 2px;
   }
 
-  /* Semantic tokens, not ramp values — the direction palettes redefine these
-     and would otherwise be stuck with an amber selection highlight. */
   ::selection {
     background-color: var(--color-signal);
     color: var(--color-surface);

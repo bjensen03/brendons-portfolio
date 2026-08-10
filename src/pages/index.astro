@@ -1,64 +1,80 @@
 ---
 import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
 import Section from '../components/Section.astro';
-import StrataBand from '../components/StrataBand.astro';
 
 /*
-  Placeholder home page. The real strata hero, selected work, lenses strip and
-  proof strip are Phase 2 — this page exists so the foundation can be seen
-  working end to end: tokens, type scale, both accents, the reveal helpers, the
-  split headline and the parallax band all appear below.
+  Home page.
+
+  The hero is real. Everything below it is still scaffolding: the selected-work
+  rows are placeholders until Phase 0 content exists, and the lenses strip,
+  proof strip and hover video previews are Phase 2 proper.
 */
+
+const work = [
+  { client: 'ProLook Sports', outcome: 'Rebuilt the marketing front end', year: '2026' },
+  { client: 'Lincoln Academy', outcome: 'Full site revamp for a K–9 charter', year: '2026' },
+  { client: 'Third study', outcome: 'Still to be chosen', year: '2025' },
+];
 ---
 
 <Base>
-  <Section size="compact" surface="sunken" width="measure">
-    <p class="text-2xs tracking-widest text-accent uppercase">Phase 1 — foundation</p>
-    <h1 class="mt-6 font-display text-4xl tracking-tightest md:text-5xl" data-split>
-      Groundwork, not the hero.
-    </h1>
-    <p class="mt-6 text-lg text-fg-muted">
-      The design tokens, motion system, content schemas and page shell are in place. The
-      layered hero, case studies and lab replace this page in later phases.
-    </p>
-  </Section>
+  <Hero />
 
-  <StrataBand facing="down" size="lg" />
+  <Section surface="base" width="wide" revealGroup>
+    <div class="flex flex-wrap items-baseline justify-between gap-4">
+      <h2
+        class="font-display text-4xl uppercase md:text-5xl"
+        style="letter-spacing: var(--tracking-display);"
+        data-split
+      >
+        Selected work
+      </h2>
+      <p class="font-body text-2xs tracking-widest text-fg-faint uppercase" data-reveal>
+        Placeholder — awaiting real case studies
+      </p>
+    </div>
 
-  <Section revealGroup width="content">
-    <h2 class="text-2xl tracking-tighter md:text-3xl" data-reveal>What's wired up</h2>
-
-    <ul class="mt-10 grid gap-6 sm:grid-cols-2">
-      <li class="rounded-card border border-edge bg-surface-raised p-6" data-reveal>
-        <h3 class="text-lg text-accent">Motion module</h3>
-        <p class="mt-2 text-sm text-fg-muted">
-          Lenis driven from the GSAP ticker, ScrollTrigger wired to it, and every animation
-          torn down before a view transition swaps the DOM.
-        </p>
-      </li>
-      <li class="rounded-card border border-edge bg-surface-raised p-6" data-reveal>
-        <h3 class="text-lg text-accent">Reduced motion</h3>
-        <p class="mt-2 text-sm text-fg-muted">
-          One switch, checked in one place, reactive to being toggled mid-session. Content
-          stays visible whether or not the animations ever run.
-        </p>
-      </li>
-      <li class="rounded-card border border-edge bg-surface-raised p-6" data-reveal>
-        <h3 class="text-lg text-accent-secondary">Design tokens</h3>
-        <p class="mt-2 text-sm text-fg-muted">
-          Colour, type, spacing, easing and duration all defined once. Contrast on this
-          surface was measured, not guessed.
-        </p>
-      </li>
-      <li class="rounded-card border border-edge bg-surface-raised p-6" data-reveal>
-        <h3 class="text-lg text-accent-secondary">Content schemas</h3>
-        <p class="mt-2 text-sm text-fg-muted">
-          Case studies fail the build without a named technical problem, and client work
-          fails without confirmed permission to publish.
-        </p>
-      </li>
+    <ul class="mt-10 divide-y divide-edge border-y border-edge">
+      {
+        work.map((item) => (
+          <li data-reveal>
+            <a
+              href="/work/"
+              class="transition-soft group grid gap-2 py-6 sm:grid-cols-[1fr_2fr_auto] sm:items-baseline sm:gap-8"
+            >
+              <span class="font-body text-lg text-fg-bright group-hover:text-signal">
+                {item.client}
+              </span>
+              <span class="font-body text-base text-fg-muted">{item.outcome}</span>
+              <span class="font-body text-2xs tracking-widest text-fg-faint uppercase">
+                {item.year}
+              </span>
+            </a>
+          </li>
+        ))
+      }
     </ul>
-  </Section>
 
-  <StrataBand facing="up" size="md" seam={false} />
+    <div class="mt-14 grid gap-10 md:grid-cols-2">
+      <p class="max-w-measure font-body text-lg text-fg-muted" data-reveal>
+        Near-black rock, bone type, and one colour reserved for anything you can interact
+        with. The hero holds no colour at all — light through a slot canyon is just light.
+      </p>
+      <div class="flex flex-wrap items-start gap-3 md:justify-end" data-reveal>
+        <a
+          href="/work/"
+          class="transition-soft inline-flex items-center rounded-full bg-signal px-6 py-3 font-body text-sm text-surface hover:bg-signal-bright"
+        >
+          See the work
+        </a>
+        <a
+          href="/contact/"
+          class="transition-soft inline-flex items-center rounded-full border border-edge-strong px-6 py-3 font-body text-sm text-fg hover:border-signal hover:text-signal"
+        >
+          Get in touch
+        </a>
+      </div>
+    </div>
+  </Section>
 </Base>

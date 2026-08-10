@@ -1,19 +1,20 @@
 ---
 /*
-  SLOT — the canyon as geometry and light.
+  The hero — the canyon as geometry and light.
 
-  Two black walls close in from either side; a bright slot of sky runs between
-  them. Scrolling narrows the gap, which is what descending a slot canyon
-  actually feels like. Cursor shifts the light shaft slightly so the wall faces
-  catch it differently.
+  Two black walls close in from either side; a bright slot runs between them.
+  Scrolling narrows the gap, which is what descending a slot canyon actually
+  feels like. The cursor shifts the light so the wall faces catch it
+  differently.
 
-  No rock colour anywhere. The canyon is carried by shape, depth and light,
-  which is what makes it read as designed rather than as a texture.
+  No rock colour anywhere, and no signal colour either — the light is just
+  light. That restraint is the whole idea: this is the one screen on the site
+  that holds no colour at all.
 */
 ---
 
 <section
-  class="slot-hero relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-surface"
+  class="slot-hero relative isolate flex min-h-[calc(100svh-4rem)] flex-col overflow-hidden bg-surface"
   data-slot-hero
 >
   <!-- The light between the walls. Sits behind everything. -->
@@ -40,7 +41,7 @@
       </p>
     </div>
 
-    <div class="mx-auto w-full max-w-wide text-center">
+    <div class="mx-auto w-full max-w-wide text-center" data-slot-titlewrap>
       <h1
         class="font-display leading-[0.82] font-black text-fg-bright uppercase"
         style="font-size: clamp(3.5rem, 17vw, 15rem); letter-spacing: var(--tracking-display);"
@@ -49,6 +50,7 @@
         <span class="block">Brendon</span>
         <span class="block text-accent">Jensen</span>
       </h1>
+      <span class="sr-only">Frontend developer based in Utah</span>
     </div>
 
     <div class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
@@ -107,7 +109,7 @@
 
 <script>
   import gsap from 'gsap';
-  import { registerMotion, prefersReducedMotion, ease, duration } from '../../scripts/motion';
+  import { registerMotion, prefersReducedMotion, ease, duration } from '../scripts/motion';
 
   /*
     Registered through the motion module rather than wiring its own page-load

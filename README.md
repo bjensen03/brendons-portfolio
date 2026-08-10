@@ -30,13 +30,13 @@ npm run dev        # http://localhost:4321
 
 ```
 src/
-  config.ts            Site constants, nav, contact details, font switch
+  config.ts            Site constants, nav, contact details
   content.config.ts    Zod schemas for case studies and lab demos
   styles/global.css    Every design token in the project
-  styles/fonts.css     Font loading, currently on system fallbacks
   scripts/motion.ts    The entire motion system
   layouts/Base.astro   Head, view transitions, motion boot
-  components/          Section, Container, StrataBand, Nav, Footer
+  components/Hero.astro  The slot-canyon hero
+  components/          Section, Container, Nav, Footer
   content/             MDX case studies and lab entries
 ```
 
@@ -46,10 +46,19 @@ src/
 easing curve. Components reference tokens; if a component needs a value that
 doesn't exist, the fix is a new token, not a literal.
 
+The palette is monochrome apart from one colour: near-black rock, bone type, and
+vermilion. Two tokens keep that honest:
+
+- `--color-accent` is **bone**. The hero holds no colour at all, because light
+  through a slot canyon is just light.
+- `--color-signal` is **vermilion**, and covers hover, focus, active nav,
+  buttons and selection — nothing else. If everything is highlighted, nothing
+  is. It also means a focus ring can't vanish into bone-coloured text.
+
 Contrast ratios for every foreground against every surface are computed and
-recorded in the comment at the top of that file. Amber and teal both clear WCAG
-AA on the core surfaces; the two combinations that only clear it at large sizes
-are called out there.
+recorded in the comment at the top of `global.css`. Vermilion clears AA in both
+directions, as text on the surface and as a button background carrying
+surface-coloured text.
 
 ### Motion
 
@@ -92,12 +101,25 @@ things that are easy to skip and expensive to omit:
 - Lighthouse scores require the URL measured and the date, since a score with no
   provenance is a claim rather than evidence
 
+### Fonts
+
+Big Shoulders Display for the oversized condensed display type, Space Grotesk
+for everything else. Both are self-hosted through Astro's fonts API, which
+handles subsetting, `woff2`, preload and metric-matched fallbacks — see the
+`fonts` block in `astro.config.mjs`.
+
+Big Shoulders is ultra-condensed and only works very large. Anything under about
+2rem should use the body face.
+
 ## Still to do
 
-- Fonts are on system fallbacks. `src/styles/fonts.css` has the switch-on steps;
-  the `size-adjust` values are placeholders that need measuring against the real
-  faces.
 - Domain, domain email and social URLs are placeholders in `src/config.ts` and
   `astro.config.mjs`.
-- The home page is a foundation placeholder — the layered hero, case studies,
-  about page, contact form and lab all come later.
+- The home page has a real hero; everything below it is scaffolding until there
+  are case studies to put there.
+- Case studies, about page, contact form and lab are all still to build.
+
+Two rejected design directions (a light topographic one, and a photography-led
+one) were prototyped and removed. They're recoverable from git at commit
+`154e46c` if either idea is ever wanted — the topographic contour motion would
+suit a Lab demo.

@@ -5,21 +5,15 @@ import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import { SITE } from '../config';
 import '../styles/global.css';
-/* Imported after global.css so the direction blocks win the cascade. */
-import '../styles/directions.css';
 
 interface Props {
   title?: string;
   description?: string;
   /** Page-specific social image. Per-study OG images land in Phase 6. */
   ogImage?: string;
-  /** Prototype design direction. Omit for the base palette. */
-  direction?: 'slot' | 'topo' | 'beta';
-  /** Drop the site chrome — used by the full-bleed direction prototypes. */
-  bare?: boolean;
 }
 
-const { title, description = SITE.description, ogImage, direction, bare = false } = Astro.props;
+const { title, description = SITE.description, ogImage } = Astro.props;
 
 const pageTitle = title ? `${title} — ${SITE.name}` : SITE.title;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url);
@@ -27,7 +21,7 @@ const ogUrl = ogImage ? new URL(ogImage, Astro.site ?? SITE.url) : undefined;
 ---
 
 <!doctype html>
-<html lang="en" data-direction={direction}>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -48,13 +42,11 @@ const ogUrl = ogImage ? new URL(ogImage, Astro.site ?? SITE.url) : undefined;
 
     {
       /* Astro emits the @font-face rules, the metric-matched fallbacks and the
-         preload links. Only the display face of the active direction is
-         preloaded — preloading all three would waste bandwidth on two fonts the
-         page never paints. */
+         preload links. Both faces are preloaded because both paint above the
+         fold on every page. */
     }
+    <Font cssVariable="--font-condensed" preload />
     <Font cssVariable="--font-grotesk" preload />
-    {direction === 'topo' && <Font cssVariable="--font-bricolage" preload />}
-    {direction !== 'topo' && <Font cssVariable="--font-condensed" preload />}
 
     <ClientRouter />
 
@@ -86,13 +78,13 @@ const ogUrl = ogImage ? new URL(ogImage, Astro.site ?? SITE.url) : undefined;
       Skip to content
     </a>
 
-    {!bare && <Nav />}
+    <Nav />
 
     <main id="main">
       <slot />
     </main>
 
-    {!bare && <Footer />}
+    <Footer />
 
     <script>
       import { initMotion } from '../scripts/motion';
