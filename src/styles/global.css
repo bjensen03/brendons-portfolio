@@ -64,6 +64,13 @@
   --color-accent-bright: var(--color-amber-300);
   --color-accent-secondary: var(--color-teal-400);
 
+  /* Signal — the interaction colour, and only that: hover, focus, active nav,
+     buttons, selection. Kept separate from --color-accent so a monochrome
+     palette still has something that reads as clickable. Defaults to the accent
+     so palettes that don't want a distinct interaction colour need do nothing. */
+  --color-signal: var(--color-accent);
+  --color-signal-bright: var(--color-accent-bright);
+
   /* Type */
   --font-display: 'Display', 'Display Fallback', ui-serif, Georgia, serif;
   --font-body: 'Text', 'Text Fallback', ui-sans-serif, system-ui, sans-serif;
@@ -160,10 +167,10 @@
     text-wrap: pretty;
   }
 
-  /* Focus states have to survive on a dark surface — amber ring plus a dark
-     offset ring so it reads on both sunken and raised backgrounds. */
+  /* Focus is an interaction state, so it uses the signal colour — on a
+     monochrome palette a bone focus ring would vanish into the text. */
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid var(--color-signal);
     outline-offset: 3px;
     border-radius: 2px;
   }
@@ -171,7 +178,7 @@
   /* Semantic tokens, not ramp values — the direction palettes redefine these
      and would otherwise be stuck with an amber selection highlight. */
   ::selection {
-    background-color: var(--color-accent);
+    background-color: var(--color-signal);
     color: var(--color-surface);
   }
 }

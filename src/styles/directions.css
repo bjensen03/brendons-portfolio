@@ -32,9 +32,16 @@ html[data-direction='slot'] {
   --color-fg-muted: #9aa0ab;
   --color-fg-faint: #727986;
 
-  --color-accent: #d6f84c;
-  --color-accent-bright: #e8ff8a;
-  --color-accent-secondary: #6ee7f9;
+  /* Bone. The hero holds no colour at all — the light through the slot is just
+     light, which is the whole point of the direction. */
+  --color-accent: #f2f0ea; /* 17.48 */
+  --color-accent-bright: #ffffff; /* 18.90 */
+  --color-accent-secondary: #9aa0ab; /* 7.58 */
+
+  /* The one colour on the site. Interaction only, so it stays meaningful:
+     if everything is highlighted, nothing is. Swap via the picker. */
+  --color-signal: #ff5232; /* 6.17 */
+  --color-signal-bright: #ff8b74; /* 8.62 */
 
   --font-display: var(--font-condensed), Impact, sans-serif;
   --font-body: var(--font-grotesk), 'Helvetica Neue', sans-serif;
@@ -112,39 +119,38 @@ html[data-direction='beta'] {
 }
 
 /* ---------------------------------------------------------------------------
-   Accent variants for the Slot direction.
+   Signal colour candidates.
 
-   Prototype only — once an accent is chosen, its two values move into the
-   `slot` block above and this section is deleted. Ratios measured against the
-   Slot surface (#08090B); all clear AA.
+   The accent is settled — bone. This picks the third colour, the one used for
+   hover, focus, buttons and selection. Prototype only: once chosen, the two
+   values move into the `slot` block above and this section is deleted.
+
+   Ratios measured against the Slot surface (#08090B). All clear AA, in both
+   directions — these are used as text on the surface AND as button
+   backgrounds with surface-coloured text on top.
    --------------------------------------------------------------------------- */
 
-html[data-accent='bone'] {
-  --color-accent: #f2f0ea; /* 17.48 — no colour at all, the light is just light */
-  --color-accent-bright: #ffffff;
-  --color-accent-secondary: #9aa0ab;
+html[data-signal='vermilion'] {
+  --color-signal: #ff5232; /* 6.17 — hot, the loudest option */
+  --color-signal-bright: #ff8b74; /* 8.62 */
 }
 
-html[data-accent='sun'] {
-  --color-accent: #ffd9a0; /* 14.88 — daylight through a gap, warm without brown */
-  --color-accent-bright: #ffeccb;
-  --color-accent-secondary: #b9a88f;
+html[data-signal='cobalt'] {
+  --color-signal: #5c7cff; /* 5.48 — electric blue */
+  --color-signal-bright: #93a8ff; /* 8.24 */
 }
 
-html[data-accent='ice'] {
-  --color-accent: #6ed8ff; /* 12.26 — cold light, high altitude */
-  --color-accent-bright: #a8e9ff;
-  --color-accent-secondary: #f2f0ea;
+html[data-signal='ice'] {
+  --color-signal: #6ed8ff; /* 12.26 — cold light */
+  --color-signal-bright: #a8e9ff; /* 15.02 */
 }
 
-html[data-accent='cobalt'] {
-  --color-accent: #5c7cff; /* 5.48 */
-  --color-accent-bright: #93a8ff;
-  --color-accent-secondary: #f2f0ea;
+html[data-signal='sun'] {
+  --color-signal: #ffd9a0; /* 14.88 — daylight, warm without brown */
+  --color-signal-bright: #ffeccb; /* 17.02 */
 }
 
-html[data-accent='vermilion'] {
-  --color-accent: #ff5232; /* 6.17 — the one warm option that is nowhere near brown */
-  --color-accent-bright: #ff8b74;
-  --color-accent-secondary: #f2f0ea;
+html[data-signal='acid'] {
+  --color-signal: #d6f84c; /* 16.50 — the original lime, kept as a comparison */
+  --color-signal-bright: #e8ff8a; /* 18.12 */
 }

@@ -10,10 +10,10 @@ const directions = [
   {
     slug: 'slot',
     name: 'Slot',
-    line: 'Near-black, bone, acid lime',
-    idea: 'The canyon kept, the brown thrown out. Walls close in as you scroll and a shaft of light runs between them. Canyoneering as shape and light rather than rock colour.',
+    line: 'Near-black, bone, one signal colour',
+    idea: 'Chosen. The canyon kept, the brown thrown out. Walls close in as you scroll and a shaft of light runs between them — canyoneering as shape and light rather than rock colour. The hero holds no colour at all; a single signal colour carries hover, focus and buttons.',
     motion: 'Walls part on load, narrow on scroll, light tracks the cursor',
-    swatches: ['#08090b', '#f2f0ea', '#d6f84c', '#6ee7f9'],
+    swatches: ['#08090b', '#f2f0ea', '#ff5232', '#9aa0ab'],
   },
   {
     slug: 'topo',
@@ -52,10 +52,10 @@ const directions = [
           <li data-reveal>
             <a
               href={`/directions/${direction.slug}/`}
-              class="transition-soft group block rounded-card border border-edge bg-surface-raised p-6 hover:border-accent md:p-8"
+              class="transition-soft group block rounded-card border border-edge bg-surface-raised p-6 hover:border-signal md:p-8"
             >
               <div class="flex flex-wrap items-baseline justify-between gap-3">
-                <h2 class="font-display text-2xl text-fg-bright group-hover:text-accent">
+                <h2 class="font-display text-2xl text-fg-bright group-hover:text-signal">
                   {direction.name}
                 </h2>
                 <p class="text-2xs tracking-widest text-fg-faint uppercase">{direction.line}</p>

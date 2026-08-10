@@ -24,7 +24,7 @@ const isCurrent = (href: string) => path === href || path === href.replace(/\/$/
     <nav class="flex h-16 items-center justify-between gap-6" aria-label="Main">
       <a
         href="/"
-        class="transition-soft font-display text-lg tracking-tighter text-fg-bright hover:text-accent"
+        class="transition-soft font-display text-lg tracking-tighter text-fg-bright hover:text-signal"
       >
         {SITE.name}
       </a>
@@ -36,7 +36,7 @@ const isCurrent = (href: string) => path === href || path === href.replace(/\/$/
               <a
                 href={item.href}
                 aria-current={isCurrent(item.href) ? 'page' : undefined}
-                class="transition-soft text-sm tracking-wide text-fg-muted hover:text-fg-bright aria-[current=page]:text-accent"
+                class="transition-soft text-sm tracking-wide text-fg-muted hover:text-fg-bright aria-[current=page]:text-signal"
               >
                 {item.label}
               </a>
@@ -81,7 +81,7 @@ const isCurrent = (href: string) => path === href || path === href.replace(/\/$/
               <a
                 href={item.href}
                 aria-current={isCurrent(item.href) ? 'page' : undefined}
-                class="transition-soft block py-3 text-lg text-fg hover:text-accent aria-[current=page]:text-accent"
+                class="transition-soft block py-3 text-lg text-fg hover:text-signal aria-[current=page]:text-signal"
               >
                 {item.label}
               </a>
