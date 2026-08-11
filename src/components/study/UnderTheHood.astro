@@ -1,0 +1,157 @@
+---
+/*
+  Under the hood.
+
+  The most important block on the site for a development role: the stack, one
+  genuinely hard problem and how it was solved, a real snippet, and measured
+  Lighthouse numbers with provenance.
+
+  The schema makes this required on every deep study, so this component can
+  assume `underTheHood` exists by the time it renders.
+
+  Authored in the MDX rather than rendered by the layout, so the code snippet
+  can be an ordinary fenced block inside it and pick up Shiki highlighting like
+  any other code. Pass it the frontmatter:
+
+    <UnderTheHood data={frontmatter.underTheHood} stack={frontmatter.stack}>
+      ```ts
+      // the snippet
+      ```
+    </UnderTheHood>
+
+  `frontmatter` in MDX is the raw YAML, not the schema-parsed entry, so dates
+  arrive as strings. Coerced below rather than assumed.
+*/
+
+interface Props {
+  data: {
+    problem: string;
+    lighthouse?: {
+      performance: number;
+      accessibility: number;
+      bestPractices: number;
+      seo: number;
+      measuredUrl: string;
+      measuredOn: string | Date;
+    };
+    repo?: string;
+    liveUrl?: string;
+  };
+  stack: readonly string[];
+}
+
+const { data, stack } = Astro.props;
+const { problem, lighthouse, repo, liveUrl } = data;
+
+const scores = lighthouse
+  ? [
+      { label: 'Performance', value: lighthouse.performance },
+      { label: 'Accessibility', value: lighthouse.accessibility },
+      { label: 'Best practices', value: lighthouse.bestPractices },
+      { label: 'SEO', value: lighthouse.seo },
+    ]
+  : [];
+
+const measuredOn = lighthouse
+  ? /* UTC, because a bare YYYY-MM-DD parses as UTC midnight and would render
+       as the previous day anywhere west of Greenwich — including Utah. */
+    new Intl.DateTimeFormat('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(new Date(lighthouse.measuredOn))
+  : null;
+---
+
+<section class="my-20 border-t border-edge pt-12 lg:-mx-24">
+  <h2
+    class="font-display text-4xl uppercase md:text-5xl"
+    style="letter-spacing: var(--tracking-display);"
+  >
+    Under the hood
+  </h2>
+
+  <div class="mt-10 grid gap-12 lg:grid-cols-[1.4fr_0.6fr] lg:gap-16">
+    <div>
+      <h3 class="font-body text-2xs tracking-widest text-fg-faint uppercase">The hard part</h3>
+      <p class="mt-4 max-w-measure font-body text-lg text-fg">{problem}</p>
+
+      {
+        /* The snippet, from the slot. Optional — not every hard problem is best
+           shown as code, and a contrived snippet is worse than none. */
+      }
+      <div class="mt-8 [&_pre]:overflow-x-auto [&_pre]:rounded-card [&_pre]:border [&_pre]:border-edge [&_pre]:p-5 [&_pre]:text-sm">
+        <slot />
+      </div>
+    </div>
+
+    <aside class="flex flex-col gap-10">
+      <div>
+        <h3 class="font-body text-2xs tracking-widest text-fg-faint uppercase">Stack</h3>
+        <ul class="mt-4 flex list-none flex-wrap gap-2 pl-0">
+          {
+            stack.map((item) => (
+              <li class="rounded-full border border-edge px-3 py-1 font-body text-2xs tracking-wide text-fg-muted">
+                {item}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      {
+        scores.length > 0 && (
+          <div>
+            <h3 class="font-body text-2xs tracking-widest text-fg-faint uppercase">Lighthouse</h3>
+            <dl class="mt-4 grid grid-cols-2 gap-4">
+              {scores.map((score) => (
+                <div>
+                  <dt class="font-body text-2xs text-fg-faint">{score.label}</dt>
+                  <dd
+                    class:list={[
+                      'font-display text-3xl',
+                      score.value >= 90 ? 'text-fg-bright' : 'text-fg-muted',
+                    ]}
+                    style="letter-spacing: var(--tracking-display);"
+                  >
+                    {score.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            {/* Provenance, so the numbers are evidence rather than assertion. */}
+            <p class="mt-4 font-body text-2xs text-fg-faint">
+              Measured {measuredOn} on {lighthouse!.measuredUrl.replace(/^https?:\/\//, '')}
+            </p>
+          </div>
+        )
+      }
+
+      {
+        (repo || liveUrl) && (
+          <div class="flex flex-col gap-2">
+            {liveUrl && (
+              <a
+                href={liveUrl}
+                rel="noopener"
+                class="transition-soft font-body text-sm text-signal hover:text-signal-bright"
+              >
+                Visit the live site →
+              </a>
+            )}
+            {repo && (
+              <a
+                href={repo}
+                rel="noopener"
+                class="transition-soft font-body text-sm text-signal hover:text-signal-bright"
+              >
+                Read the source →
+              </a>
+            )}
+          </div>
+        )
+      }
+    </aside>
+  </div>
+</section>

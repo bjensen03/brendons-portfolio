@@ -199,6 +199,74 @@
     transition-timing-function: var(--ease-out-soft);
   }
 
+  /*
+    Long-form case study prose.
+
+    Child selectors are wrapped in :where() so they carry no specificity. Study
+    components render inside this container, and without that a rule like
+    `.prose-study ul` would beat a component's own `list-none` class and put
+    bullets on the stack pills.
+  */
+  .prose-study :where(h2) {
+    margin-top: 4rem;
+    margin-bottom: 1.25rem;
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-display);
+  }
+
+  .prose-study :where(h3) {
+    margin-top: 2.5rem;
+    margin-bottom: 0.75rem;
+    font-family: var(--font-body);
+    font-size: var(--text-xl);
+    color: var(--color-fg-bright);
+  }
+
+  .prose-study :where(p) {
+    margin-block: 1.25rem;
+    color: var(--color-fg-muted);
+  }
+
+  .prose-study :where(ul) {
+    margin-block: 1.25rem;
+    padding-left: 1.25rem;
+    list-style: disc;
+    color: var(--color-fg-muted);
+  }
+
+  .prose-study :where(li) {
+    margin-block: 0.5rem;
+  }
+
+  .prose-study :where(a) {
+    color: var(--color-signal);
+  }
+
+  .prose-study :where(a):hover {
+    color: var(--color-signal-bright);
+  }
+
+  .prose-study :where(pre) {
+    margin-block: 2rem;
+    overflow-x: auto;
+    border: 1px solid var(--color-edge);
+    border-radius: var(--radius-card);
+    padding: 1.25rem;
+    font-size: var(--text-sm);
+  }
+
+  .prose-study :where(code) {
+    font-family: var(--font-mono);
+  }
+
+  @media (min-width: 768px) {
+    .prose-study :where(h2) {
+      font-size: var(--text-4xl);
+    }
+  }
+
   /* Skip link — visually out of the way until focused. */
   .skip-link {
     position: absolute;

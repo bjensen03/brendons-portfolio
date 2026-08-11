@@ -36,8 +36,12 @@ src/
   scripts/motion.ts    The entire motion system
   layouts/Base.astro   Head, view transitions, motion boot
   components/Hero.astro  The slot-canyon hero
-  components/          Section, Container, Nav, Footer
+  components/          Section, Container, Nav, Footer, home sections
+  components/study/    Case study blocks — Stat, Figure, BeforeAfter, UnderTheHood
+  pages/work/          Index with discipline filtering, plus [...slug] study pages
   content/             MDX case studies and lab entries
+docs/
+  case-study-template.mdx   Copy this to start a study. Documents every field.
 ```
 
 ### Design tokens
@@ -115,13 +119,23 @@ handles subsetting, `woff2`, preload and metric-matched fallbacks — see the
 Big Shoulders is ultra-condensed and only works very large. Anything under about
 2rem should use the body face.
 
+### Writing a case study
+
+Copy `docs/case-study-template.mdx` into `src/content/projects/`, rename it, and
+fill it in. Images go in `src/content/projects/images/`, referenced relatively so
+Astro's pipeline can emit AVIF/WebP at the right sizes.
+
+`Stat`, `Stats`, `Figure`, `BeforeAfter` and `UnderTheHood` are available in the
+MDX without importing anything. The work index and the home page both read the
+collection, so a new study appears in both without touching a component.
+
 ## Still to do
 
 - Domain, domain email and social URLs are placeholders in `src/config.ts` and
   `astro.config.mjs`.
-- The home page has a real hero; everything below it is scaffolding until there
-  are case studies to put there.
-- Case studies, about page, contact form and lab are all still to build.
+- No case studies written yet — the work index and home page show marked
+  placeholders until there are.
+- About page, contact form and lab are still to build.
 
 Two rejected design directions (a light topographic one, and a photography-led
 one) were prototyped and removed. They're recoverable from git at commit

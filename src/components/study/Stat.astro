@@ -1,0 +1,29 @@
+---
+/*
+  A single result. Used inside the Result section of a case study.
+
+  `source` is required rather than optional on purpose: a number without a
+  provenance is a claim, not evidence, and someone will eventually ask where it
+  came from. "Google Analytics, Jan–Jun 2026" is a fine answer. "Estimated" is
+  not — if it's an estimate, write the qualitative result instead.
+*/
+
+interface Props {
+  value: string;
+  label: string;
+  source: string;
+}
+
+const { value, label, source } = Astro.props;
+---
+
+<div class="flex flex-col gap-2 border-t border-edge pt-5">
+  <p class="font-body text-2xs tracking-widest text-fg-faint uppercase">{label}</p>
+  <p
+    class="font-display text-5xl text-fg-bright md:text-6xl"
+    style="letter-spacing: var(--tracking-display);"
+  >
+    {value}
+  </p>
+  <p class="font-body text-2xs text-fg-faint">{source}</p>
+</div>

@@ -38,7 +38,9 @@ const lighthouse = z.object({
 });
 
 const projects = defineCollection({
-  loader: glob({ pattern: '**/*.mdx', base: './src/content/projects' }),
+  /* Underscore-prefixed files are ignored, so _template.mdx can document every
+     field without shipping a fake case study to the live site. */
+  loader: glob({ pattern: '**/[!_]*.mdx', base: './src/content/projects' }),
   schema: ({ image }) =>
     z
       .object({
@@ -103,7 +105,7 @@ const projects = defineCollection({
 });
 
 const lab = defineCollection({
-  loader: glob({ pattern: '**/*.mdx', base: './src/content/lab' }),
+  loader: glob({ pattern: '**/[!_]*.mdx', base: './src/content/lab' }),
   schema: z.object({
     title: z.string(),
     summary: z.string(),

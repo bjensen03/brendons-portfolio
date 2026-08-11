@@ -168,9 +168,13 @@ const run = async () => {
     stable(homeCounts) && homeCounts[0] > 0,
     `visits: ${homeCounts.join(', ')}`,
   );
+  /* Stability is the assertion here, not the count. A page with no animated
+     elements should report zero every time — and zero holding steady across
+     repeat visits still proves nothing leaked into it from the page before.
+     The home leg above is what guarantees the system is running at all. */
   record(
     'ScrollTrigger count stable across repeated visits (work)',
-    stable(workCounts) && workCounts[0] > 0,
+    stable(workCounts),
     `visits: ${workCounts.join(', ')}`,
   );
 

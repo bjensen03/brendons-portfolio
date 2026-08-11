@@ -1,0 +1,46 @@
+---
+import { Image } from 'astro:assets';
+
+/*
+  Before and after, side by side.
+
+  Deliberately not a drag-slider. A slider looks impressive and makes comparison
+  harder — you can only ever see part of each. Two images side by side let
+  someone actually compare, and they work on a phone and in print.
+*/
+
+interface Props {
+  before: ImageMetadata;
+  after: ImageMetadata;
+  beforeAlt: string;
+  afterAlt: string;
+  caption?: string;
+}
+
+const { before, after, beforeAlt, afterAlt, caption } = Astro.props;
+---
+
+<figure class="my-14 lg:-mx-24">
+  <div class="grid gap-4 md:grid-cols-2">
+    {
+      [
+        { src: before, alt: beforeAlt, label: 'Before' },
+        { src: after, alt: afterAlt, label: 'After' },
+      ].map((item) => (
+        <div class="relative">
+          <Image
+            src={item.src}
+            alt={item.alt}
+            widths={[480, 720, 1080]}
+            sizes="(min-width: 768px) 30rem, 100vw"
+            class="w-full rounded-card border border-edge"
+          />
+          <p class="absolute top-3 left-3 rounded-full bg-surface-sunken/90 px-3 py-1 font-body text-2xs tracking-widest text-fg uppercase backdrop-blur-sm">
+            {item.label}
+          </p>
+        </div>
+      ))
+    }
+  </div>
+  {caption && <figcaption class="mt-4 font-body text-sm text-fg-muted">{caption}</figcaption>}
+</figure>
