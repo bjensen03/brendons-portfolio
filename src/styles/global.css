@@ -8,9 +8,13 @@
 
   The palette is monochrome by design: near-black rock, bone type, and exactly
   one colour. The hero holds no colour at all, because light through a slot
-  canyon is just light. Vermilion is Utah sandstone at full saturation and is
-  reserved for interaction — hover, focus, buttons, selection — so it stays
-  meaningful. If everything is highlighted, nothing is.
+  canyon is just light. The blue is reserved for interaction — hover, focus,
+  buttons, selection — so it stays meaningful. If everything is highlighted,
+  nothing is.
+
+  It is deliberately not the indigo that sits at #5c6cf5 and thereabouts: that
+  hue is the default accent of half the templates on the internet, and looking
+  generated is the one thing this site cannot afford.
 
   Contrast is measured, not guessed. Ratios against rock-900 (#08090B), the
   default page surface, computed with the WCAG 2.1 formula:
@@ -19,9 +23,9 @@
     bone-50     18.90  AAA
     bone-300     7.58  AAA   muted copy
     bone-500     4.55  AA    metadata only, never body text
-    flare-500    6.17  AA    interaction — also passes inverted, as a button
+    flare-500    6.95  AA    interaction — also passes inverted, as a button
                              background carrying surface-coloured text
-    flare-400    8.62  AAA   interaction, hovered
+    flare-400    9.64  AAA   interaction, hovered
 */
 
 @theme {
@@ -38,9 +42,9 @@
   --color-bone-300: #9aa0ab;
   --color-bone-500: #727986;
 
-  /* Flare — the one colour */
-  --color-flare-400: #ff8b74;
-  --color-flare-500: #ff5232;
+  /* Flare — the one colour the site carries */
+  --color-flare-400: #77b9ff;
+  --color-flare-500: #3d9bff;
 
   /* Semantic aliases. Components use these; raw ramps are for exceptions.
      Named `fg` rather than `text` so the generated utility reads `text-fg-muted`
@@ -221,59 +225,4 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-}
-
-/* ---------------------------------------------------------------------------
-   Signal colour candidates — TEMPORARY.
-
-   Everything else in the palette is settled. This is choosing the one colour
-   the site carries, used only for interaction: hover, focus, active nav,
-   buttons and selection.
-
-   Ratios are against rock-900 (#08090B) and hold in both directions, since the
-   colour is used as text on the surface AND as a button background with
-   surface-coloured text on top. All clear AA on rock-800 as well.
-
-   Once chosen, its two values move into the @theme block above as --color-signal
-   and --color-signal-bright, and this section plus SignalPicker.astro are
-   deleted.
-   --------------------------------------------------------------------------- */
-html[data-signal='cobalt'] {
-  --color-signal: #5c7cff; /* 5.48 — electric blue */
-  --color-signal-bright: #8da3ff; /* 8.36 */
-}
-
-html[data-signal='azure'] {
-  --color-signal: #3d9bff; /* 6.95 — bright sky blue */
-  --color-signal-bright: #77b9ff; /* 9.64 */
-}
-
-html[data-signal='ice'] {
-  --color-signal: #6ed8ff; /* 12.26 — cold cyan */
-  --color-signal-bright: #9ae4ff; /* 14.15 */
-}
-
-html[data-signal='violet'] {
-  --color-signal: #9b6bff; /* 5.64 — electric purple */
-  --color-signal-bright: #b997ff; /* 8.47 */
-}
-
-html[data-signal='orchid'] {
-  --color-signal: #ff5cc8; /* 7.23 — hot pink */
-  --color-signal-bright: #ff8dd9; /* 9.55 */
-}
-
-html[data-signal='periwinkle'] {
-  --color-signal: #a5b4ff; /* 10.03 — pale blue-violet */
-  --color-signal-bright: #c0cbff; /* 12.55 */
-}
-
-html[data-signal='steel'] {
-  --color-signal: #93a7c4; /* 8.12 — quiet blue-grey */
-  --color-signal-bright: #b3c1d6; /* 10.92 */
-}
-
-html[data-signal='bone'] {
-  --color-signal: #ffffff; /* 19.92 — no colour at all */
-  --color-signal-bright: #ffffff; /* 19.92 */
 }

@@ -47,16 +47,20 @@ easing curve. Components reference tokens; if a component needs a value that
 doesn't exist, the fix is a new token, not a literal.
 
 The palette is monochrome apart from one colour: near-black rock, bone type, and
-vermilion. Two tokens keep that honest:
+one blue. Two tokens keep that honest:
 
 - `--color-accent` is **bone**. The hero holds no colour at all, because light
   through a slot canyon is just light.
-- `--color-signal` is **vermilion**, and covers hover, focus, active nav,
+- `--color-signal` is **azure `#3d9bff`**, and covers hover, focus, active nav,
   buttons and selection — nothing else. If everything is highlighted, nothing
   is. It also means a focus ring can't vanish into bone-coloured text.
 
+  Deliberately not the indigo around `#5c6cf5`: that hue is the default accent
+  of half the templates on the internet, and looking generated is the one thing
+  this site cannot afford.
+
 Contrast ratios for every foreground against every surface are computed and
-recorded in the comment at the top of `global.css`. Vermilion clears AA in both
+recorded in the comment at the top of `global.css`. Azure clears AA in both
 directions, as text on the surface and as a button background carrying
 surface-coloured text.
 
