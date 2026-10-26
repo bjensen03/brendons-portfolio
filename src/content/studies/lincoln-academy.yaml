@@ -1,0 +1,903 @@
+order: 3
+# Lincoln Academy is approved for publication, so this builds in production
+# and replaces the older MDX page at the same URL.
+approved: true
+
+kind: Custom WordPress theme · school systems
+name: Lincoln Academy
+label: Rebuilding a school website around the parents, teachers, and staff who use it every day
+role: Solo Web Developer / Designer
+company: Lincoln Academy
+timeline: 2025 to Present
+team: Operations, Administration, Finance, Lunch, Teachers, and Staff
+stack: WordPress, PHP, ACF Pro, JavaScript, Formidable, Zapier, Google SSO
+live: https://lincoln-academy.org
+
+# Shown on the home and work pages in place of a cover until there are
+# screenshots of the rebuilt site. Each one is a system described in the study.
+highlights:
+  - name: Staff directory
+    note: One directory — family-facing in public, more detail for logged-in staff
+  - name: Lunch ordering
+    note: Class orders, missing students, meal totals, labels and CSV export
+  - name: Staff portal
+    note: Forms, lunch, tickets, calendars and the directory in one place
+  - name: Weekly newsletter
+    note: Sent every Monday, with dates families can add to their calendars
+
+# ── Case-study template blocks ────────────────────────────────────────────
+# Every sentence in a block body is my own: taken from this file's sections
+# below, or from my notes. Headings, step titles, tab names and captions are
+# labels only.
+
+heroMedia:
+  image:
+    src: lincoln-academy/mockups/macbook-iphone.webp
+    alt: A MacBook Pro and an iPhone showing the new Lincoln Academy site — the "Apply to be an Eagle Here" home page on the laptop, the "This Week at Lincoln" newsletter on the phone.
+  # The mockup is exported on a transparent 3200 × 2400 canvas; this trims
+  # the empty space round the two devices.
+  crop: { x: 0.19, y: 0.1, w: 0.62, h: 0.8 }
+  size: medium
+
+# Composed from: situation (first and last lines); myRole (first two
+# paragraphs); my notes on the overall study and on the lunch system.
+inShort:
+  - Lincoln Academy is a K through 9 charter school in Utah. During the summer, I was given the job of ==rebuilding its website==.
+  - I was the solo developer and designer for the rebuild — I planned the new structure, designed the experience, built the custom WordPress theme, migrated the content, built the internal tools, and handled the launch.
+  - Inside it, ==a lunch ordering system== for the kitchen and a field trip and event request system — plus the newsletter I send every Monday and a staff login connected through Google.
+  - With the new lunch dashboard, the kitchen can add custom labels to every item, ==so they cut their time in half==.
+
+layout:
+  - inShort
+  - situation
+  - feature:old-site
+  - story:0
+  - role
+  - glance
+  - eras
+  - decisions
+  - scroller
+  - strip:pages
+  - story:1
+  - viewer:lunch
+  - feature:forms
+  - strip:automation
+  - viewer:field-trips
+  - feature:staff-login
+  - strip:newsletter-before
+  - feature:newsletter
+  - story:5
+  - hardProblem
+  - result
+  - differently
+  - fullStack
+
+# The old site against the new one. The old captures are from the Internet
+# Archive (2025-08 to 2026-05); the new ones from the live site.
+eras:
+  heading: Old site, new site
+  items:
+    - year: Then
+      title: The Divi site
+      url: lincoln-academy.org
+      body: |
+        The old site relied heavily on Divi and several plugins.
+
+        That made simple content changes more complicated than they needed to be.
+      # The first four are my own screenshots of the Divi site from
+      # Oct–Nov 2025 (webflow-2025/); the same header and menus as the
+      # Internet Archive captures, so one era, not two.
+      shots:
+        - src: lincoln-academy/webflow-2025/old-home-attendance-banner.webp
+          alt: The Divi home page in 2025 — a two-sided menu with the logo in the middle, an "Attendance Concerns?" slide, and a bar of links for Order Meals, Infinite Campus, Canvas, Calendar & Schedule, Attendance and Apply.
+        - src: lincoln-academy/webflow-2025/old-home-events.webp
+          alt: Further down the 2025 home page — a clock and a Google Calendar widget beside "Lincoln Academy Charter School | Empowering Students to SOAR", a Learn More button and a short Events list.
+        - src: lincoln-academy/webflow-2025/old-what-is-a-charter-school.webp
+          alt: The 2025 "What is a Charter School?" section and a "Discover the Lincoln Academy Difference" banner, written for prospective families.
+        - src: lincoln-academy/webflow-2025/old-student-life.webp
+          alt: The 2025 Student Life page — a dark blue side menu and three counters, 550 elementary students, 320 junior high students and 145 teachers and assistants.
+        - src: lincoln-academy/old/desktop-lunch-menu.webp
+          alt: The old Lunch Menu page — a short note, an "Add $ to your account" button and a monthly heading.
+    - year: Now
+      title: The rebuild
+      url: lincoln-academy.org
+      body: |
+        I rebuilt the site as ==a custom PHP WordPress theme using ACF==.
+
+        The layout stays controlled in code, but the content that staff actually needs to change lives in clear fields.
+      shots:
+        - src: lincoln-academy/site/home.webp
+          alt: The new home page — the most-used links along the top, search and Donate Now in the header, and the "Apply to be an Eagle Here" slider.
+        - src: lincoln-academy/site/home-welcome.webp
+          alt: The new home page's "Welcome! Where would you like to go?" — Parents, Students, Staff & Teachers, Future Families — over a Quick Links grid.
+        - src: lincoln-academy/site/staff-directory.webp
+          alt: The new Staff Directory — a search box and a filter for every department.
+        - src: lincoln-academy/site/staff-portal.webp
+          alt: The new Staff Portal — "Everything Lincoln staff need, in one place", with Lunch Ordering and Supply Request as quick actions.
+
+scroller:
+  heading: The new home page
+  intro: |
+    Scroll to move down the page. The numbers mark what I built into it.
+  pages:
+    - id: home
+      label: The home page
+      url: lincoln-academy.org
+      src: lincoln-academy/fullpage/home.webp
+      alt: The full new Lincoln Academy home page — the header and slider, where-would-you-like-to-go, quick links, search, events and calendar, the newsletter, help topics, programs and the footer.
+      annotations:
+        - label: The most-used links, up top
+          body: I simplified the navigation and started putting the most-used links where people naturally look for them.
+          x: 0.6
+          y: 0.004
+        - label: Where would you like to go?
+          body: The site has several different groups using it, and each one needs something different.
+          x: 0.12
+          y: 0.124
+        - label: Quick links
+          body: That included quick-link areas, a cleaner main navigation, useful links in the footer, and links placed directly on the pages where they were relevant.
+          x: 0.12
+          y: 0.175
+        - label: Search
+          body: I also added search in more places so someone who knows what they are looking for does not have to understand the school's site structure first.
+          x: 0.5
+          y: 0.268
+        - label: Events and the calendar
+          body: Parents need to find information quickly. That includes calendars and announcements.
+          x: 0.62
+          y: 0.33
+        - label: The weekly newsletter
+          body: Every Monday, I put together and send the school newsletter.
+          x: 0.38
+          y: 0.44
+        - label: Links in the footer
+          body: Make the common things easy to find.
+          x: 0.33
+          y: 0.935
+
+viewers:
+  - id: lunch
+    heading: Rebuilding lunch ordering
+    intro: |
+      A generic form can collect someone's lunch choice.
+
+      ==That does not mean it can run a lunch program.==
+
+      The lunch team needed something built around the way they actually work each morning.
+    lead:
+      src: lincoln-academy/mockups/lunch-dashboard-laptop.webp
+      alt: A MacBook on a wooden desk showing the new kitchen dashboard — meal totals across the top and each class's order in the table below, names blurred.
+      crop: { x: 0.1, y: 0.15, w: 0.8, h: 0.55 }
+    steps:
+      - tab: Order forms
+        group: Before
+        title: Forms on the old site
+        url: lincoln-academy.org
+        video:
+          src: /video/lincoln/old-lunch-portal.mp4
+          poster: /video/lincoln/old-lunch-portal.webp
+          label: A screen recording of the old Divi lunch menu and its separate order forms — individual, hot, front office, class and monthly ordering.
+          width: 1600
+          height: 1000
+          crop: { x: 0, y: 0, w: 1, h: 0.75 }
+        body: |
+          The old process depended on roster information that became harder to maintain after the school moved to Infinite Campus.
+      - tab: Entries
+        group: Before
+        title: The old order forms in Formidable
+        url: lincoln-academy.org/wp-admin
+        src: lincoln-academy/webflow-2025/formidable-forms-list-entry-counts.webp
+        alt: The Formidable forms list in WordPress — Front Office Ordering, Fundraising, Home School Form, HR Form, In Class Hot Ordering with 5316 entries and Individual Meal Ordering with 11046 entries.
+        detail: { x: 0, y: 0.74, w: 0.66, h: 0.26 }
+        body: |
+          The forms list shows 5,316 entries on In Class Hot Ordering and 11,046 on Individual Meal Ordering.
+      - tab: Google Sheets
+        group: Before
+        title: A spreadsheet, without the students
+        url: docs.google.com/spreadsheets
+        src: lincoln-academy/lunch/sheet-staff-list.webp
+        alt: The old "Lunch Ordering" Google Sheet, List of Classes tab — names and emails blurred, with Ordered and Reminder columns mostly empty.
+        body: |
+          The old way you had to use Google Sheets.
+
+          It didn't have the students, so they had to manually add them.
+
+          There was no portal.
+      - tab: Order form
+        group: Now
+        title: Teachers order for their class
+        url: lincoln-academy.org
+        src: lincoln-academy/lunch/order-form.webp
+        alt: The new lunch order form — date, grade level, teacher from the staff directory, hot meal count, special lunches, and "Orders for this date are closed (cutoff 8:40 AM)".
+        detail: { x: 0.29, y: 0.17, w: 0.36, h: 0.62 }
+        body: |
+          Teachers submit their class orders through the site.
+
+          The form is easier to fill out, and it has ==a cutoff time for the kitchen staff==.
+      - tab: Kitchen dashboard
+        group: Now
+        title: The lunch manager's dashboard
+        url: lincoln-academy.org
+        src: lincoln-academy/lunch/dashboard.webp
+        alt: The kitchen dashboard — Remind 6 missing and Email summary buttons, "6 not submitted yet", totals (433 meals, 336 hot, 41 of 44 classes in) and each teacher's order, names blurred.
+        body: |
+          The lunch manager has her own dashboard where she can see:
+
+          - Submitted classes
+          - Missing classes
+          - Missing students
+          - What each student ordered
+          - Daily meal totals
+
+          It shows the lunches ordered and ==who is missing==, and you can send emails with it.
+      - tab: Labels
+        group: Now
+        title: Labels, already filled in
+        url: lincoln-academy.org
+        src: lincoln-academy/lunch/labels.webp
+        alt: The Lunch Labels page for Thursday, October 22 — 99 labels for special student meals and staff meals, a printing tip, and the label sheet with names blurred.
+        body: |
+          Before, a lot of that work required manually checking information and typing or writing labels.
+
+          Now the website prepares much of it automatically.
+
+          They can add custom labels to every item, ==so they cut their time in half==.
+      - tab: The numbers
+        group: Now
+        title: Day, week or month
+        url: lincoln-academy.org
+        src: lincoln-academy/lunch/dashboard.webp
+        alt: The kitchen dashboard's Day, Week and Month switch, with Export CSV and Print for state.
+        detail: { x: 0.1, y: 0, w: 0.36, h: 0.38 }
+        body: |
+          They can go back and look at the numbers to see who ordered what.
+
+          - Printable information
+          - Downloadable CSV data
+
+          That gives the lunch staff more time to focus on actually preparing and serving lunch instead of spending the morning organizing data.
+
+  - id: field-trips
+    heading: Field trip and event requests
+    intro: |
+      This includes things like staff requests, school forms, event-related requests, and other workflows that ==route information to the right people==.
+    steps:
+      - tab: 2025 form
+        group: Before
+        title: The 2025 event request form
+        url: lincoln-academy.org
+        src: lincoln-academy/webflow-2025/form-event-request-2025.webp
+        alt: The 2025 event request form — teacher or staff names, email and phone, event name and date, start, end and setup times, "Is this happening during the school day?", and location or department, with a warning about AM and PM above the times.
+        body: |
+          It asked for the teacher's name, email and phone, the event name and date, start, end and setup times, whether it was during the school day, and the location or department.
+
+          A line above the times warns that the event will not make it to the calendar if AM and PM are wrong.
+
+          Behind it was a 2025 Zap. Each request sent an email, added a spreadsheet row, then split into approve and deny paths for two admin approvers. Once a request was fully approved, it went onto the Lincoln Academy calendar, and IT, Facilities and Communications each got a task on a master school sheet.
+      - tab: Request
+        group: Now
+        title: A teacher fills out the form
+        url: lincoln-academy.org/field-trip-request
+        video:
+          src: /video/lincoln/field-trip-form.mp4
+          poster: /video/lincoln/field-trip-form.webp
+          label: A screen recording filling out the Field Trip Request form on the new site.
+          width: 1600
+          height: 772
+          # Trims the WordPress admin bar off the top of the recording.
+          crop: { x: 0, y: 0.036, w: 1, h: 0.964 }
+        body: |
+          A teacher fills out the field trip or event form on the website.
+      - tab: Request ID
+        group: Now
+        title: Every request gets its own ID
+        url: zapier.com
+        video:
+          src: /video/lincoln/field-trip-zapier-request.mp4
+          poster: /video/lincoln/field-trip-zapier-request.webp
+          label: A screen recording walking through the Field Trip Request Zap — new form entry, Python step, emails, a new spreadsheet row, then paths.
+          width: 1600
+          height: 772
+          # Trims Zapier's empty Copilot panel off the left.
+          crop: { x: 0.15, y: 0.03, w: 0.85, h: 0.826 }
+        body: |
+          Zapier gives the request ==its own ID, like FT-123456==, and logs it in the spreadsheet.
+      - tab: Approval
+        group: Now
+        title: Approval comes first
+        url: zapier.com
+        video:
+          src: /video/lincoln/field-trip-zapier-approval.mp4
+          poster: /video/lincoln/field-trip-zapier-approval.webp
+          label: A screen recording of the approval Zap — a spreadsheet update sends an email, then splits into Approved and Denied paths.
+          width: 1600
+          height: 772
+          crop: { x: 0.15, y: 0.03, w: 0.85, h: 0.826 }
+        body: |
+          Two approvers get the approval request first. Either one can approve it.
+      - tab: Routing
+        group: Now
+        title: Only the people who need it
+        url: docs.google.com/spreadsheets
+        src: lincoln-academy/field-trip/tracking-sheet.webp
+        alt: The Field Trip Request tracking sheet — lunches and drivers needed, Admin Approval or Admin Denied, the denial reason, Lunch Approval, the approvers' column and the Request ID.
+        detail: { x: 0.45, y: 0.15, w: 0.5, h: 0.45 }
+        body: |
+          After a yes, the request goes ==only to the people who need it==: IT and Facilities if the event needs them, and the lunch team if student lunches were requested.
+      - tab: Rejected
+        group: Now
+        title: A new date, without starting over
+        url: zapier.com
+        src: lincoln-academy/field-trip/zapier-approval.webp
+        alt: The Field Trip Approval Zap — a spreadsheet trigger, an email, then Approved and Denied paths that each send their own email.
+        detail: { x: 0.33, y: 0.48, w: 0.38, h: 0.5 }
+        body: |
+          If it's rejected, the teacher gets an email with a link to propose a new date.
+
+          That link already knows which request it belongs to, so ==nothing has to be retyped==.
+
+# Compact rows of screenshots. Labels describe only what is visible; each
+# intro is my own sentence (this file, or my 2025 Webflow page).
+strips:
+  - id: pages
+    heading: The rest of the rebuild
+    intro: |
+      The project included public pages, program information, documents, staff resources, and school content.
+    items:
+      - src: lincoln-academy/site/about.webp
+        alt: The new About Us page — the SOAR header, a blue title band, and a welcome paragraph about Lincoln Academy in Pleasant Grove.
+        label: About Us
+      - src: lincoln-academy/site/contact.webp
+        alt: The new Contact Us page — "We're here to help — reach the right person below", then Call, Email the Office and Get Directions under Reach Us.
+        label: Contact Us, with call, email and directions
+      - src: lincoln-academy/site/fine-arts.webp
+        alt: The new Fine Arts page — an intro to music, theater and visual art, and a Drama/Fine Arts Calendar with upcoming events.
+        label: Fine Arts, with its own calendar
+      - src: lincoln-academy/site/junior-high.webp
+        alt: The new Junior High Programs page — an intro paragraph and a Jump to row for Core Classes, Electives, Athletics, Houses and Register.
+        label: Junior High Programs, with jump links
+      - src: lincoln-academy/site/title-1.webp
+        alt: The new Title 1 page — a paragraph on how Title I funds are used, then a State school report card heading.
+        label: Title 1
+      - src: lincoln-academy/site/staff-directory.webp
+        alt: The new Staff Directory — a search box and a filter chip for every department.
+        label: Staff Directory, search and department filters
+      - src: lincoln-academy/site/staff-portal.webp
+        alt: The new Staff Portal — "Welcome back! Everything Lincoln staff need, in one place", with Lunch Ordering and Supply Request as quick actions.
+        label: Staff Portal, behind the Google login
+      - src: lincoln-academy/login/staff-sign-in.webp
+        alt: The new Staff Sign-In page — "Staff accounts get in automatically", three numbered steps, and a Continue with Google button under the login form.
+        label: Staff Sign-In, with Continue with Google
+
+  - id: automation
+    heading: The Zaps behind the forms
+    intro: |
+      I built automated systems using Zapier and Google Sheets that instantly organize and route form submissions, saving hours of manual work.
+    items:
+      - src: lincoln-academy/lunch/zapier-old-flow.webp
+        alt: The Zapier "All in One Lunch Ordering" Zap — a Formidable submission splits into two paths that add rows to Google Sheets, one looping over student IDs.
+        label: All in One Lunch Ordering — a form submission split into paths, looping over student IDs into Google Sheets
+      - src: lincoln-academy/webflow-2025/zapier-flow-a.webp
+        alt: A 2025 Zap — a Formidable new entry sends an email, creates a spreadsheet row, sends another email, then splits into Sarah/Steph Approval and Sarah/Steph Deny paths.
+        label: 2025 — a new entry, emails and a spreadsheet row, then approve and deny paths
+      - src: lincoln-academy/webflow-2025/zapier-flow-b.webp
+        alt: A 2025 Zap — a delay, a "Totally Approved" filter, the Lincoln Academy Calendar, a spreadsheet row and an email, then IT, Facilities and Communications paths that each add a task to a master school sheet.
+        label: 2025 — once approved, onto the school calendar, then tasks for IT, Facilities and Communications
+      - src: lincoln-academy/field-trip/zapier-request.webp
+        alt: The Field Trip Request 4.0 Zap — a Formidable new entry, a Python step, an email, a new spreadsheet row, another email, then paths.
+        label: Field Trip Request 4.0 — new entry, Python, emails, a spreadsheet row, then paths
+      - src: lincoln-academy/field-trip/zapier-approval.webp
+        alt: The Field Trip Approval Zap — a spreadsheet trigger, an email, then Approved and Denied paths that each send their own email.
+        label: Field trip approval — Approved and Denied paths
+
+  - id: newsletter-before
+    heading: Lincoln at a Glance, 2025
+    intro: |
+      I organize newsletters, blog posts, and custom forms so the office team can quickly update information, track responses, and keep parents informed without digging through spreadsheets or email threads.
+    items:
+      - src: lincoln-academy/webflow-2025/newsletter-2025-lincoln-at-a-glance.webp
+        alt: 'The 2025 web version of "Lincoln at a Glance: A Quick Peek at the Week" — a short intro, then Events and Announcements as plain bulleted lists.'
+        label: The 2025 web post — events and announcements as plain lists
+      - src: lincoln-academy/webflow-2025/wp-newsletter-posts-with-views.webp
+        alt: The WordPress posts list — weekly Lincoln at a Glance issues by brendonjensen with 149, 241 and 301 views, and Board Meeting Highlights October 2025 with 105.
+        label: Weekly issues in WordPress — 149, 241 and 301 views on three issues
+
+features:
+  - id: old-site
+    heading: The site before the rebuild
+    layout: stack
+    media:
+      - video:
+          src: /video/lincoln/old-site-tour.mp4
+          poster: /video/lincoln/old-site-tour.webp
+          label: A screen recording of the old Divi site — the home page, About, Apply and the Calendar.
+          width: 1600
+          height: 1000
+        caption: The old Divi site — home, About, Apply and Calendar.
+  - id: forms
+    heading: Forms and automation
+    body: |
+      Forms are also a major part of the website.
+
+      Lincoln already had Formidable forms connected to Zapier automations, and several school workflows depended on those exact forms and field IDs.
+
+      That meant the rebuild had an important constraint.
+
+      I could change almost everything around them, but ==I could not casually rebuild those forms== and break the automations people were already using.
+
+      I kept the existing Formidable and Zapier structure intact where it needed to stay intact, then built the new website around it.
+    media:
+      - video:
+          src: /video/lincoln/field-trip-form-builder.mp4
+          poster: /video/lincoln/field-trip-form-builder.webp
+          label: A screen recording of the Field Trip Request form in Formidable's form builder.
+          width: 1600
+          height: 772
+        caption: The field trip request form in Formidable's builder.
+  - id: staff-login
+    heading: A staff login through Google
+    body: |
+      I also built a new staff login connected through Google, so it can be protected and ==only staff can access it==.
+
+      The staff portal became one place for internal forms, lunch ordering, tickets, directory information, calendars, and other resources.
+
+      Access is tied to staff accounts so internal tools stay private without requiring another completely separate website.
+    media:
+      - video:
+          src: /video/lincoln/staff-login.mp4
+          poster: /video/lincoln/staff-login.webp
+          label: A phone pulls back from the Continue with Google button to the whole Staff Sign-In page.
+          # A camera move that ends on the whole phone: play once and hold.
+          once: true
+          matte: '#000000'
+          width: 1600
+          height: 1600
+          crop: { x: 0.2, y: 0, w: 0.6, h: 1 }
+  - id: newsletter
+    heading: The Monday newsletter
+    body: |
+      My role at Lincoln also includes helping communicate what is happening around the school.
+
+      ==Every Monday, I put together and send the school newsletter.==
+
+      I redesigned that experience so it is easier to scan and gives families a clearer view of upcoming events, announcements, and important information.
+
+      I also made calendar dates easier to use so families can add relevant events to their own calendars instead of manually creating them.
+
+      On the website, I added an announcement area for information that needs to be seen quickly.
+
+      The website, newsletter, calendar, and announcements now work more like parts of the same communication system instead of separate things.
+    media:
+      - src: lincoln-academy/newsletter/issue-top.webp
+        alt: The top of a Monday newsletter on a phone — "Lincoln at a Glance — Week of October 19th", then This Month's Lunch Menu.
+        caption: Lincoln at a Glance, the week of October 19th.
+      - src: lincoln-academy/newsletter/issue-events.webp
+        alt: The newsletter's "This Week at Lincoln" list on a phone — each event with its date, time and an Add to calendar button.
+        caption: This Week at Lincoln, with Add to calendar on every event.
+
+situation: |
+  By the time I started planning the rebuild, the website had grown into a mix of Divi pages, plugins, staff-only content, forms, documents, directories, newsletters, school resources, and other systems that had been added over time.
+
+  ==It worked, but it was getting harder to manage.==
+
+  Different departments needed different things from the website, and making those changes inside the existing Divi setup was becoming more difficult.
+
+  The staff directory needed more information and better organization.
+
+  Government and school-board documents needed to stay organized and easy to find.
+
+  Staff needed private resources.
+
+  Parents needed quick access to school information.
+
+  The lunch-ordering process was becoming harder to maintain after the school moved to Infinite Campus and the old roster process stopped staying current.
+
+  The website had also become ==more focused on explaining Lincoln to prospective families== than helping the parents, teachers, and staff who were already using it every day.
+
+myRole: |
+  I was already part of Lincoln's operations team, which meant I was working directly with the people who would use what I was building.
+
+  I talked with the lunch team about what they needed every morning.
+
+  I worked with finance on how their information should be organized.
+
+  I worked with administration on the staff directory, private resources, and other school information.
+
+  I also continued working on forms, automations, newsletters, announcements, and the other web systems the school already relied on.
+
+  This was not just a website redesign.
+
+  I was rebuilding the public site while also improving several of the workflows running through it.
+
+atAGlance:
+  - value: Half the time
+    label: For the kitchen, with custom labels on every lunch item
+    note: From the new lunch dashboard.
+  - value: About 200 pages
+    label: Rebuilt, migrated, or reorganized
+    note: The project included public pages, program information, documents, staff resources, and school content.
+  - value: 3 custom plugins
+    label: Built around actual school workflows
+    note: Staff forms, lunch ordering, and internal ticketing.
+  - value: WCAG 2.1 AA
+    label: Accessibility built into the new templates
+    note: Keyboard access, contrast, labeling, and screen-reader support were tested across the site.
+
+keyDecisions:
+  - heading: Build navigation around what people actually use
+    body: |
+      One of the biggest complaints from the survey was that it took too long to find common information.
+
+      People should not have to click through four pages to find something they use every week.
+
+      So I simplified the navigation and started putting the most-used links where people naturally look for them.
+
+      That included quick-link areas, a cleaner main navigation, useful links in the footer, and links placed directly on the pages where they were relevant.
+
+      I also added search in more places so someone who knows what they are looking for does not have to understand the school's site structure first.
+
+      The goal was simple.
+
+      ==Make the common things easy to find.==
+  - heading: Build mobile as a real experience, not a smaller desktop site
+    body: |
+      Parents and staff specifically called out mobile in the survey.
+
+      That mattered because a lot of school information is checked quickly from a phone.
+
+      A parent might be looking for a calendar date in the parking lot.
+
+      A teacher might need a form between classes.
+
+      Someone might be looking for a staff extension while already on the way to the school.
+
+      I rebuilt the site so those experiences were considered from the beginning instead of being squeezed down after the desktop layout was finished.
+  - heading: Replace Divi with something the school could actually maintain
+    body: |
+      The old site relied heavily on Divi and several plugins.
+
+      That made simple content changes more complicated than they needed to be.
+
+      I rebuilt the site as a custom PHP WordPress theme using ACF.
+
+      The layout stays controlled in code, but the content that staff actually needs to change lives in clear fields.
+
+      That means somebody can update text, links, images, documents, or other school information without understanding how a page builder was assembled.
+
+      The goal was not just to make the new website easier for me to develop.
+
+      It needed to be ==easier for Lincoln to run after I finished building it==.
+  - heading: Build one staff directory that works differently for public and internal users
+    body: |
+      The staff directory was one of the areas administration really wanted improved.
+
+      Families need to be able to find teachers and staff quickly.
+
+      They need things like names, roles, extensions, and useful teacher links.
+
+      At the same time, not every staff member or every piece of staff information should be publicly visible.
+
+      I built the directory so public visitors see the information meant for families, while logged-in staff can see additional internal information.
+
+      That let us keep one structured directory instead of maintaining separate lists in different places.
+
+story:
+  - heading: Parent and staff feedback
+    placement: afterSituation
+    body: |
+      Before the school year ended, we sent an anonymous Qualtrics survey to parents and staff.
+
+      I wanted the rebuild to be ==based on what people were actually frustrated with==, not just what I thought needed to change.
+
+      The survey asked four questions about how people used the website, what bothered them, and what they wanted to see improved.
+
+      Several themes kept coming up.
+
+      People said the mobile site felt like a smaller version of the desktop site instead of something designed for a phone.
+
+      Finding basic information could take several clicks.
+
+      Navigation was confusing.
+
+      Pages were slow.
+
+      The interface did not always make sense.
+
+      Parents wanted easier access to the things they used regularly instead of having to search through pages aimed at prospective families.
+
+      Lunch information was difficult to find.
+
+      People wanted quick links.
+
+      They wanted better search.
+
+      They wanted the website to feel simpler.
+
+      I used that feedback as the starting point for the new site.
+  - heading: Building around the school day
+    body: |
+      The site has several different groups using it, and each one needs something different.
+
+      ### Parents and families
+
+      Parents need to find information quickly.
+
+      That includes:
+
+      - Staff and teacher information
+      - School policies
+      - Lunch information
+      - Parent Teacher Conferences
+      - Announcements
+      - Calendars
+      - Forms
+      - Program information
+      - Quick links
+
+      I tried to remove unnecessary steps between the parent and the thing they are trying to find.
+
+      ### Teachers and staff
+
+      Staff need more than public information.
+
+      They need tools.
+
+      ### Administration and office staff
+
+      Administration needed school information to stay organized without every change becoming a development request.
+
+      That includes:
+
+      - Staff information
+      - Board updates
+      - Government documents
+      - School policies
+      - Newsletters
+      - Program pages
+      - Announcements
+      - Internal resources
+
+      I structured those areas so they could be updated from the WordPress dashboard instead of buried inside Divi layouts.
+  - heading: Rebuilding lunch ordering
+    body: |
+      A generic form can collect someone's lunch choice.
+
+      That does not mean it can run a lunch program.
+
+      The kitchen needs to know who submitted.
+
+      They need to know who did not.
+
+      They need to know which students are missing.
+
+      They need totals for each meal.
+
+      They need labels.
+
+      They need information they can use quickly before lunch starts.
+
+      So I built a custom lunch-ordering system around that workflow.
+
+      Teachers submit their class orders through the site.
+
+      The lunch manager has her own dashboard where she can see:
+
+      - Submitted classes
+      - Missing classes
+      - Missing students
+      - What each student ordered
+      - Daily meal totals
+      - Printable information
+      - Downloadable CSV data
+      - Pre-populated labels
+      - Reminder tools
+
+      Before, a lot of that work required manually checking information and typing or writing labels.
+
+      Now the website prepares much of it automatically.
+
+      That gives the lunch staff more time to focus on actually preparing and serving lunch instead of spending the morning organizing data.
+  - heading: Improving communication with families
+    body: |
+      My role at Lincoln also includes helping communicate what is happening around the school.
+
+      Every Monday, I put together and send the school newsletter.
+
+      I redesigned that experience so it is easier to scan and gives families a clearer view of upcoming events, announcements, and important information.
+
+      I also made calendar dates easier to use so families can add relevant events to their own calendars instead of manually creating them.
+
+      On the website, I added an announcement area for information that needs to be seen quickly.
+
+      That gives the school another way to communicate important updates without expecting every family to hunt through individual pages.
+
+      The website, newsletter, calendar, and announcements now work more like parts of the same communication system instead of separate things.
+  - heading: Forms and automation
+    body: |
+      Forms are also a major part of the website.
+
+      Lincoln already had Formidable forms connected to Zapier automations, and several school workflows depended on those exact forms and field IDs.
+
+      That meant the rebuild had an important constraint.
+
+      I could change almost everything around them, but I could not casually rebuild those forms and break the automations people were already using.
+
+      I kept the existing Formidable and Zapier structure intact where it needed to stay intact, then built the new website around it.
+
+      That allowed the school to keep using its existing workflows while the rest of the site changed underneath them.
+
+      This includes things like staff requests, school forms, event-related requests, and other workflows that route information to the right people.
+  - heading: Accessibility
+    body: |
+      Accessibility was also part of the rebuild from the beginning.
+
+      A school website needs to work for more than one type of user.
+
+      I worked on:
+
+      - Keyboard navigation
+      - Better heading structure
+      - Color contrast
+      - Screen-reader labels
+      - Alt text
+      - Clear form labels
+      - More consistent templates
+
+      Instead of trying to fix accessibility one page at a time after launch, I wanted the theme itself to create a better starting point for every page.
+
+      That makes accessibility easier to maintain as new content is added.
+
+hardProblem:
+  punchline: Refreshing the lunch dashboard could send the same reminder again because the action had no memory of who had already been contacted.
+  problem: |
+    Teachers who missed the lunch-order cutoff were supposed to receive one reminder.
+
+    Instead, some teachers were getting the same reminder more than once.
+
+    That was frustrating for them and made the system look unreliable.
+  assumption: |
+    My first thought was that somebody was clicking the reminder button several times or that some scheduled process was accidentally running more than once.
+
+    The number of duplicate emails made that seem like the obvious explanation.
+  found: |
+    The reminder was not actually automated.
+
+    It was triggered through a protected URL in the kitchen dashboard.
+
+    The security token stayed valid long enough that refreshing the page could run the reminder action again.
+
+    If another admin opened the same URL, it could run again there too.
+
+    Each time that happened, everyone who was still marked as missing received another email.
+
+    The system knew who still needed to submit lunch.
+
+    ==It did not know who had already been reminded.==
+
+    **That was the real problem.**
+  fix: |
+    I changed the reminder process so it remembers who has already been contacted that day.
+
+    Before sending an email, the system checks the day's reminder record.
+
+    If that teacher has already received one, they are skipped.
+
+    If the email sends successfully, that teacher is added to the record.
+
+    That means refreshing the page, clicking the button twice, or having another admin open it does not send the same reminder again.
+
+    I also updated the email handling so replies go back to the kitchen instead of somewhere unrelated.
+  verified: |
+    After the fix, I deliberately triggered the reminder several times.
+
+    The first send worked normally.
+
+    Every attempt after that skipped the teachers who had already been contacted and ==sent zero duplicate emails==.
+
+    Then I tested with a teacher who had not been reminded yet and confirmed that person still received exactly one.
+
+result: |
+  The biggest change is that Lincoln's website now feels much more like ==a tool for the people who are already part of the school==.
+
+  I do not have a conversion number to attach to a school website, and that would not be the right way to judge this project anyway.
+
+  The result I care about is that parents can find things faster, staff have better tools, and departments can do more of their work without fighting the website.
+
+  The old website had become a collection of pages and plugins.
+
+  The new one is built much more closely around how the school actually works.
+
+differently: |
+  The first thing I would change is the staging and launch process.
+
+  I would want ==a staging environment that mirrors production== as closely as possible and a narrower deployment process instead of moving more of the database than necessary.
+
+  That would make production-only issues easier to catch before launch.
+
+  I would also create a formal content-parity checklist before migration.
+
+  With a site this large, it is easy for one old page, external tool link, or program resource to get missed.
+
+  A checklist would make every old page and important link something that gets intentionally kept, replaced, redirected, or removed.
+
+  Finally, I would automate more of the final QA.
+
+  Broken-link checks, accessibility scans, and other basic tests should happen before deployment instead of waiting for a parent or staff member to find the problem.
+
+fullStack:
+  - group: CMS and backend
+    items: [WordPress, PHP, ACF Pro, MySQL, Custom post types, Custom roles and capabilities]
+  - group: Front end
+    items: [HTML, SCSS / CSS, JavaScript, Responsive layouts]
+  - group: Forms and automation
+    items: [Formidable Forms, Zapier]
+  - group: Authentication and integrations
+    items: [Google SSO, Nextend Social Login, Google Calendar / ICS]
+  - group: Development
+    items: [Local by Flywheel, WP-CLI, Git / GitHub]
+
+next:
+  href: /work/all-in/
+  name: ALL IN Tournament
+  line: Redesigning a live tournament site and building its 2027 registration, without disrupting the app behind it.
+
+# Quick Overview: the condensed read behind the "Quick overview | Full case
+# study" switch. Built from this file's own sections; every sentence is
+# backed by a line above.
+overview:
+  glance: true
+  sections:
+    - heading: Overview
+      body: |
+        Lincoln Academy is a K–9 charter school in Utah. I was the solo developer and designer on its website rebuild. I planned the structure, designed it, built the custom WordPress theme, migrated the content, built the internal tools and handled the launch.
+
+        I was already on the school's operations team, so I was building for people I worked with every day.
+      labels: ["WordPress", "PHP", "ACF Pro"]
+    - heading: The Challenge
+      body: |
+        The old site was Divi pages, plugins, forms, documents and staff content added over time, and every change inside Divi was getting harder.
+
+        Lunch ordering was breaking down too. After the school moved to Infinite Campus, the old roster process stopped staying current.
+
+        In an anonymous survey, parents and staff said the mobile site felt like a shrunken desktop site, the navigation was confusing, and basic information took several clicks to find.
+      labels: ["Divi", "Infinite Campus"]
+      image: { src: lincoln-academy/webflow-2025/old-home-attendance-banner.webp, alt: "The old Divi home page in 2025, with an \"Attendance Concerns?\" slide and a bar of links under a two-sided menu." }
+    - heading: The Solution
+      body: |
+        I rebuilt the site as a custom PHP theme with ACF, with the layout in code and content in clear fields. Around it I built three custom plugins, for staff forms, lunch ordering and internal ticketing.
+
+        Staff sign in through Google to a private staff portal.
+
+        Formidable forms already fed Zapier by field ID, so I kept them and built around them.
+
+        A field trip request gets an ID like FT-123456, goes to two approvers, then only to the people who need it. A rejected one comes back with a link to pick a new date.
+      labels: ["ACF Pro", "Custom plugins", "Google SSO", "Formidable", "Zapier"]
+      show: ["viewer:lunch", "viewer:field-trips", "feature:staff-login"]
+    - heading: Engineering Deep Dive
+      body: |
+        Teachers who missed the lunch cutoff were supposed to get one reminder. Some got the same one several times.
+
+        My first guess was someone clicking the button more than once, or a scheduled job running twice.
+
+        It wasn't scheduled at all. The reminder ran from a protected URL in the kitchen dashboard, and the security token stayed valid long enough that a refresh, or another admin opening the page, ran it again. The system knew who hadn't ordered. It didn't know who had already been reminded.
+
+        I made it keep a record of who's been contacted each day. It checks the record before sending and adds a teacher only once the email goes out. Replies now go to the kitchen.
+
+        Then I triggered it several times on purpose. It sent zero duplicate emails, and a teacher who hadn't been reminded yet still got exactly one.
+      labels: ["PHP", "WordPress", "Email"]
+      image: { src: lincoln-academy/lunch/dashboard.webp, alt: "The kitchen dashboard, with the Remind missing and Email summary buttons, the day's meal totals and each class's order, names blurred." }
+    - heading: Results
+      body: |
+        **The kitchen cut its time in half** with custom labels on every lunch item in the new dashboard.
+
+        About 200 pages were rebuilt, migrated or reorganized, and the three custom plugins are built around how the school actually works.
+
+        I don't have a conversion number for a school website, and that wouldn't be the right way to judge it anyway.
+      labels: ["Lunch dashboard", "Migration"]
+      image: { src: lincoln-academy/lunch/labels.webp, alt: "The Lunch Labels page, with special student meals and staff meals filled in and names blurred." }
+    - heading: Reflection
+      body: |
+        I'd want a staging environment that mirrors production, and a narrower deployment that doesn't move more of the database than it needs to.
+
+        I'd also write a content-parity checklist before migrating a site this size, and run broken-link and accessibility checks before a deploy instead of waiting for a parent to find the problem.
+      labels: ["Staging", "QA"]

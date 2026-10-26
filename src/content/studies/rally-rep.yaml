@@ -1,0 +1,156 @@
+order: 9
+# Approved for publication. Route: /work/rally-rep/.
+approved: true
+
+# Small study. The tradeshow section is from my old Webflow case study. In
+# short, the situation, my role and the result come from my own lines plus
+# what is visible on rallyrep.com: the eleven Infrastructure Partners pages in
+# the menu, the regional rep map, the "Click for Your Rep" call tab, and the
+# Any Part You Need / Reel Trailers / Equipment Source sections. "The
+# dealer-facing division of Rally Trailer Manufacturing" is from my old About
+# page. Anything else is left out. It showcases Rally Rep and what it is, so
+# this study has no key decisions, hard problem or "what I'd do differently".
+
+kind: WordPress · dealer network site
+name: Rally Rep
+label: Designing a smarter way to connect dealers and customers
+role: Web Designer & Marketing Specialist
+company: Rally Rep
+timeline: 2025 to Present
+stack: WordPress, Divi Supreme Pro, Elementor, HTML, CSS, JavaScript, Mailchimp, HubSpot
+live: https://rallyrep.com
+
+# Hero: an iPad mockup.
+# Transparent 3200 x 2400 canvas; the iPad and keyboard span x 0.239-0.761,
+# y 0.14-0.86. The crop keeps a little room round it, and with no panel
+# behind it the device sits straight on the page.
+heroMedia:
+  image:
+    src: rally-rep/mockups/hero.webp
+    alt: An iPad on a keyboard case with a pencil resting on top, angled to the right, showing rallyrep.com — the orange "Click for Your Rep" call bar, a strip of partner logos including Dura-Line, CommScope and VeEX, and the "Any Part You Need" section with photos of a technician and a tower climber.
+  crop: { x: 0.22, y: 0.12, w: 0.56, h: 0.76 }
+  size: medium
+  transparent: true
+
+inShort:
+  - Rally Rep is the dealer-facing division of Rally Trailer Manufacturing. Its reps connect crews with equipment from partners like Dura-Line, CommScope and VeEX.
+  - I designed and built its website, with ==a page for each partner==, a map that points you to your regional rep, and a "Click for Your Rep" call tab at the top of every page.
+  - I also handled the marketing for Rally Connects, the tradeshow Rally Rep hosted at Rally HQ in Mona, Utah, from ==the event emails== to the banners and signage.
+
+# In short is not first, so the iPad follows the title and facts directly
+# (In short first would sit between them and push the iPad off the first
+# screen); At a glance then In short follow the hero.
+layout:
+  - glance
+  - inShort
+  - situation
+  - role
+  - viewer:site
+  - story:0
+  - strip:emails
+  - result
+  - fullStack
+
+viewers:
+  - id: site
+    heading: The website
+    intro: Four pages of rallyrep.com, captured October 23, 2026. On a phone, each step shows the phone layout.
+    steps:
+      - tab: Home
+        title: Partners first
+        body: |
+          A slider of partner brands, each with a Visit Partner Website button, and a "Click for Your Rep" tab with the phone number pinned to the top of every page.
+        url: rallyrep.com
+        src: rally-rep/home-desktop.webp
+        alt: The Rally Rep home page, with the partner slider on the Oldcastle slide and the top of the coverage map.
+        narrow: rally-rep/home-phone.webp
+      - tab: Find your rep
+        title: Find Your Rally Rep
+        body: |
+          A coverage map of the western states with a marker for each region, beside "Connect with your Rally Rep today" and the phone number.
+        url: rallyrep.com/regional-reps
+        src: rally-rep/reps-desktop.webp
+        alt: The Find Your Rally Rep page, with a map of the western United States marked by region.
+        narrow: rally-rep/reps-phone.webp
+      - tab: Partner page
+        title: A dealer page for each partner
+        body: |
+          Each manufacturing partner has its own page. This one is Dura-Line: "A Rally Rep Dura-Line specialist can help."
+        url: rallyrep.com/dura-line
+        src: rally-rep/duraline-desktop.webp
+        alt: The Rally Rep Dura-Line partner page, with the Dura-Line logo on a dark band.
+        narrow: rally-rep/duraline-phone.webp
+      - tab: Training
+        title: Onsite Equipment Training
+        body: |
+          A service page with the training details beside an orange "Interested in Onsite Equipment Training?" form.
+        url: rallyrep.com/onsite-equipment-training
+        src: rally-rep/training-desktop.webp
+        alt: The Rally Rep Onsite Equipment Training page, with a request form on the right.
+        narrow: rally-rep/training-phone.webp
+
+strips:
+  - id: emails
+    heading: The event emails
+    intro: Four of the emails behind Rally Connects, before, during and after the event.
+    items:
+      - src: rally-rep/connects-email-header.webp
+        alt: The Rally Connects Tradeshow email header, "September 9–11 · Mona, Utah", with a photo of a demo under a tent and a Schedule & Info button.
+        label: The invitation. September 9–11 in Mona, Utah
+      - src: rally-rep/connects-email-info.webp
+        alt: The event info section of the Rally Connects email, listing dates, location, host, registration, cost, audience and highlights including a keynote by Utah Governor Spencer Cox.
+        label: Event info, with the Governor's keynote listed first
+      - src: rally-rep/connects-email-kickoff.webp
+        alt: The "Rally Connects Kicks Off Today" email, with a short intro and a photo of attendees at a live demo.
+        label: The kickoff email
+      - src: rally-rep/connects-mailchimp.webp
+        alt: The Mailchimp campaign list showing the "Rally Connects Kicks Off Today!" and "Thank you for coming to rally connects" emails, with recipient counts and rates blurred.
+        label: The two campaigns in Mailchimp (numbers blurred)
+        phone: fit
+
+situation: |
+  Rally Rep covers telecom, power and gas infrastructure, with eleven partners from Dura-Line and CommScope to Oldcastle and VeEX.
+
+  So the site is built around two questions: who makes what I need, and who is my rep?
+
+myRole: |
+  I designed and developed the site in WordPress with Divi Supreme Pro and Elementor, plus custom HTML and CSS.
+
+  The home page leads with a slider of partner brands, each with a button to that partner's website, then sections for Reel Trailers, Any Part You Need and Equipment Source that send you to the partners. Each partner has its own page, and the Find Your Rally Rep page puts a map of the regions next to the phone number.
+
+  Outside the website I handle Rally Rep's email campaigns and trade show materials, and I keep working on the site so it stays fast and easy to use.
+
+atAGlance:
+  - value: Over 250
+    label: Attendees at Rally Connects, first planned for about 100
+  - value: '11'
+    label: Partner pages, one for each infrastructure partner
+
+story:
+  - heading: Rally Connects Tradeshow
+    body: |
+      The Rally Connects Tradeshow was one of the biggest projects I helped bring to life at Rally Trailer.
+
+      What started as a small idea to host around 100 people turned into ==a packed event with over 250 attendees==, including Utah Governor Spencer Cox, who came and gave a speech.
+
+      I handled the marketing side of the event—from designing flyers, emails, and social posts to creating banners and signage that tied everything together.
+
+      I also helped capture photos and videos throughout the event and worked with the team to make sure everything ran smoothly.
+
+      The tradeshow was a huge success, not just for turnout but for ==the connections, partnerships, and attention it brought to Rally==.
+
+result: |
+  rallyrep.com is live, with eleven partner pages, the regional rep map, the call tab on every page and a request form for on-site equipment training.
+
+  - [Visit rallyrep.com](https://rallyrep.com/)
+
+fullStack:
+  - group: Website
+    items: [WordPress, Divi Supreme Pro, Elementor, HTML, CSS, JavaScript]
+  - group: Marketing
+    items: [Mailchimp, HubSpot, Illustrator]
+
+next:
+  href: /work/leamington-town/
+  name: Leamington Town
+  line: The official website for a small Utah town, and why it looks the way it does.

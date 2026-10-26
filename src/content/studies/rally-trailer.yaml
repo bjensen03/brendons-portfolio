@@ -1,0 +1,782 @@
+order: 2
+# Rally Trailer Manufacturing is approved for publication, so this builds in production and
+# replaces the older MDX page at the same URL.
+approved: true
+
+kind: Custom WordPress theme · dealer platform
+name: Rally Trailer Manufacturing
+label: Turning a website into a tool for customers, dealers, marketing, and operations
+role: Web Developer / Web & Marketing
+company: Rally Trailer Manufacturing
+timeline: 2025 to Present
+team: Marketing, Sales, Operations, Leadership, and Dealers
+stack: WordPress, PHP, ACF Pro, JavaScript, SCSS, MySQL, LiteSpeed, HubSpot
+live: https://rallytrailermfg.com
+
+cover: rally-trailer/screenshot-2025-10-29-at-3-58-15-pm.webp
+coverAlt: The trailer range on the Rally Trailer Manufacturing site, split by industry — telecom, gas, energy, pole trailers and truck beds.
+
+gallery:
+  heading: Screens from the site
+  desktop:
+    - src: rally-trailer/screenshot-2025-10-29-at-3-58-15-pm.webp
+      alt: The trailer range split by industry — telecom, gas, energy, pole and truck beds.
+      label: Range, split by industry
+    - src: rally-trailer/screenshot-2025-10-29-at-3-59-17-pm.webp
+      alt: The full trailer catalog as a filterable grid of products.
+      label: Catalog, with filtering
+    - src: rally-trailer/screenshot-2025-10-29-at-4-00-22-pm.webp
+      alt: A single trailer page with its specification table and quote request.
+      label: Trailer detail and specs
+    - src: rally-trailer/screenshot-2025-10-29-at-4-00-33-pm.webp
+      alt: The trailer color picker, offering black and red finishes.
+      label: Configure a finish
+    - src: rally-trailer/screenshot-2025-10-29-at-4-00-47-pm.webp
+      alt: The literature page listing the product and telecom catalogs as downloads.
+      label: Literature downloads
+    - src: rally-trailer/screenshot-2025-10-29-at-4-05-10-pm.webp
+      alt: The dealer locator, with a find-your-local-dealer prompt over the trailer grid.
+      label: Dealer locator
+
+# ── Case-study template blocks ────────────────────────────────────────────
+
+heroMedia:
+  video:
+    src: /video/rally/macbook-pro-black.mp4
+    poster: /video/rally/macbook-pro-black.webp
+    label: A camera pulls back from the new Rally Trailer Manufacturing home page to a black MacBook Pro.
+    # The recording's own background is pure black, so the panel round it is
+    # seamless. A camera move that ends on the whole laptop: play once, hold.
+    matte: '#000000'
+    once: true
+    width: 1600
+    height: 1600
+    # Taller than 16:9: once the camera has pulled back (~2.2 s) the laptop
+    # stays inside y 0.28–0.87 of the frame, and the black above and below it
+    # is the breathing room inside the panel. Ends at x 0.04–0.96, y 0.30–0.83.
+    crop: { x: 0, y: 0.22, w: 1, h: 0.7 }
+  # A centred panel inside the margins rather than edge to edge.
+  size: medium
+
+# "In short" — every line is taken from this
+# file: result (last paragraph); eras 2026 / story stage 4; story stage 2 and
+# "Building the dealer portal"; result, For performance.
+inShort:
+  - What started as a website I was maintaining became ==a platform I designed== around how Rally actually markets, sells trailers, works with dealers, and supports its operations.
+  - I built a ZIP-code system that connected a customer with the correct dealer based on their location — I built ==a private dealer portal== inside the website.
+  - The site that once took around 26 seconds to load ==now loads in under two seconds== after the rebuild and continued optimization.
+
+layout:
+  - inShort
+  - situation
+  - mockup:field
+  - role
+  - glance
+  - eras
+  - mockup:studio-display
+  - decisions
+  - mockup:ipad
+  - scroller
+  - story:1
+  - viewer:buy-now
+  - story:2
+  - viewer:portal
+  - story:3
+  - hardProblem
+  - result
+  - strip:marketing
+  - differently
+  - fullStack
+
+mockups:
+  - id: field
+    src: rally-trailer/photos/trailer-4.webp
+    alt: A white triple-axle Rally reel trailer parked on a road, photographed from a low angle.
+    crop: { x: 0, y: 0.08, w: 1, h: 0.75 }
+  - id: studio-display
+    src: rally-trailer/mockups/studio-display.webp
+    alt: An Apple Studio Display on a desk in a dark room, showing the Features and Options section of a trailer page on the new site.
+    caption: The new trailer page, on a Studio Display.
+    crop: { x: 0.137, y: 0.226, w: 0.73, h: 0.5475 }
+  - id: ipad
+    src: rally-trailer/mockups/ipad.webp
+    alt: Hands holding an iPad Pro showing the new trailer grid, with compare checkboxes on each trailer and the compare bar along the bottom.
+    caption: The trailer grid with compare, on an iPad Pro.
+    crop: { x: 0.135, y: 0.226, w: 0.73, h: 0.5475 }
+
+# "How the project evolved" (story 1), split across the three versions of
+# the site. The story entry itself stays below for the default layout.
+eras:
+  heading: How the project evolved
+  intro: |
+    The rebuild did not happen because I came in and immediately decided page builders were bad.
+
+    It happened in stages.
+  items:
+    - year: '2022'
+      title: The site I inherited
+      url: rallytrailermfg.com
+      shots:
+        - src: rally-trailer/eras/2022-salient-home.webp
+          alt: The 2022 Rally site — a grey hero reading "Reel Trailers. Real Differences. Real Tough." with Find a Dealership and Learn More buttons.
+        - src: rally-trailer/eras/2022-salient-section.webp
+          alt: The 2022 site's "Your Trusted Choice of Reel Trailers" row — Manual, Hydraulic, Turret and Gas Utility.
+    - year: '2025'
+      title: Work with what Rally already had
+      url: rallytrailermfg.com
+      body: |
+        I inherited the Salient, WPBakery, Elementor, and Hello Elementor setup and started fixing the biggest problems inside it.
+
+        I rebuilt pages in Elementor, cleaned up layouts, fixed bugs, improved mobile behavior, and worked on performance.
+
+        It helped, but the site still had multiple builders, multiple themes, multiple caches, and performance problems.
+      shots:
+        - src: rally-trailer/eras/2025-elementor-industries.webp
+          alt: The 2025 Elementor site — trailers split by industry, Telecom, Gas, Energy, Pole Trailers and Truck Beds.
+        - src: rally-trailer/eras/2025-elementor-grid.webp
+          alt: The 2025 site's trailer grid, each trailer with a View More button.
+        - src: rally-trailer/eras/2025-elementor-trailer.webp
+          alt: A 2025 trailer page — color picker, Buy Now and Rent Now buttons, and the specifications as a text list.
+    - year: '2026'
+      title: Propose the rebuild
+      url: rallytrailermfg.com
+      body: |
+        At that point, the business had outgrown the architecture.
+
+        I proposed rebuilding the site as ==one custom WordPress theme== that could handle the public website, trailer data, dealer routing, lead management, and future tools in one system.
+
+        The plan was approved, and ==I took ownership of the rebuild==.
+      shots:
+        - src: rally-trailer/eras/2026-home.webp
+          alt: The 2026 custom theme home page — "Designed by people in the field. For crews who are out there every day." with Buy Now and Rent to Own.
+        - src: rally-trailer/eras/2026-grid-filters.webp
+          alt: The 2026 trailer grid with a filter bar and a Compare checkbox on every trailer.
+        - src: rally-trailer/eras/2026-compare-table.webp
+          alt: The 2026 Compare Trailers table, three trailers side by side by category, GVWR, payload and reel width.
+
+scroller:
+  heading: Walk through the new site
+  intro: |
+    Scroll to move down each page. The numbers mark what I built into it.
+  pages:
+    - id: trailer
+      label: A trailer page
+      url: rallytrailermfg.com/trailers/hydraulic-load-4-place-48
+      src: rally-trailer/fullpage/trailer.webp
+      alt: The full HL4P-48 trailer page on the new site, from the hero to the footer.
+      clip:
+        src: /video/rally/trailer-page.mp4
+        poster: /video/rally/trailer-page.webp
+        label: A screen recording scrolling through the HL4P-48 trailer page.
+        width: 1600
+        height: 772
+        crop: { x: 0, y: 0.036, w: 1, h: 0.964 }
+      annotations:
+        - label: Specifications first
+          body: Customers care about specifications. Capacity, payload, reel width and reel diameter are the first thing on the page.
+          x: 0.08
+          y: 0.092
+        - label: Buy Now, Rent to Own, compare
+          body: The new forms automatically capture the trailer the customer is viewing.
+          x: 0.545
+          y: 0.108
+        - label: Spec sheet and owner manual
+          body: Every section of the page is one click from the menu, with the spec sheet and owner manual beside it.
+          x: 0.585
+          y: 0.13
+        - label: Specifications
+          body: Each trailer has its own specifications, images, options, upgrades, documents, and buying information.
+          x: 0.535
+          y: 0.389
+        - label: Features and options
+          body: What comes included and the add-ons available, listed separately.
+          x: 0.08
+          y: 0.543
+        - label: Upgrades
+          body: Upgrade information, right on the trailer it applies to.
+          x: 0.36
+          y: 0.66
+        - label: Related trailers
+          body: Similar trailers, so a customer can keep comparing without starting over.
+          x: 0.33
+          y: 0.778
+        - label: Talk to a dealer
+          body: Not sure? The page ends by sending the customer to their local dealer.
+          x: 0.36
+          y: 0.884
+    - id: category
+      label: A category page
+      url: rallytrailermfg.com/telecom-trailers
+      src: rally-trailer/fullpage/compare.webp
+      alt: The full Telecom trailers category page — filters, then a grid of trailers each with a Compare checkbox.
+      clip:
+        src: /video/rally/compare-filters.mp4
+        poster: /video/rally/compare-filters.webp
+        label: A screen recording filtering the Telecom trailers and picking trailers to compare.
+        width: 1600
+        height: 772
+        crop: { x: 0, y: 0.036, w: 1, h: 0.964 }
+      annotations:
+        - label: Filters
+          body: Filter by reel diameter, reel width, payload, features and options.
+          x: 0.08
+          y: 0.118
+        - label: Compare up to three
+          body: Customers can compare up to three trailers side by side.
+          x: 0.23
+          y: 0.157
+        - label: Custom builds
+          body: And a way to ask for a trailer that isn't in the grid.
+          x: 0.33
+          y: 0.79
+    - id: home
+      label: The home page
+      url: rallytrailermfg.com
+      src: rally-trailer/fullpage/home.webp
+      alt: The full new home page — hero, trailer categories, videos, the company story and newsletters.
+      annotations:
+        - label: Buy Now and Rent to Own
+          body: On the homepage, customers can choose the trailer they are interested in.
+          x: 0.375
+          y: 0.13
+        - label: Trailers by industry
+          body: Telecom, gas, power and pole trailers, each a page of its own.
+          x: 0.08
+          y: 0.25
+
+viewers:
+  - id: buy-now
+    heading: Buy Now and Rent to Own
+    steps:
+      - tab: '2025'
+        group: Before
+        title: Find your local dealer
+        url: rallytrailermfg.com
+        src: rally-trailer/buy-now/old-zip-modal.webp
+        alt: The 2025 trailer page with a "Find your local dealer" box asking for a ZIP code over the page.
+        detail: { x: 0.36, y: 0.33, w: 0.28, h: 0.45 }
+        body: |
+          Someone could be on a specific trailer page and still be asked:
+
+          - Which trailer are you interested in?
+          - What state are you in?
+          - Which dealer are you trying to contact?
+
+          That did not make sense.
+      - tab: Trailer
+        group: Now
+        title: The trailer is already filled in
+        url: rallytrailermfg.com/trailers/2p102h
+        src: rally-trailer/buy-now/step-trailer.webp
+        alt: The new quote panel, step 1 of 3, "Which trailer interests you?" with 2P102H already selected.
+        detail: { x: 0.75, y: 0, w: 0.25, h: 0.45 }
+        body: |
+          If somebody is already looking at the SLRT-28R page, the website already knows which trailer they want.
+
+          The new forms ==automatically capture the trailer the customer is viewing==.
+      - tab: ZIP and dealer
+        group: Now
+        title: The ZIP code picks the dealer
+        url: rallytrailermfg.com/trailers/2p102h
+        src: rally-trailer/buy-now/step-zip-dealer.webp
+        narrow: rally-trailer/buy-now/step-zip-mobile.webp
+        alt: Step 2 of 3, "Where are you?" — a ZIP code entered and the matching dealer shown under it.
+        detail: { x: 0.75, y: 0, w: 0.25, h: 0.45 }
+        body: |
+          ==Their ZIP code determines their state and dealer territory.==
+
+          A customer can enter or change their ZIP code and the site can use that location to figure out which dealer should handle them.
+      - tab: Contact
+        group: Now
+        title: Then just the contact details
+        url: rallytrailermfg.com/trailers/2p102h
+        src: rally-trailer/buy-now/step-contact.webp
+        alt: Step 3 of 3, contact info — the trailer and the matched dealer carried along at the top of the form.
+        detail: { x: 0.75, y: 0, w: 0.25, h: 0.6 }
+        body: |
+          The lead can then be sent to the correct dealer without making the customer figure any of that out.
+
+          The form became shorter because the website started doing more of the work.
+
+  - id: portal
+    heading: Inside the dealer portal
+    steps:
+      - tab: Dashboard
+        title: One login per dealership
+        url: rallytrailermfg.com/dealer-portal
+        src: rally-trailer/portal/dashboard.webp
+        alt: The portal dashboard — new leads, trailers across all lots and open build orders, with quick actions and a message box for every dealer.
+        body: |
+          Each dealer has their own login and only sees the information connected to their dealership.
+
+          - Receive and manage their leads
+          - See quoted trailers
+          - See sold trailers
+          - Request trailers for their lot
+      - tab: Messages
+        title: Talking to one dealer, not all of them
+        url: rallytrailermfg.com/dealer-portal/messages
+        src: rally-trailer/portal/messages.webp
+        alt: The portal's messages screen — a list of dealers down the left and a conversation pane on the right.
+        body: |
+          - Receive messages from Rally
+          - Communicate with Rally staff
+
+          Rally admins can also communicate with dealers individually instead of treating the entire dealer network like one group.
+      - tab: Build tracking
+        title: Trailers in the shop
+        url: rallytrailermfg.com/dealer-portal/build-board
+        src: rally-trailer/portal/build-tracking.webp
+        alt: The "Trailers in the shop" board — an order card with buttons for each production stage, In Queue through Final Inspection.
+        body: |
+          - Follow trailers through the build process
+          - See which production stage their trailers are in
+      - tab: Getting started
+        title: A walkthrough and a quick reference
+        url: rallytrailermfg.com/dealer-portal/help
+        src: rally-trailer/portal/walkthrough.webp
+        alt: The portal's help page — a 60-second walkthrough button and a quick reference table of where to go for each task.
+        body: |
+          - Update dealership information and branding
+
+          The portal turned the website into ==a working tool for the dealer relationship== instead of just a public marketing site.
+
+strips:
+  - id: marketing
+    heading: Marketing side
+    items:
+      - src: rally-trailer/marketing/catalog-telecom-cover.webp
+        alt: The cover of Rally's "Reel Power" product catalog.
+        label: Product catalog cover
+      - src: rally-trailer/marketing/catalog-energy-1.webp
+        alt: An energy catalog page, "Push don't pull", showing a compressor trailer in use.
+        label: Energy catalog
+      - src: rally-trailer/marketing/catalog-energy-2.webp
+        alt: An energy catalog spec page for the Three Place Turret and Double Turret trailers.
+        label: Energy catalog specs
+      - src: rally-trailer/marketing/spec-sheet-2p102h.webp
+        alt: The spec sheet for the 2P-102H 2 Place Hydraulic Load trailer.
+        label: 2P-102H spec sheet
+      - src: rally-trailer/marketing/email-design-1.webp
+        alt: A marketing email for the 2 Place Turret Trailer.
+        label: Email, 2 Place Turret
+      - src: rally-trailer/marketing/email-design-2.webp
+        alt: A marketing email with the DTRT-604's features and quick specs.
+        label: Email, DTRT-604
+      - src: rally-trailer/marketing/email-design-3.webp
+        alt: A marketing email, "Ready for the work you do".
+        label: Email, "Ready for the work you do"
+      - src: rally-trailer/marketing/email-performance-1.webp
+        alt: An email performance report showing open, click, bounce and unsubscribe rates for a campaign.
+        label: Email performance report
+      - src: rally-trailer/marketing/email-performance-2.webp
+        alt: A second email performance report showing open, click, bounce and unsubscribe rates.
+        label: Email performance report
+      - src: rally-trailer/marketing/zapier-hubspot-outlook.webp
+        alt: A Zapier flow — a new HubSpot form submission sends an email through Microsoft Outlook.
+        label: Zapier, HubSpot form to Outlook
+
+situation: |
+  Rally Trailer Manufacturing builds industrial reel and cable trailers for telecom, utility, and construction crews.
+
+  When I took over the website, it had grown into ==a mix of different WordPress systems==.
+
+  The original site was built with the Salient theme and WPBakery. Later, Elementor had been added on top of that, along with the Hello Elementor theme in parts of the site.
+
+  Some pages were built in WPBakery.
+
+  Some were built in Elementor.
+
+  Different sections depended on different themes, and there were multiple caching systems running at the same time.
+
+  But the business was also asking more from the website.
+
+  Customers needed an easier way to find the right trailer and contact the correct dealer.
+
+  Dealers needed better access to leads, inventory, and trailer requests.
+
+  Marketing needed to update pages without fighting several different builders.
+
+  Operations needed better visibility into what dealers were requesting and where trailers were in production.
+
+  The website was starting to become more than a marketing site.
+
+  ==It was becoming part of how Rally actually sold trailers and worked with its dealer network.==
+
+myRole: |
+  I became ==the main person responsible for Rally's website== and most of the day-to-day web work around it.
+
+  I worked directly with marketing, sales, operations, leadership, and dealers.
+
+  At first, that meant maintaining and improving the website Rally already had.
+
+  Over time, it turned into much more.
+
+  I worked on landing pages, trailer pages, lead generation, dealer tools, forms, performance, product content, SEO issues, analytics, dealer routing, and internal workflows.
+
+  One of the first bigger sales projects was adding **Buy Now** and **Rent Now** to the website.
+
+  That sounded like two buttons.
+
+  It ended up becoming ==a full lead-routing system==.
+
+  As Rally kept wanting to do more with dealers, leads, products, and internal tools, I reached a point where adding more onto the existing WordPress setup did not make sense anymore.
+
+  I put together ==a plan to rebuild the website from the ground up==.
+
+  Once the plan was approved, I was given control of the project, including the site structure, development approach, page system, trailer experience, dealer tools, and how the different parts of the website worked together.
+
+atAGlance:
+  - value: About 26 seconds to under 2 seconds
+    label: Website load time
+    note: The original site had major performance problems. After the rebuild and continued optimization, load time dropped to under two seconds.
+  - value: 30+ trailer models
+    label: Structured product pages
+    note: Each trailer has its own specifications, images, options, upgrades, documents, and buying information.
+  - value: 27 reusable modules
+    label: Marketing-editable sections
+    note: Pages can be built and rearranged from reusable content sections instead of needing a developer for every layout change.
+
+keyDecisions:
+  - heading: Rebuild only after the existing system reached its limit
+    body: |
+      I did not rebuild the site just because I wanted to custom code something.
+
+      I had already spent a lot of time working inside the existing setup.
+
+      I knew what it could do, what it struggled with, and what kept breaking.
+
+      The biggest problem was that ==every new feature made the stack harder to maintain==.
+
+      Even after moving pages into Elementor, I was still working around old WPBakery content, multiple themes, caching conflicts, and performance issues.
+
+      Rally was also asking for things that page builders were never really meant to manage, including dealer territories, lead routing, custom portals, trailer comparisons, and production tracking.
+
+      At that point, a custom build gave us more room to grow instead of adding another layer on top.
+  - heading: Stop asking customers for information the website already knows
+    body: |
+      One thing that bothered me about the old forms was how much information the customer had to repeat.
+
+      Someone could be on a specific trailer page and still be asked:
+
+      - Which trailer are you interested in?
+      - What state are you in?
+      - Which dealer are you trying to contact?
+
+      That did not make sense.
+
+      If somebody is already looking at the SLRT-28R page, the website already knows which trailer they want.
+
+      The new forms automatically capture the trailer the customer is viewing.
+
+      Their ZIP code determines their state and dealer territory.
+
+      The lead can then be sent to the correct dealer without making the customer figure any of that out.
+
+      The form became shorter because ==the website started doing more of the work==.
+  - heading: Build trailer pages around how someone actually chooses equipment
+    body: |
+      Industrial trailers are not products where somebody picks the nicest photo and checks out.
+
+      Customers care about specifications.
+
+      They need to know capacity, dimensions, axle setup, reel size, options, available upgrades, and which trailer fits the work they are doing.
+
+      I rebuilt each trailer page around that decision.
+
+      Each page now includes:
+
+      - Trailer photos
+      - Specifications
+      - Buy Now
+      - Rent to Own
+      - Sticky action buttons
+      - Spec sheets
+      - Available options
+      - Upgrade information
+      - Related trailers
+      - Comparison tools
+
+      Customers can ==compare up to three trailers side by side==.
+
+      That lets someone actually evaluate the differences instead of opening several tabs and trying to remember which trailer had which specification.
+
+story:
+  - heading: How the project evolved
+    placement: beforeDecisions
+    body: |
+      The rebuild did not happen because I came in and immediately decided page builders were bad.
+
+      It happened in stages.
+
+      ### Stage 1: Work with what Rally already had
+
+      I inherited the Salient, WPBakery, Elementor, and Hello Elementor setup and started fixing the biggest problems inside it.
+
+      I rebuilt pages in Elementor, cleaned up layouts, fixed bugs, improved mobile behavior, and worked on performance.
+
+      ### Stage 2: Build the first dealer-routing system
+
+      Rally wanted Buy Now and Rent Now buttons.
+
+      I built a ZIP-code system that connected a customer with the correct dealer based on their location.
+
+      Leads were captured into a spreadsheet, notifications were sent, and dealers could be followed up with later to see whether they had contacted the lead.
+
+      That was the first point where the website started becoming part of the sales process instead of just showing products.
+
+      ### Stage 3: Push the existing site as far as it could go
+
+      I continued moving older WPBakery pages into Elementor to make the site more consistent.
+
+      It helped, but the site still had multiple builders, multiple themes, multiple caches, and performance problems.
+
+      Lighthouse scores were not improving enough, and every new dealer or sales feature made the setup more complicated.
+
+      ### Stage 4: Propose the rebuild
+
+      At that point, the business had outgrown the architecture.
+
+      I proposed rebuilding the site as ==one custom WordPress theme== that could handle the public website, trailer data, dealer routing, lead management, and future tools in one system.
+
+      The plan was approved, and ==I took ownership of the rebuild==.
+  - heading: Building around the sales process
+    body: |
+      One of the biggest changes was connecting the website to what happens after someone becomes interested in a trailer.
+
+      A customer enters their ZIP code.
+
+      The website determines their dealer territory.
+
+      The customer chooses the trailer they are interested in.
+
+      The lead is captured with the correct trailer and location already attached.
+
+      The correct dealer receives the lead.
+
+      Rally can see that the lead exists.
+
+      The dealer can follow up with the customer.
+
+      The system can also check back later instead of letting the lead disappear into an inbox.
+
+      That same thinking carried into the rebuild.
+
+      ==The website should not stop doing its job after somebody presses Submit.==
+  - heading: Building the dealer portal
+    body: |
+      As Rally's dealer network grew, they needed more than emailed leads.
+
+      I ==built a private dealer portal== inside the website.
+
+      Each dealer has their own login and only sees the information connected to their dealership.
+
+      Dealers can:
+
+      - Receive and manage their leads
+      - See quoted trailers
+      - See sold trailers
+      - Request trailers for their lot
+      - Follow trailers through the build process
+      - See which production stage their trailers are in
+      - Receive messages from Rally
+      - Communicate with Rally staff
+      - Update dealership information and branding
+
+      Rally admins can also communicate with dealers individually instead of treating the entire dealer network like one group.
+
+      The portal turned the website into a working tool for the dealer relationship instead of just a public marketing site.
+  - heading: Building for the shop floor
+    body: |
+      Not every internal user needed the same type of system.
+
+      The shop floor works differently from the dealer network.
+
+      They use shared department computers and do not need individual customer-style accounts.
+
+      Instead of forcing every employee into a login system they would have to remember and manage, I built the production board around how they actually work.
+
+      They can see the trailer builds that need attention and where those builds are in the process without making the system harder than the job itself.
+
+      That decision was simple: build something people will actually use.
+
+hardProblem:
+  punchline: The dealer portal worked perfectly for me and silently failed for the people who actually used it.
+  problem: |
+    The operations team reported that changes inside the dealer portal were not always saving.
+
+    Trailers added to a dealer's lot would disappear.
+
+    Lead statuses could be changed and then come back as "New."
+
+    The frustrating part was that I could not reproduce it.
+
+    I could log into production, make the same changes, reload the page, and everything worked.
+  assumption: |
+    My first thought was that something was wrong with the save logic.
+
+    If information is not staying in the database, the obvious place to look is the code saving it.
+
+    I traced the status handler and database updates.
+
+    They were working correctly.
+
+    That meant the failure was happening somewhere else.
+  found: |
+    I started looking at the actual network requests from the affected accounts.
+
+    The portal's AJAX requests were returning **403 Forbidden**.
+
+    WordPress was rejecting the security nonce.
+
+    That led me to LiteSpeed.
+
+    The host's cache was serving logged-in users cached copies of portal pages.
+
+    Those cached pages contained old security tokens.
+
+    By the time the operations team tried to save something, WordPress correctly rejected the stale token.
+
+    That also explained why I struggled to reproduce it.
+
+    My own admin session kept getting a freshly generated page with a valid nonce.
+
+    The people actually using the portal were getting cached versions with expired ones.
+
+    The save code was fine.
+
+    ==**The cache was the problem.**==
+  fix: |
+    I excluded the authenticated dealer portal and its AJAX endpoints from LiteSpeed's cache.
+
+    Logged-in users now ==always receive a freshly generated page with a valid security token==.
+
+    I also made the front end show a clear retry message if an AJAX request fails instead of quietly acting like the change saved.
+
+    I did not weaken or remove the WordPress nonce checks.
+
+    They were doing exactly what they were supposed to do.
+
+    The right fix was making sure the cache stopped serving authenticated pages with old tokens.
+  verified: |
+    I reproduced the full dealer workflow on production using a separate account.
+
+    I changed lead statuses.
+
+    I added trailers to a dealer lot.
+
+    I reloaded the page.
+
+    I checked that everything stayed saved.
+
+    I watched the network requests and confirmed the 403 responses were gone.
+
+    I also checked the response headers to make sure LiteSpeed was no longer caching the portal pages.
+
+    That gave me proof that the actual cause was fixed instead of just making the symptom disappear.
+  code:
+    - snippet: litespeedPortal
+      caption: The portal is never cached for a logged-in user. It lives in the theme, so a plugin setting can't undo it.
+    - snippet: portalAjax
+      caption: And if a save does fail, the portal says so instead of acting like it worked.
+
+result: |
+  The biggest change is not just that the new site is faster.
+
+  It is that the website can do much more for the business.
+
+  The original site was a mix of themes, builders, caches, and forms that needed a lot of manual help.
+
+  The rebuilt site is now ==one system designed around how Rally actually works==.
+
+  I have also tested the new site against competitors using Lighthouse, and Rally is now performing much closer to where I wanted a modern manufacturing website to be.
+
+  I do not own all of Rally's sales analytics, so I am not going to claim that the rebuild increased sales by a percentage I cannot verify.
+
+  What I can stand behind is the system I built and the problems it removed.
+
+differently: |
+  The first thing I would add is ==a staging environment that matches production== as closely as possible.
+
+  The dealer portal caching bug only happened in production because that was where LiteSpeed was behaving differently.
+
+  A true production mirror would have given me a safe place to catch that before real users did.
+
+  I would also move the deployment process further toward Git-driven releases.
+
+  The project has grown far beyond a basic WordPress marketing site, so I want the repository and deployment process to reflect that.
+
+  Finally, I would create better internal documentation earlier.
+
+  There are now reusable modules, trailer data, dealer territories, lead routing, portal roles, forms, build tracking, and other systems connected together.
+
+  The site is much easier to use than the one I inherited, but the next developer should also be able to understand why everything works the way it does without having to reverse engineer my decisions.
+
+fullStack:
+  - group: CMS and backend
+    items: [WordPress, PHP, ACF Pro, MySQL, Custom post types, Custom roles and permissions]
+  - group: Front end
+    items: [HTML, SCSS / CSS, JavaScript, Responsive components]
+  - group: Sales and marketing
+    items: [HubSpot, Google Analytics 4, Google Tag Manager, Dealer lead routing, ZIP-code territory matching]
+  - group: Infrastructure and development
+    items: [Hostinger, LiteSpeed Cache, WP-CLI, Git / GitHub, Microsoft 365 / SMTP]
+
+next:
+  href: /work/lincoln-academy/
+  name: Lincoln Academy
+  line: How I rebuilt a large school website and the systems parents and staff use around it.
+
+# Quick Overview.
+# Every line is sourced from this file; see his notes for line numbers.
+overview:
+  glance: true
+  sections:
+    - heading: Overview
+      body: |
+        I'm the main person responsible for Rally's website and most of the web work around it. I work directly with marketing, sales, operations, leadership and dealers.
+
+        When adding more to the old setup stopped making sense, I put together a plan to rebuild the site as one custom WordPress theme. Once it was approved, I owned the rebuild, from the site structure to the dealer tools.
+      labels: ['WordPress', 'Custom theme']
+    - heading: The Challenge
+      body: |
+        The site I inherited was a mix of WordPress systems. It started on Salient and WPBakery, Elementor and Hello Elementor were added later, and more than one caching system ran at the same time.
+
+        Every new feature made it harder to maintain, and Rally kept asking for things a page builder was never meant to handle, like dealer territories, lead routing and a dealer portal. The website was becoming part of how Rally sold trailers.
+      labels: ['WPBakery', 'Elementor', 'Hello Elementor', 'LiteSpeed']
+      show: ['eras']
+    - heading: The Solution
+      body: |
+        I rebuilt it as one custom WordPress theme that runs the public site, trailer data, dealer routing and lead management in one system.
+
+        The forms stopped asking customers for things the site already knew. On a trailer page the trailer is filled in, and the customer's ZIP code decides their state and dealer territory.
+
+        I also built a private dealer portal, where each dealer has their own login and only sees their dealership, and a production board for the shop floor.
+      labels: ['PHP', 'ACF Pro', 'Dealer routing', 'Custom roles']
+      show: ['viewer:buy-now']
+    - heading: Engineering Deep Dive
+      body: |
+        The operations team reported that changes in the dealer portal weren't saving. Trailers added to a dealer's lot disappeared, and lead statuses went back to "New." I couldn't reproduce it; on production, my changes stuck.
+
+        I first suspected the save logic, but the status handler and database updates were working. So I checked the affected accounts' network requests. The portal's AJAX calls were returning 403 Forbidden, because WordPress was rejecting the security nonce.
+
+        The host's LiteSpeed cache was serving logged-in users cached portal pages with old tokens. My admin session always got a fresh page, which is why it worked for me.
+
+        I excluded the portal and its AJAX endpoints from the cache, kept the nonce checks, and made the portal show a retry message when a save fails. Then I ran the full dealer workflow on production with a separate account, confirmed the 403s were gone, and checked the response headers for caching.
+      labels: ['LiteSpeed Cache', 'WordPress nonces', 'AJAX']
+      show: ['hardProblem']
+    - heading: Results
+      body: |
+        **Load time: about 26 seconds → under 2 seconds.** That came from the rebuild and the optimization work after it.
+
+        More than 30 trailer models now have structured product pages, and marketing builds and rearranges pages from 27 reusable modules without needing a developer for every layout change.
+
+        I don't own Rally's sales analytics, so I won't claim a sales increase I can't verify.
+      labels: ['Performance', 'Reusable modules']
+      show: ['mockup:ipad']
+    - heading: Reflection
+      body: |
+        I'd set up a staging environment that matches production first. The portal bug only showed up on production, because that's where LiteSpeed behaved differently.
+
+        I'd also move deployments toward Git-driven releases and write the internal documentation earlier, so the next developer doesn't have to reverse-engineer why everything works the way it does.
+      labels: ['Staging', 'Git-driven releases', 'Documentation', 'Deployment']

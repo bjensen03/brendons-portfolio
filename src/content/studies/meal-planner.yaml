@@ -1,0 +1,321 @@
+order: 5
+# My own app, so there is no client to sign off. The one approval it needed was
+# Kaylee's, because the screens show her calorie and protein targets — she said
+# yes.
+approved: true
+
+# Not public: sign-in is limited to two Google accounts, so there is no `live`
+# link. The cover (also the homepage shot) is a composite of three dark phone
+# captures (images/meal-planner/composites/).
+kind: Next.js · private web app
+name: Meal Planner
+label: A meal planner I built to fuel trail running, canyoneering and backpacking, splitting the same meals between two people's protein targets
+role: Solo Developer / Designer
+company: Personal project
+timeline: August to September 2026
+team: Solo
+stack: Next.js, TypeScript, Tailwind CSS, Postgres, Drizzle
+
+cover: meal-planner/composites/home-phones-1440x900@2x.webp
+coverAlt: Three Meal Planner screens on a phone, side by side — the week plan with each person’s calories and protein, a dinner scaled into per-person portions, and the recipe library both of them rate.
+
+inShort:
+  - I'm constantly trail running, hiking, canyoneering, backpacking and traveling. It's hard on my body, and I need ==enough food and protein== to keep it up week after week.
+  - So I built an app to keep track of it. We cook one meal and it calculates ==how much each of us should eat== based on our individual needs.
+  - The budget said a week cost $437 when the receipt said $250, so I fixed it to ==price weighed items by weight== instead of by packages nobody sells.
+  - We still use it regularly. It's turned into something we actually use instead of just a project I finished and forgot about.
+
+# Screens: src/content/studies/images/meal-planner/. Dark theme
+# throughout (it sits better on the graphite page). Surnames, birthdate,
+# height and weight are blurred in the files; Kaylee approved showing her
+# targets.
+
+# Hero: a Galaxy Z Fold mockup.
+# The background is transparent, so it runs at 'full': 'large' and 'medium'
+# put the media on a raised panel, which would box the device in. The device
+# fills about x 0.255–0.745, y 0.14–0.86 of the frame; the crop keeps the full
+# width (so the device sits centred at about half the page) and trims the
+# empty space above and below.
+heroMedia:
+  image:
+    src: meal-planner/mockups/galaxy-fold-recipes.webp
+    alt: An opened Galaxy Z Fold seen from the back, its camera bump on the left half and the cover screen on the right showing the light Recipes library, 101 recipes rated by both of you, with Surprise me, place and meal filters, and cards for an Apple, Cheddar and Cracker Plate and Avocado Toast with Eggs.
+  # Transparent 3200 × 2400 canvas; the device spans x 0.255–0.745,
+  # y 0.14–0.86. The crop keeps a little room round it, and with no panel
+  # behind it the Fold fills the column on a phone.
+  crop: { x: 0.235, y: 0.12, w: 0.53, h: 0.76 }
+  size: medium
+  transparent: true
+
+layout:
+  - inShort
+  - situation
+  - mockup:week-setup
+  - viewer:week
+  - role
+  - glance
+  - decisions
+  - feature:around
+  - hardProblem
+  - result
+  - differently
+  - fullStack
+
+viewers:
+  - id: week
+    heading: A week on a phone
+    intro: |
+      The app on a phone, in the order a week gets planned.
+    device: phone
+    matte: '#0A0A0C'
+    steps:
+      - tab: Set up
+        title: This week look normal?
+        src: meal-planner/dark/phone/week-setup.webp
+        alt: The week setup screen for October 4 to 10, with a seven-day color strip and Sunday's card showing Kaylee at 2,259 and Brendon at 3,183 calories, Home, Away and Off, day types, and meal toggles.
+        body: |
+          The week opens on the usual one. Each day shows both people's calories, where they're eating, the kind of day, and which meals to plan.
+      - tab: The plan
+        title: The plan
+        src: meal-planner/dark/phone/week-plan.webp
+        alt: The plan for August 30 to September 5. Sunday is off plan; Monday is a gym day with Kaylee at 1,533 kcal and 102 g protein, Brendon at 2,189 kcal and 140 g, and a Winter Citrus Yogurt Bowl at 1× and 1.25× with its ingredients for 2.25 portions.
+        body: |
+          Each day carries both people's calorie and protein targets. A meal shows each person's portion, here 1× and 1.25×, and the ingredients scaled to cook 2.25 portions.
+      - tab: Recipes
+        title: The week's recipes
+        src: meal-planner/dark/phone/week-recipes.webp
+        alt: The recipes screen, listing lunch, dinner and a snack for Monday, Tuesday and Wednesday.
+        body: |
+          Everything on the plan, day by day. Tapping a meal opens what you need and how to make it.
+      - tab: The day
+        title: Monday
+        src: meal-planner/dark/phone/day-view.webp
+        alt: Monday's screen with lunch, dinner and a snack, and a Done, show me Tuesday button.
+        body: |
+          One day at a time: lunch, dinner and a snack, then on to Tuesday.
+      - tab: Portions
+        title: One pot, two portions
+        src: meal-planner/dark/phone/meal-portions.webp
+        alt: Monday's dinner, Chicken and Vegetable Stir-Fry with Rice, at 1.25× for Kaylee and 1.75× for Brendon, with ingredients to cook 3 portions and the chicken split 1¼ and 1¾ on the plates.
+        body: |
+          Monday's dinner. The ingredients are scaled to cook 3 portions, and On the plates splits the chicken 1¼ to Kaylee and 1¾ to Brendon.
+      - tab: Targets
+        title: This week's targets
+        src: meal-planner/dark/phone/body-stats-targets-full.webp
+        crop: { x: 0, y: 0.53, w: 1, h: 0.47 }
+        alt: Brendon's targets for the week at a 15% deficit, 3192 calories on mountain days, 2203 on gym days, and 140 g of protein every day.
+        body: |
+          From the profile: Brendon's daily calories for the week at a 15% deficit, 3192 on mountain days and 2203 on gym days, with 140 g of protein throughout.
+
+# The iPhone mockup leads into the phone viewer: the same week-setup screen,
+# shown whole on a device first. The phone fills about x 0.40–0.60,
+# y 0.14–0.86 of the frame.
+mockups:
+  - id: week-setup
+    src: meal-planner/mockups/iphone-week-setup.webp
+    alt: A black iPhone, upright and turned slightly, showing the dark This week look normal? screen for October 4 to 10, with the seven-day color strip, Sunday's card with Kaylee at 2,259 and Brendon at 3,183 calories, and the top of Monday's card.
+    caption: Setting up the week, on a phone.
+    crop: { x: 0.37, y: 0.11, w: 0.26, h: 0.78 }
+
+features:
+  - id: around
+    heading: Around the app
+    layout: stack
+    media:
+      - src: meal-planner/dark/phone/home.webp
+        alt: The home screen, Hey Brendon, with Nothing planned yet for this week, a Plan the week card, and links to the grocery list, trail bin, recipes, taste profile and profile.
+        caption: Home, before the week is planned.
+      - src: meal-planner/dark/phone/recipe-library.webp
+        alt: The recipe library, 101 recipes rated by both, with filters and recipe cards showing calories, protein, minutes, Home and Day trip tags, and thumbs up or down.
+        caption: The recipe library, rated by both of us.
+      - src: meal-planner/dark/phone/taste-profile.webp
+        alt: The taste profile, with a red Can't eat, hard block box for allergies, then Don't like and Love, all empty.
+        caption: The taste profile. An allergy is a hard block; a dislike only turns up less often.
+
+situation: |
+  I'm constantly trail running, hiking, canyoneering, backpacking and traveling. Those days put my body through hard, exhilarating situations, and to keep doing them on a regular basis I need ==enough food and protein==.
+
+  I wanted an app that would keep track of that for me and make it easier to eat what I need. So I built one.
+
+  The app is for two people with different calorie and protein targets cooking one set of meals.
+
+  It has to work standing at the stove, deciding how much of tonight's pot is whose.
+
+  It has to work in a grocery store, with the list open on a phone.
+
+  And it has to work when packing food for a canyoneering day, where everything has to be carried.
+
+  The money mattered too. At one point the budget said a week cost $437.16 when the receipt said $250. ==The one screen about money was the one giving the wrong answer.==
+
+myRole: |
+  I built it on my own.
+
+  I wrote the spec, designed it, and built everything: the planner, the portioning, the grocery list, the cost estimate, the Trail Bin for hiking food, AI recipe generation, and the test suite.
+
+  Nothing was in place before me except the services it runs on: Neon, Vercel, Google sign-in, and the Anthropic API.
+
+  I had wanted to build my own application for a while, but I knew it was going to be a bigger project than what I had worked on before. I used Claude Code to help with development, work through technical challenges, and understand things as I was building.
+
+  AI was a big part of the development process, but ==the project came from something I personally wanted to create and use==. I was involved in shaping the features, figuring out what worked, and making changes based on how we actually used the app.
+
+  One of the biggest things I took away from the project was ==how much I learned throughout the process==. It gave me experience working through a larger application, and it's something I want to keep improving and building on.
+
+atAGlance:
+  - value: 17 days
+    label: To build the first version
+    note: 25 August to 10 September 2026.
+  - value: '1,491'
+    label: Automated tests, all passing
+    note: From a Vitest run on 22 October 2026, which includes work after September.
+  - value: '104'
+    label: Ingredients modeled
+    note: 36 of them with a recorded piece weight.
+
+keyDecisions:
+  - heading: Only give an ingredient a piece count when the piece is honest
+    body: |
+      "2 chicken breasts" is easier to shop for than "425 g", so every ingredient could have been given a count.
+
+      But shrimp, a cabbage head and a rotisserie chicken vary by two or three times per piece.
+
+      ==A count that is not honest reads as precise== while being worse than the weight it replaced.
+
+      So 36 of the 104 ingredients have a piece weight, and the rest stay in grams.
+
+      Every piece weight is pinned in a test, so a new ingredient cannot be added without a decision about its piece.
+  - heading: Split one cooked recipe into two different portions
+    body: |
+      Kaylee and I eat dinner together, and ==we're not going to cook two completely different meals every night==. We also wanted to be more intentional about our portions and weight goals.
+
+      The idea was to cook one meal but have the app calculate how much each of us should eat based on our individual needs.
+
+      The solver might say 425 g of chicken. Nobody shops that way, so the list rounds to what you can actually buy, and the cooking screen splits one pot into two unequal servings.
+  - heading: Google sign-in plus a two-email allowlist
+    body: |
+      Signing in with Google proves who you are. It does not prove you are allowed in.
+
+      I wanted the application to be private so only the two of us could use it. The allowlist is what keeps it that way.
+
+      I tested it with another Google account, and ==it was denied access==.
+  - heading: A week already shopped for keeps its old maths
+    body: |
+      When the over-buying bug was fixed, a saved week with no recorded yield kept the previous arithmetic.
+
+      That way a list someone had already shopped from did not silently change underneath them.
+
+hardProblem:
+  title: A budget 75% too high
+  punchline: The grocery budget said $437 for a week that cost $250 at the till, because the app priced every item as whole packages when a meat counter charges for exactly what the scale weighs.
+  problem: |
+    The weekly cost came out at $437.16 against a real receipt of $250. That is 75% too high, on the only screen about money.
+
+    One line showed it clearly: 1,020 g of salmon charged as three 1 lb packs at $36.00.
+  assumption: |
+    When I saw the budget showing $437 against a $250 grocery receipt, I knew something wasn't adding up.
+
+    It made me realize that ==just because a feature works doesn't necessarily mean it's calculating everything correctly==. I needed to look more closely at how the budget was being calculated.
+  found: |
+    A scale sets the price at the meat counter, the deli slicer and the produce bin.
+
+    The counter weighs out 2.25 lb of salmon for $26.96. Nobody sells half a jar.
+
+    ==The app had one rule for two kinds of item.== Eighteen ingredients are sold by weight.
+  fix: |
+    I worked on correcting the budget calculations so the numbers would better reflect our actual grocery spending.
+
+    I added a `soldByWeight` flag and set it on those 18 ingredients, so they charge the exact share and show the per-pound price instead of naming a package nobody had to buy.
+
+    Jars, cartons and sealed bacon still round up, because you really do buy the whole thing.
+
+    The waste figure now counts only the rounded lines.
+  verified: |
+    I don't have a verified before-and-after total for that specific week, so I'd rather explain what I fixed than claim a result I can't confirm.
+
+    The tests are the check. They pin the edge cases: bacon and shrimp are priced per pound but still come sealed, and Swiss cheese is shelf-priced but sliced to order.
+  code:
+    - snippet: groceryCost
+      caption: A weighed line is charged for the share it uses. Everything else still rounds up to whole packages.
+
+result: |
+  We still use it regularly. I built it so I could eat what I need for the things I do, and ==it's turned into something we actually use== instead of just a project I finished and forgot about.
+
+  The list now buys each recipe once per batch instead of once per portion.
+
+  The budget prices weighed items by weight instead of by packages nobody sells.
+
+differently: |
+  I would spend more time making sure the grocery budget and meal planning work together correctly from the beginning.
+
+  I'd also improve how food groups are organized and make it easier to grab everything we need for the week.
+
+  I learned that ==building features is one thing, but making sure they work together in everyday use is just as important==.
+
+fullStack:
+  - group: Front end
+    items: [Next.js 16 (App Router), React, TypeScript, Tailwind CSS 4, Zod, PWA]
+  - group: Backend and data
+    items: [Postgres (Neon), Drizzle ORM, Auth.js v5, Google sign-in]
+  - group: Build and deploy
+    items: [Vercel, Vitest]
+  - group: AI
+    items: [Anthropic SDK]
+
+next:
+  href: /work/twilight-trekkers/
+  name: The Twilight Trekkers
+  line: How I designed and built a custom WordPress theme for a travel photography brand serving two audiences at once.
+
+# Quick overview: the condensed read (2–3 minutes), shown by the
+# Quick overview / Full case study switch. The full study above is unchanged.
+overview:
+  glance: true
+  sections:
+    - heading: Overview
+      body: |
+        I'm constantly trail running, hiking, canyoneering, backpacking and traveling, and I need enough food and protein to keep that up. I wanted an app that keeps track of it for me, so I built one.
+
+        I built it on my own, from the spec and the design to the code. The first version took 17 days. Claude Code helped me with development, and the features came from how we actually used the app.
+      labels: ['Next.js', 'TypeScript']
+    - heading: The Challenge
+      body: |
+        Kaylee and I have different calorie and protein targets, and we're not going to cook two different dinners every night. One set of meals has to feed both of us.
+
+        That has to work standing at the stove, deciding how much of tonight's pot is whose. It also has to work when I'm packing food for a canyoneering day, where everything gets carried.
+      labels: ['PWA', 'Phone-first screens']
+      show: ['mockup:week-setup']
+    - heading: The Solution
+      body: |
+        It's a Next.js App Router app in TypeScript. Every write goes through a server action, and the data lives in Postgres on Neon through Drizzle, across 16 tables.
+
+        Each day's targets start from the Mifflin-St Jeor equation, scaled by the kind of day, from a rest day to a backpacking day. Each person's share of a meal is rounded to a quarter serving, and the cooking screen splits one pot into two plates.
+
+        Sign-in is Google through Auth.js, plus a two-email allowlist that fails closed: if the list is missing, nobody gets in. I tested it with another Google account, and it was denied.
+
+        The app also uses the Anthropic API to draft recipes. A draft is only saved after I approve it, and the server checks it again before writing it.
+      labels: ['Next.js App Router', 'Server actions', 'Postgres (Neon)', 'Drizzle ORM', 'Auth.js']
+      show: ['viewer:week']
+    - heading: Engineering Deep Dive
+      body: |
+        The weekly budget said $437.16. The receipt said $250. That's 75% too high, on the only screen about money. One line showed it: 1,020 g of salmon, charged as three 1 lb packs at $36.00.
+
+        It was hard to see because the feature worked. It just wasn't calculating correctly.
+
+        The cause was one rule for two kinds of item. The app priced everything as whole packages, but a meat counter charges for exactly what the scale weighs. Eighteen of the ingredients are sold by weight.
+
+        I added a `soldByWeight` flag to those 18, so they're charged for the exact share they use. Jars, cartons and sealed bacon still round up, because you really do buy the whole thing.
+
+        I don't have a verified before-and-after total for that week, so I won't claim one. The tests are the check. They pin the edge cases, like bacon and shrimp that are priced per pound but come sealed.
+      labels: ['TypeScript', 'Vitest', 'Money in cents']
+      show: ['hardProblem']
+    - heading: Results
+      body: |
+        We still use it regularly. It turned into something we actually use, not a project I finished and forgot about.
+
+        **1,491 automated tests across 67 files, all passing.** They cover the targets, portions, pricing, the grocery list, sign-in and the main screens.
+
+        The grocery list now buys each recipe once per batch instead of once per portion, and weighed items are priced by weight. The app models 104 ingredients, 36 of them with a piece weight.
+      labels: ['Vitest', '1,491 tests']
+    - heading: Reflection
+      body: |
+        I'd make sure the grocery budget and the meal planning work together correctly from the start, and I'd organize food groups better. Building features is one thing; making sure they work together in everyday use matters just as much.
+      labels: ['Testing', 'Everyday use']

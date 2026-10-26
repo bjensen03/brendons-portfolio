@@ -1,0 +1,482 @@
+order: 1
+# PROLOOK is approved for publication, so the full study
+# builds in production in place of the resume page at the same URL.
+approved: true
+
+kind: Custom Sage theme · marketing development
+name: PROLOOK Sports
+label: Building fast-moving marketing projects without waiting weeks for development
+role: Web Developer / Marketing Web Development
+company: PROLOOK Sports
+timeline: 2026 to Present
+team: Marketing, Sales, Creative, and Development
+stack: WordPress, Sage 9, Blade, PHP, ACF, SCSS, JavaScript, GSAP, Git
+
+# A MacBook mockup of the Denver Athletic partner page
+# (images/prolook/mockups/). Cropped round the laptop and the
+# chair seat so the dark scene reads as a photo panel, centred on the laptop.
+heroMedia:
+  image:
+    src: prolook/mockups/macbook-denver-athletic.webp
+    alt: A MacBook on the seat of a curved wooden chair in a dark room, showing the Denver Athletic and Gold Crown Foundation page — Login to start designing and Connect with Denver Athletic buttons, the headline Championships start with superior custom team apparel, Learn more, and the tops of three tile photos for basketball, baseball and flag football.
+  crop: { x: 0.08, y: 0.12, w: 0.84, h: 0.74 }
+  size: large
+live: https://prolook.com
+
+# "In short" — composed from sentences this file already says (situation,
+# role, decisions, PRO-AI, result) and the family list. Nothing new.
+inShort:
+  - PROLOOK brought me in because marketing needed somebody who could move fast, with ==landing pages and partner pages that sometimes had to go live within a day== or within the same week.
+  - I work inside their ==existing Sage 9 theme==, building new templates, landing pages, ACF controls, animations, and forms without getting into product systems I do not own.
+  - The PRO-AI landing page went from design to live in about a week and received ==about 5,000 submissions== from July to September.
+  - I also work on [ALL IN Tournament](/work/all-in/), PROLOOK's tournament site, on a different stack. It has its own study.
+
+layout:
+  - inShort
+  - situation
+  - role
+  - glance
+  - scroller
+  - decisions
+  - mockup:pro-ai
+  - story:0
+  - strip:pro-ai
+  - strip:denver-athletic
+  - story:1
+  - viewer:homepage-hero
+  - strip:guides
+  - hardProblem
+  - result
+  - differently
+  - fullStack
+
+# Whole-page captures of prolook.com. PRO-AI and
+# Denver Athletic are the -crop versions: each starts below the opening video
+# (which captured as blank white) and stops at the end of the footer; the
+# home page capture ends at the Cheer tile, before the footer. Callout text is
+# taken from the story, the result and the decisions below.
+scroller:
+  heading: Scroll the pages
+  intro: |
+    Three pages from prolook.com: the home page, the PRO-AI landing page, and the Denver Athletic partner page. Scroll to move down each one.
+  pages:
+    - id: home
+      label: The home page
+      url: prolook.com
+      src: prolook/screens/homepage-full.webp
+      alt: The PROLOOK home page from the top — a basketball hero, the Build Your Superior Fit product slider, a row of brand logos, ProLook Hockey, WPBL, the 30-years badge, PRO-AI Just Launched and ProLook Cheer.
+      annotations:
+        - label: Homepage updates
+          body: Homepage updates are regular work, alongside new landing pages and campaigns.
+          x: 0.5
+          y: 0.1
+        - label: Superior Fit
+          body: Superior Fit product section updates. It is also where customers saw a stray pipe character in the product labels. That is the hard problem below.
+          x: 0.5
+          y: 0.32
+        - label: A logo marquee
+          body: Custom logo and partner animations.
+          x: 0.5
+          y: 0.415
+        - label: Video-driven sections
+          body: Video-driven sections, GSAP and scroll-triggered animations.
+          x: 0.75
+          y: 0.53
+        - label: PRO-AI, just launched
+          body: The home page points visitors to the PRO-AI landing page, next in this scroller.
+          x: 0.25
+          y: 0.93
+    - id: pro-ai
+      label: The PRO-AI landing page
+      src: prolook/screens/pro-ai-full-crop.webp
+      alt: The PRO-AI landing page below its opening video — the phone and email buttons, the Designed by AI. Built. Better. By us. headline beside the demo video, five How It Works cards, the submit buttons, the call or email help block, the Prefer to design it yourself? banner and the footer.
+      annotations:
+        - label: Design to live in about a week
+          body: I received the design with about a week to turn it into a finished live page.
+          x: 0.5
+          y: 0.02
+        - label: A video-led hero
+          body: The finished page included a video-led hero.
+          x: 0.66
+          y: 0.13
+        - label: How PRO-AI works
+          body: Information explaining how PRO-AI worked.
+          x: 0.5
+          y: 0.34
+        - label: The submission flow
+          body: What users needed to submit, forms, and the full submission flow.
+          x: 0.5
+          y: 0.47
+        - label: Help content
+          body: Help content for anyone who would rather call or email.
+          x: 0.5
+          y: 0.62
+        - label: About 5,000 submissions
+          body: It went live on schedule, and from July to September it received about 5,000 submissions.
+          x: 0.5
+          y: 0.76
+    - id: denver-athletic
+      label: The Denver Athletic partner page
+      src: prolook/screens/denver-athletic-full-crop.webp
+      alt: The Denver Athletic and Gold Crown Foundation partner page below its opening video — two buttons, the Championships Start With Superior Custom Team Apparel headline, three product tiles for basketball, baseball and flag football, the Bring Your Vision to Life form and the footer.
+      annotations:
+        - label: A partner page by the next morning
+          body: The Denver Athletic partner page went from a morning project discussion to a complete five-section live page for a client demo the following morning.
+          x: 0.5
+          y: 0.03
+        - label: Three tiles
+          body: Three learn-more tiles, each wired to its own URL.
+          x: 0.5
+          y: 0.3
+        - label: A lead form
+          body: The lead form fed inquiries straight to the partner.
+          x: 0.5
+          y: 0.63
+        - label: Logos that turn
+          body: Partner logos that rotate on their vertical axis like globes, caught here mid-turn.
+          x: 0.5
+          y: 0.816
+
+mockups:
+  - id: pro-ai
+    src: prolook/screens/pro-ai-logo-padded.webp
+    alt: The PRO-AI wordmark in rainbow colors.
+
+strips:
+  - id: denver-athletic
+    heading: Denver Athletic, live next morning
+    intro: |
+      The Denver Athletic partner page went from a morning project discussion to ==a complete five-section live page== for a client demo the following morning.
+
+      Three learn-more tiles, each wired to its own URL, and a lead form that fed inquiries straight to the partner.
+    items:
+      - src: prolook/screens/denver-athletic-logos-crop.webp
+        alt: The Denver Athletic Keeping It Local logo beside the Gold Crown Foundation logo.
+        label: Denver Athletic and the Gold Crown Foundation
+        phone: fit
+      - src: prolook/screens/denver-athletic-tiles-crop.webp
+        alt: Three product tiles under Learn More — Basketball Uniforms at $90, Baseball and Flag Football — each with a team photo.
+        label: Three learn-more tiles, each wired to its own URL
+      - src: prolook/screens/denver-athletic-form-crop.webp
+        alt: The Bring Your Vision to Life form, with full name, email and phone fields and a submit button.
+        label: The lead form
+  - id: pro-ai
+    heading: Inside the PRO-AI page
+    intro: |
+      Information explaining how PRO-AI worked, what users needed to submit, and help content.
+    items:
+      - src: prolook/screens/pro-ai-logos-crop.webp
+        alt: The ChatGPT, Claude, Copilot and Gemini logos in a row.
+        label: The AI tools a design can come from
+        phone: fit
+      - src: prolook/screens/pro-ai-how-it-works-crop.webp
+        alt: Five numbered How It Works cards, from You Design with AI to Built. Better. Faster.
+        label: How it works, in five cards
+      - src: prolook/screens/pro-ai-help-section-crop.webp
+        alt: Want help? Call or email us now, with the phone and email icons, above No Rebuilding, One Approval, Built. Better.
+        label: Help content
+  - id: guides
+    heading: Care Guide, How to Size
+    intro: |
+      ==One Blade template, one ACF field group.== Care Guide and How to Size are the same template with different content.
+    items:
+      - src: prolook/screens/care-guide.webp
+        alt: The Care Guide page, a bordered card of care instructions, basic guidelines and washing steps.
+        label: Care Guide
+      - src: prolook/screens/care-guide-mobile.webp
+        alt: The Care Guide page on a phone.
+        label: Care Guide, on a phone
+      - src: prolook/screens/how-to-size.webp
+        alt: The How to Size page, with how to measure, fit tips and a download link, above the footer.
+        label: How to Size
+      - src: prolook/screens/how-to-size-mobile.webp
+        alt: The How to Size page on a phone.
+        label: How to Size, on a phone
+
+viewers:
+  - id: homepage-hero
+    heading: The homepage hero
+    intro: |
+      The homepage hero's ACF fields are registered in PHP, so marketing controls the right parts of the page while ==the layout stays controlled in code==.
+    steps:
+      - tab: Fastpitch
+        title: The Fastpitch hero
+        src: prolook/screens/homepage-hero-desktop.webp
+        narrow: prolook/screens/homepage-hero-mobile.webp
+        alt: The home page hero as a collage of fastpitch photos under a large FASTPITCH title.
+        body: |
+          A photo collage under the FASTPITCH title. On a phone the same hero stacks, with the Superior Bestsellers bar below it.
+      - tab: Basketball
+        title: The basketball hero
+        src: prolook/screens/homepage-hero-basketball.webp
+        alt: The home page hero, a Salem Hills player in a blue number 22 jersey driving with the ball.
+        body: |
+          The same hero, running a different campaign.
+
+situation: |
+  PROLOOK already had a development team and an established website, but marketing had a different problem.
+
+  ==They needed somebody who could move fast.==
+
+  Campaigns, landing pages, partner pages, website updates, and sales projects sometimes needed to go live within a day or within the same week. When those requests had to go through the normal development process, they could take ==a couple of weeks or sometimes longer== depending on what else was already being worked on.
+
+  That was one of the main reasons I was brought in as a contractor.
+
+  They needed somebody on the marketing side who could take a request, figure out what needed to happen, communicate with the people involved, build it, test it, and get it live without turning every request into a long development cycle.
+
+  The website is also being used by coaches, athletic directors, dealers, partners, and teams who are trying to understand PROLOOK's products or take the next step. Moving quickly only matters if the finished page is still clear and useful for the person on the other side of the screen.
+
+myRole: |
+  I work between PROLOOK's marketing team and its existing development environment.
+
+  I was not brought in to rebuild the entire platform or replace the other development team. My role is different.
+
+  When marketing needs a landing page, campaign page, website update, animation, form, partner page, navigation change, or something fixed quickly, I can take that project and move it forward.
+
+  A big part of my job is also figuring things out.
+
+  Before working with PROLOOK, ==I had never worked inside a Sage 9 or Blade codebase.== I had to learn how their theme was built while also completing real production work.
+
+  I learned where things lived, how the site was structured, how their deployment process worked, what I could safely change, and what parts of the platform belonged to another team.
+
+  At first, they gave me work to see how I handled the codebase and their process.
+
+atAGlance:
+  - value: About 1 week
+    label: PRO-AI design to live launch
+    note: I received the design and had about a week to turn it into a complete working page while collaborating with marketing, sales, and other people involved in the launch.
+  - value: About 5,000
+    label: PRO-AI submissions, July to September
+  # From the Denver Athletic strip (24h, spec meeting to live partner page).
+  - value: Within 24 hours
+    label: Denver Athletic, discussion to live page
+    note: A complete five-section live page for a client demo the following morning.
+
+keyDecisions:
+  - heading: Make marketing work move at marketing speed
+    body: |
+      The biggest thing I try to solve is the gap between how quickly marketing needs something and how long a normal development process can take.
+
+      If marketing needs a text change, new image, product update, campaign section, or new landing page, I try to build it in a way that does not create another development request the next time something changes.
+
+      That usually means giving marketing control over the right parts of the page through ACF while keeping the actual layout and functionality controlled in code.
+
+      The goal is not to make everything editable.
+
+      ==The goal is to make the things marketing actually changes editable.==
+
+      That helps marketing move faster without giving up the structure and consistency of the site.
+  - heading: Work inside the existing system instead of trying to replace it
+    body: |
+      PROLOOK's main WordPress theme uses Sage 9, Blade, PHP, SCSS, Foundation, Webpack, and ACF.
+
+      Some of that stack is older, but it already supports a large production website and another development team works inside it.
+
+      I could have looked at it and decided everything needed to be rebuilt.
+
+      ==That would not have helped anybody.==
+
+      Instead, I learned the existing setup and made smaller changes where they made sense.
+
+      That lets me move quickly without turning every marketing request into a much larger engineering project.
+  - heading: Build what the project actually needs
+    body: |
+      Some of the requests I get are not normal WordPress page updates.
+
+      Marketing might want a certain animation, video behavior, navigation experience, interactive section, or something from a design that does not already exist in the theme.
+
+      ==My job is usually to figure out how to make it work.==
+
+      That has included custom GSAP animations, scroll effects, video sections, rotating logos, reusable sliders, responsive fixes, forms, navigation changes, and other custom front-end work.
+
+      Sometimes I already know exactly how to build it.
+
+      Other times I have to research it, test different approaches, and figure it out as I go.
+
+      That is a big part of what I bring to the team. They can give me something difficult or something I have not done before, and I will work through it.
+
+story:
+  - heading: 'A major launch: PRO-AI'
+    body: |
+      One of the biggest examples of this was the PRO-AI landing page.
+
+      I received the design with ==about a week to turn it into a finished live page.==
+
+      This was not a situation where I got a final design, disappeared for a week, and came back with a finished website.
+
+      I was communicating with the head of marketing, the head of sales, and other people involved with the launch while I was building it.
+
+      Content changed. Feedback came in. Parts of the experience needed adjustments. I was making those changes while still keeping the launch moving forward.
+
+      The finished page included a video-led hero, information explaining how PRO-AI worked, what users needed to submit, help content, forms, and the full submission flow.
+
+      I handled the development, changes, testing, and publishing of the page.
+
+      It went live on schedule.
+
+      From July to September, it received ==about 5,000 submissions==.
+
+      That project was also important because it showed the team what I could handle. After that, larger landing pages and faster-turnaround marketing projects became a regular part of my work.
+  - heading: Ongoing marketing development
+    body: |
+      PRO-AI was not a one-time project.
+
+      PROLOOK regularly needs new landing pages, campaign pages, website updates, and partner experiences. A lot of that work happens every couple of weeks.
+
+      Some of the work I have handled includes:
+
+      - PRO-AI landing page development
+      - Denver Athletic partner landing page
+      - Homepage updates
+      - A new navigation experience
+      - Superior Fit product section updates
+      - Team page improvements
+      - Reusable CTA components
+      - Lead capture forms
+      - Production debugging
+      - Deployment coordination
+
+      The important part to me is not whether the task sounds big or small.
+
+      It is that ==the team knows they can hand me something and I will work through it.==
+
+hardProblem:
+  punchline: The file on production was byte-for-byte correct. Production was still running the old version of it.
+  problem: |
+    One product section used a pipe character to tell the design where a line break should happen.
+
+    Customers were seeing the actual pipe instead.
+
+    I updated the Blade template so it would split the text at the pipe and display the label correctly.
+
+    It worked locally. I deployed the updated theme. Production still showed the pipe.
+  assumption: |
+    My first thought was cache.
+
+    I cleared Autoptimize, cleared the normal hosting cache, hard-refreshed the page, and confirmed the front-end assets were current.
+
+    Nothing changed.
+  found: |
+    I downloaded the actual production template through SFTP and compared it with my local file.
+
+    They were identical byte for byte.
+
+    That changed the problem. The correct source code was on production, but production was not executing it.
+
+    Sage 9 uses Blade templates, which get compiled into regular PHP files. Production was still using an older compiled Blade file even though the source template itself had already been updated.
+
+    The normal caching tools available to me did not clear that Blade compile directory, and I did not have shell access to clear it directly.
+
+    The source was fresh. ==The executable file was not.==
+  fix: |
+    Instead of continuing to fight a compiled cache I could not directly access, I moved that section into a new Blade partial.
+
+    That gave Blade a source path it had never seen before.
+
+    Since there was no old compiled version connected to that path, Blade had to compile it again from scratch.
+  verified: |
+    I deployed the new partial and refreshed production. The correct label appeared immediately.
+
+    That problem also changed how I think about sections that are edited often or touched by multiple developers.
+
+    Where it makes sense, separating those areas into smaller partials makes them easier to work on, easier to troubleshoot, and easier to isolate when something goes wrong.
+  code:
+    - snippet: bladeLabel
+      caption: The section in its new Blade partial. Blade had never seen that path, so it compiled it from scratch.
+
+result: |
+  ==The biggest result of my work at PROLOOK is trust.==
+
+  I was originally brought in because they needed somebody who could help marketing move faster.
+
+  They gave me a chance to prove that.
+
+  As I completed projects quickly, communicated clearly, figured out problems, and got work live, I started being trusted with bigger and harder projects.
+
+  Now I can be given a landing page, campaign, animation, site update, production issue, or project with a short deadline and take ownership of getting it finished.
+
+  Some requests that might otherwise have waited for the next development release can now be handled ==the same day or the next day.==
+
+  I do not own PROLOOK's full analytics dashboard, so I am not going to attach conversion numbers to work when I cannot verify them.
+
+  What I can stand behind is the work I shipped, how quickly I shipped it, and the amount of responsibility I have been trusted with since joining the team.
+
+differently: |
+  The first thing I would change is the staging setup.
+
+  I would want a staging environment that mirrors production much more closely. That would give production-only issues, like the Blade compile-cache problem, somewhere safe to show up before customers see them.
+
+  I would also move more of the deployment process toward Git instead of archive-based theme imports. That would make the repository the source of truth instead of relying as heavily on a manual deployment process between multiple developers.
+
+  Finally, I would create a simple visual guide for the marketing team showing which ACF fields control which parts of the site.
+
+  Building editable fields saves development time, but ==it only really works if the person using them knows exactly where everything goes.==
+
+fullStack:
+  - group: CMS and backend
+    items: [WordPress, PHP, Sage 9 / Roots, Blade, ACF]
+  - group: Front end
+    items: [HTML, SCSS, Foundation, JavaScript, GSAP, ScrollTrigger]
+  - group: Forms and automation
+    items: [Forminator, Zapier]
+  - group: Development and deployment
+    items: [Git, GitHub, Yarn, Webpack, SFTP, WP Engine]
+
+next:
+  href: /work/rally-trailer/
+  name: Rally Trailer Manufacturing
+  line: How I helped improve a manufacturing website across performance, lead generation, dealer tools, and day-to-day marketing work.
+
+# Quick Overview: the condensed read behind the "Quick overview | Full case
+# study" switch. Built from this file's own sections; every sentence is
+# backed by a line above.
+overview:
+  glance: true
+  sections:
+    - heading: Overview
+      body: |
+        I work between PROLOOK's marketing team and its existing development environment. When marketing needs a landing page, a partner page, a form, an animation or something fixed quickly, I take it and get it live. I wasn't brought in to rebuild the platform or replace the other development team.
+
+        I also work on ALL IN Tournament, which has its own study.
+      labels: ["WordPress", "Sage 9", "Blade", "ACF"]
+    - heading: The Challenge
+      body: |
+        Campaigns, landing pages and partner pages sometimes had to go live within a day or the same week. Through the normal development process, they could take a couple of weeks or longer.
+
+        I had never worked in a Sage 9 or Blade codebase before. I had to learn how the theme was built, how it deployed and which parts belonged to another team, while shipping real production work.
+      labels: ["Sage 9", "Blade"]
+    - heading: The Solution
+      body: |
+        I give marketing control of the right parts of a page through ACF and keep the layout and functionality in code. Not everything is editable, just the things marketing actually changes.
+
+        I learned the existing theme and make smaller changes where they make sense, instead of rebuilding it.
+
+        When a design asks for something the theme doesn't have, I build it, from GSAP animations and scroll effects to video sections, rotating partner logos and forms.
+      labels: ["ACF", "GSAP", "JavaScript", "SCSS"]
+      show: ["viewer:homepage-hero"]
+    - heading: Engineering Deep Dive
+      body: |
+        A product section used a pipe character to mark a line break, and customers were seeing the pipe itself. I updated the Blade template to split the text there. It worked locally, but after the deploy production still showed the pipe.
+
+        My first thought was cache. I cleared Autoptimize and the hosting cache and hard-refreshed. Nothing changed.
+
+        I downloaded the production template over SFTP and compared it with mine. They were identical byte for byte. Sage 9 compiles Blade into PHP, and production was still running an old compiled file that my cache tools couldn't clear. I had no shell access.
+
+        So I moved the section into a new partial. Blade had never seen that path, so it compiled it fresh, and the correct label appeared as soon as I deployed it.
+      labels: ["Blade", "SFTP", "Autoptimize"]
+      show: ["hardProblem"]
+    - heading: Results
+      body: |
+        **PRO-AI: about a week from design to live, and about 5,000 submissions from July to September.** I built it while working with the heads of marketing and sales, handled the development, testing and publishing, and it went live on schedule.
+
+        The Denver Athletic partner page went from a morning discussion to a complete five-section live page for a client demo the next morning.
+
+        I don't own PROLOOK's analytics, so I'm not attaching conversion numbers to any of it.
+      labels: ["Landing pages", "Forms"]
+      show: ["scroller"]
+    - heading: Reflection
+      body: |
+        I'd want a staging environment that mirrors production more closely, so a problem like the Blade compile cache shows up somewhere safe first.
+
+        I'd also move deployments toward Git instead of archive-based theme imports, and make marketing a simple guide to which ACF fields control which parts of the site.
+      labels: ["Staging", "Git"]

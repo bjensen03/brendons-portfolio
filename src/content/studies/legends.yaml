@@ -1,0 +1,410 @@
+order: 8
+# Approved for publication.
+approved: true
+
+kind: Sage 11 · team-uniform storefront
+name: Legends
+label: Building a branded team-uniform storefront for Legends
+role: Web Developer
+company: Legends
+timeline: '2026'
+team: Marketing, Creative, and Development
+stack: WordPress, Sage 11, ACF Pro, Tailwind CSS, Vite, JavaScript
+
+cover: legends/site-home-1440x900@2x.webp
+coverAlt: 'The top of legends-custom.com: a lacrosse game frozen mid-play from the hero video, under the Legends Team logo, Contact Us and Menu.'
+
+# The Legends website, legends-custom.com, captured 2026-10-23. The hero is a looping lacrosse video; this is a
+# paused frame of it. The crop trims the black "Legends Are Made Here" band
+# under the video.
+heroMedia:
+  image:
+    src: legends/site-home-1440x900@2x.webp
+    alt: The first screen of legends-custom.com — a lacrosse game frozen mid-play from the hero video, with Contact Us, the Legends Team logo, Menu and "Legends Are Made Here" across the top.
+  crop: { x: 0, y: 0, w: 1, h: 0.9 }
+  size: large
+live: https://legends-custom.com
+
+# Small study. The rest of the sections (glance, decisions,
+# the build, what I'd do differently) stay in this file and can go back into
+# `layout` at any time.
+#
+# The Legends website is legends-custom.com, a new site: Legends never had
+# one before.
+# It is one page. legends.qstrike.com is the uniform customizer, not the
+# Legends site, and only appears here as the place the links hand off to.
+#
+# Link targets, confirmed from the live DOM (2026-10-23):
+#   header "Legends Are Made Here", menu Customize  → legends.qstrike.com/sports
+#   + Contact Us                                    → legends.qstrike.com/contact-us
+#   menu Men / Women sports → legends.qstrike.com/sports/<Sport>/designs?gender=men|women&sport_code=…
+#   Design Your Uniform pictograms → legends.qstrike.com/sports
+#     (Hockey → /sports/Hockey/designs?gender=men&sport_code=HO)
+#   Team Favorites → filtered legends.qstrike.com design lists
+#   footer customizer, legal and tools links → legends.qstrike.com
+#   menu Legends.com → www.legends.com; wall photos → each club's Instagram
+#
+# Youth athletes: the "We Are Legends" photos are Legends' own published team
+# photos (no names). They appear in mockup:team-wall, in the scroller's
+# full-page capture and in the phone viewer's "Carousels" step. Confirm
+# before publishing.
+inShort:
+  - Legends is a sportswear brand, and legends-custom.com is ==its first website==, a branded storefront for its custom team uniforms.
+  - I owned the homepage development — the hero video, animated intro, uniform sport grid, team wall, favorites section, slide-out navigation, and ==the links into the uniform customizer==.
+  - A dealer, coach, or team can choose the sport and gender they need and ==get sent into the correct uniform design flow== without needing to understand the systems behind it.
+
+layout:
+  - inShort
+  - situation
+  - mockup:jerseys
+  - role
+  - scroller
+  - viewer:phone
+  - viewer:menu
+  - viewer:handoff
+  - strip:sections
+  - hardProblem
+  - mockup:team-wall
+  - result
+  - fullStack
+
+mockups:
+  - id: jerseys
+    src: legends/strip-jerseys.webp
+    alt: A frame of the homepage's jersey video band — rows of lacrosse, basketball and baseball jerseys on a white speckled background.
+    caption: A frame of the jersey video band on the homepage.
+  - id: team-wall
+    src: legends/strip-team-wall.webp
+    alt: The top row of the "We Are Legends" photo wall — Legends' own photos of club teams playing lacrosse and basketball.
+    caption: The "We Are Legends" wall. Each photo links to the club's Instagram.
+
+scroller:
+  heading: Walk through the homepage
+  intro: |
+    legends-custom.com is one page. Scroll to move down it. The numbers mark each section and where it sends people.
+  pages:
+    - id: home
+      label: The homepage
+      url: legends-custom.com
+      src: legends/fullpage/home.webp
+      alt: The whole legends-custom.com homepage — the lacrosse hero, "Legends Are Made Here", the Design Your Uniform sport grid, the jersey video band, the We Are Legends photo wall, Team Favorites and the footer.
+      annotations:
+        - label: Header
+          body: Contact Us and "Legends Are Made Here" go to the customizer. Menu opens the slide-out navigation.
+          x: 0.74
+          y: 0.014
+        - label: Hero video
+          body: A looping lacrosse video, with the "Legends Are Made Here" band under it.
+          x: 0.45
+          y: 0.09
+        - label: Design Your Uniform
+          body: Fourteen sport pictograms. Each one sends people into the uniform customizer.
+          x: 0.36
+          y: 0.243
+        - label: Jersey video band
+          body: A second looping video, of lacrosse, basketball and baseball jerseys.
+          x: 0.5
+          y: 0.44
+        - label: We Are Legends
+          body: Eight team photos, each linking to the club's Instagram.
+          x: 0.4
+          y: 0.555
+        - label: Team Favorites
+          body: Eight products, each opening a filtered list of designs in the customizer.
+          x: 0.42
+          y: 0.77
+        - label: Footer
+          body: Every customizer sport, plus tools, legal pages and social links. All the sport links go to the customizer.
+          x: 0.08
+          y: 0.87
+
+viewers:
+  - id: phone
+    heading: On a phone
+    device: phone
+    matte: '#FFFFFF'
+    steps:
+      - tab: First screen
+        title: The first screen
+        url: legends-custom.com
+        src: legends/site-home-phone.webp
+        alt: The homepage on a phone — the lacrosse hero video, "Legends Are Made Here", and the first four sports of Design Your Uniform with an arrow button under them.
+        body: |
+          The hero, then the sport grid. On a phone the grid shows four sports at a time, with an arrow to move through the rest.
+      - tab: Carousels
+        title: Sections become carousels
+        url: legends-custom.com
+        src: legends/fullpage/home-phone.webp
+        crop: { x: 0, y: 0.335, w: 1, h: 0.2786 }
+        alt: Further down on a phone — the We Are Legends wall showing two photos and Team Favorites showing two products, each with an arrow button.
+        body: |
+          The team wall and Team Favorites work the same way, a few items at a time with an arrow button.
+      - tab: Footer
+        title: The footer
+        url: legends-custom.com
+        src: legends/fullpage/home-phone.webp
+        crop: { x: 0, y: 0.68, w: 1, h: 0.2786 }
+        alt: The footer on a phone — the customizer's sports in two columns, Legends Team Division and Tools links, Contact Us and social icons.
+        body: |
+          The footer lists every sport in the customizer, in two columns on a phone.
+
+  - id: menu
+    heading: The slide-out menu
+    steps:
+      - tab: Menu
+        title: Men, Women, Customize
+        url: legends-custom.com
+        src: legends/site-menu-desktop.webp
+        narrow: legends/site-menu-phone.webp
+        alt: The slide-out menu open over the homepage — Men, Women, Customize and Legends.com, with the sales email and phone number at the bottom.
+        body: |
+          Men and Women open a list of sports. Customize goes to the customizer's sport picker. Legends.com goes to the Legends brand site.
+      - tab: Men
+        title: The men's sports
+        url: legends-custom.com
+        src: legends/site-menu-men-desktop.webp
+        narrow: legends/site-menu-men-phone.webp
+        alt: The menu's Men panel — a Back link and twelve sports from Baseball to Wrestling.
+        body: |
+          Twelve sports. Each one links to that sport's men's designs in the customizer.
+      - tab: Women
+        title: The women's sports
+        url: legends-custom.com
+        src: legends/site-menu-women-desktop.webp
+        alt: The menu's Women panel — a Back link and ten sports.
+        body: |
+          Ten sports, each linking to the women's designs. These two panels are the ones in the hard problem below.
+
+  - id: handoff
+    heading: Where the links land
+    intro: |
+      The homepage, navigation, and footer all send users into the uniform customizer at legends.qstrike.com. I did not build the customizer itself. My responsibility was making sure the Legends experience handed users into it correctly every time.
+    steps:
+      - tab: A sport
+        title: A sport's designs, in the customizer
+        body: |
+          Lacrosse in the Men panel lands here, in the customizer with the sport and gender already set. This page is the customizer's, not part of the Legends site.
+        url: legends.qstrike.com/sports/Lacrosse/designs?gender=men&sport_code=LAX
+        src: legends/handoff-lacrosse-designs-desktop.webp
+        alt: The uniform customizer at legends.qstrike.com showing Lacrosse designs, with Men/Boys and Lacrosse already set in the filters.
+        # No `narrow` on purpose: the customizer's own phone layout runs off
+        # the right edge ("LACROSS…", "CUSTOMIZ…"), so its phone capture read
+        # as a crop on our side. Phones get the whole desktop capture, fitted.
+      - tab: Sport picker
+        title: The customizer's sport picker
+        body: |
+          Customize, "Legends Are Made Here" and the Design Your Uniform grid land on the customizer's sport picker.
+        url: legends.qstrike.com/sports
+        src: legends/customizer-sports-desktop.webp
+        alt: The customizer's sport picker at legends.qstrike.com, a grid of sport icons from baseball to wrestling.
+        narrow: legends/customizer-sports-phone.webp
+
+strips:
+  - id: sections
+    heading: The sections
+    items:
+      - src: legends/site-section-sports.webp
+        alt: The Design Your Uniform section — fourteen sport pictograms in two rows, from Baseball to Wrestling.
+        label: Design Your Uniform
+      - src: legends/site-section-favorites.webp
+        alt: The Team Favorites row of eight products, from a lacrosse vintage jersey to a baseball button jersey, with the top of the footer below.
+        label: Team Favorites
+      - src: legends/site-section-footer.webp
+        alt: The footer — customizer sport links, Legends Team Division and Tools links, social icons and a large "We Are Legends" wordmark.
+        label: Footer
+
+situation: |
+  Legends is its own sportswear brand, and its custom team uniforms are designed in a separate uniform customizer.
+
+  The Legends website is the branded storefront for those uniforms. Legends didn't have a website before this one.
+
+  Someone visiting the site should feel like they are shopping through Legends, even though the uniform design flow runs on its own system underneath.
+
+  That made the project more than just building another landing page.
+
+  The site had to feel like Legends, follow its brand direction, and still connect cleanly into the existing uniform customizer.
+
+  A dealer, coach, or team should be able to land on the Legends site, choose the sport and uniform they need, and move into the correct design experience without needing to understand the systems working behind the scenes.
+
+  My job was to build that front-end experience and make that handoff feel seamless.
+
+myRole: |
+  On Legends I owned the homepage development.
+
+  The Sage 11 theme, Tailwind setup, and overall brand direction were already in place.
+
+  I worked from the design team's Figma files and built the actual experience inside WordPress.
+
+  That included the hero video, animated intro, uniform sport grid, team wall, favorites section, slide-out navigation, footer, responsive behavior, ACF fields, and the links into the uniform customizer.
+
+  I did not build the customizer itself.
+
+  My responsibility was making sure the Legends experience handed users into it correctly every time.
+
+  That meant each sport, gender, and call to action had to point to the right place without turning the site into a mess of hard-coded links.
+
+atAGlance:
+  - value: 14 sports
+    label: In Design Your Uniform, each linked into the uniform customizer
+    note: Each sport had to resolve to the correct customizer path.
+  - value: 8 editable content groups
+    label: Built with ACF Pro
+    note: Marketing can update the homepage without needing a developer for every copy, photo, video, or link change.
+
+keyDecisions:
+  - heading: Make the storefront feel like Legends, not like a template with a different logo
+    body: |
+      The site could not just borrow the look of the customizer or another existing site.
+
+      Legends is its own brand.
+
+      That meant the homepage needed its own visual identity, animation style, typography, video treatment, spacing, and content structure.
+
+      At the same time, it still needed to connect into the customizer behind the scenes.
+
+      My job was to keep those two sides separate in the user's experience.
+
+      The visitor should see Legends from the first screen to the hand-off.
+  - heading: Make the page editable without giving up the structure
+    body: |
+      I could have hard-coded the homepage directly into Blade and called it done.
+
+      That would have worked technically, but it would have created more work later.
+
+      Marketing regularly changes photos, videos, copy, links, and featured content. If every update needed a developer, a branch, and a deployment, the page would become harder to maintain almost immediately.
+
+      So I built the homepage around ACF fields while keeping fallback content in the theme.
+
+      That meant the page could still render correctly when the theme was first installed, but marketing could take over the content as soon as the fields were filled in.
+
+      The layout stayed controlled in code. The content did not have to.
+  - heading: Keep all customizer links tied to one source of truth
+    body: |
+      The homepage, navigation, and footer all send users into the uniform customizer.
+
+      There are a lot of sport and gender combinations, which means there are a lot of places where a wrong URL could quietly send someone into the wrong experience.
+
+      Instead of hard-coding every full link separately, I used one customizer base URL and built the individual paths from there.
+
+      Specific links can still override the base when a deeper customizer path is needed.
+
+      That gives the site one place to update if the customizer path ever changes instead of forcing someone to hunt through dozens of templates and links.
+
+      It also makes the whole system much easier to troubleshoot.
+  - heading: Build the intro animation from the real logo
+    body: |
+      The design called for the Legends name to draw itself onto the screen before the hero loaded.
+
+      There were a few ways I could have built it. I could have exported a video, used a GIF, or brought in something like Lottie.
+
+      Instead, I converted the actual brand font into vector paths and animated the SVG stroke.
+
+      That gave me a sharp version of the logo at any screen size without adding a large video or another animation library just for a short intro.
+
+      It also meant the animation could use the site's colors and stay lightweight.
+
+story:
+  - heading: The build
+    body: |
+      The homepage is made up of several pieces that all have to work together.
+
+      I built:
+
+      - Hero video and load-in intro
+      - Animated Legends wordmark
+      - "Design Your Uniform" sport grid
+      - Sport and gender customizer links
+      - "We Are Legends" team wall
+      - Team Favorites section
+      - Slide-out mobile navigation
+      - Footer navigation
+      - ACF content controls
+      - Responsive layouts
+      - Mobile interactions
+      - Video and image handling
+      - Customizer handoff logic
+
+      The goal was not just to match the Figma file.
+
+      It had to feel like Legends while still working like a real production site.
+
+      That meant adjusting spacing, interactions, responsive behavior, and navigation once everything was running in a browser instead of a static mockup.
+
+hardProblem:
+  punchline: Opening one gender in the mobile menu sometimes showed the other one, even though the menu logic was correct.
+  problem: |
+    The mobile menu has separate sport lists for men's and women's uniforms.
+
+    After the menu was built, opening one of those views could leave the wrong list visible.
+
+    At first it looked like a simple logic mistake. The two panels are nearly identical, so the obvious explanation was that the wrong view was being selected.
+  assumption: |
+    I checked the state and button bindings first. They were correct.
+
+    That made me think it might be a stale asset or caching issue.
+
+    After another refresh and test, the problem was still there.
+  found: |
+    I started capturing the menu during the actual interaction instead of only checking the final state. That showed the view logic was working. The problem was the scroll position.
+
+    The two gender panels sit next to each other inside a horizontal overflow container. When I opened a panel, the script moved keyboard focus to the first link inside it.
+
+    The browser was trying to help by automatically scrolling that focused element into view. Because the incoming panel was still positioned beside the current panel, that automatic scroll moved the whole container and could leave the wrong side visible.
+
+    The menu logic was right. **The browser's focus behavior was moving the drawer.**
+  fix: |
+    I fixed the actual cause instead of trying to force the panel back into place afterward.
+
+    I moved focus using `preventScroll: true`, which lets keyboard focus move without allowing the browser to scroll the container.
+
+    I also changed the drawer so the overflow could not be manually scrolled into the wrong position.
+
+    That stopped the movement at the source.
+  verified: |
+    I repeated the exact interaction at mobile and desktop widths.
+
+    I opened the men's view and captured it. Then I opened the women's view and captured that. Each button now consistently opened the correct list.
+
+    I also checked the container's scroll position after the view changed. If that value moves again in the future, it gives me a clear signal that the bug has come back.
+  code:
+    - snippet: legendsFocus
+    - snippet: legendsDrawer
+
+result: |
+  Legends now has a storefront that feels like its own brand while still connecting cleanly into the uniform customizer.
+
+  The intro animation, hero, uniform grid, team content, navigation, and footer all work together as one experience instead of feeling like separate pieces.
+
+  The most important part is the handoff into the customizer.
+
+  A dealer, coach, or team can choose the sport and gender they need and get sent into the correct uniform design flow without needing to understand the systems behind it.
+
+  The site also gives marketing much more control than a hard-coded homepage would have. Photos, videos, copy, links, and other content can be updated through WordPress without needing me to change the template every time.
+
+  I do not have a conversion or customizer-entry number I can verify for this project, so I am not going to attach one.
+
+  What I can stand behind is that the homepage, navigation, footer, and customizer links now work together as one responsive system and are much easier for the marketing team to manage.
+
+differently: |
+  I would fill the real content into the ACF fields earlier in the build.
+
+  Because the theme had good fallback content, the page could look finished even when some sections were still pulling from code. That made it less obvious during review which areas had already been connected to WordPress. Pre-filling the fields from the beginning would have made that clearer.
+
+  I would also make the cache-clear and staging process part of the deployment setup from day one.
+
+  More than once, something that looked like a code problem was really a hosting cache that had not updated yet. Having that process documented at the start would make reviews and releases smoother.
+
+fullStack:
+  - group: Front end
+    items: [HTML, Blade templates, Tailwind CSS, JavaScript, SVG animation]
+  - group: CMS and backend
+    items: [WordPress, PHP 8.4, Sage 11, Acorn, Laravel components, ACF Pro, Yoast SEO]
+  - group: Build and deployment
+    items: [Vite, npm, WP Engine, Git / GitHub]
+  - group: Tooling and QA
+    items: [fontTools, Headless Chrome, MySQL]
+
+next:
+  href: /work/rally-rep/
+  name: Rally Rep
+  line: Designing a smarter way to connect dealers and customers

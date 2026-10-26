@@ -1,0 +1,115 @@
+order: 10
+# Approved for publication.
+approved: true
+
+# Short showcase study (2026-10-24), like Rally Rep: what Leamington is and
+# why the site looks the way it does. No numbers on purpose.
+# Every fact here was checked against the live site (homepage, /privacy-notice/
+# and the theme's style.css, fetched 2026-10-24); design notes are kept only
+# where they match what's live ("Est. 1880", the AA ochre #8a5c1a, no 480px
+# breakpoint, the cookie choice lasting 365 days).
+
+kind: Custom WordPress theme · town government site
+name: Leamington Town
+label: The official website for a small Utah town, and why it looks the way it does
+role: Designer & Developer, custom WordPress theme
+company: Leamington Town
+timeline: '2026'
+stack: WordPress, PHP, ACF, JavaScript, CSS
+live: https://leamingtontown.gov
+
+# Hero: a screenshot of the home page for now. Swap it for a redone mockup
+# (the old laptop mockup.webp was too zoomed).
+heroMedia:
+  image:
+    src: leamington-town/home-hero.webp
+    alt: 'The top of the Leamington Town home page: an umber header with "Official Town Website", the Leamington Town name, the menu and "Est. 1880" in script, above a painted mural reading "150 Years of Pioneer Heritage" with a steam train, a brick church, mountains and a rider on horseback. Over it, "Leamington Town", "Leamington, Utah — Population 217" and an Explore Town Services button.'
+  size: large
+
+# At a glance is left out of the page to keep it short (the two facts are
+# already in In short); add `glance` back if wanted.
+layout:
+  - inShort
+  - situation
+  - role
+  - story:0
+  - story:1
+  - story:2
+  - mockup:heritage-cookie-banner
+  - story:3
+  - result
+  - fullStack
+
+# My own screenshots of the live site, taken in the browser at 2x
+# (automated capture is blocked by the site's bot check).
+mockups:
+  - id: heritage-cookie-banner
+    src: leamington-town/heritage-cookie-banner.webp
+    alt: 'The "Our Community / A Legacy of Heritage" card beside a photo of a valley under a blue sky, with the cookie banner across the bottom: "We use cookies", a link to the Privacy Notice, and two buttons, Decline non-essential and Accept all.'
+    caption: The heritage card, with the cookie banner a first-time visitor sees.
+    inset: true
+
+inShort:
+  - Leamington is a small pioneer town in Millard County, Utah, established in 1880. This is ==the town's official website==.
+  - It needed to feel like Leamington rather than a government template, so it opens on the town's pioneer heritage mural and pairs a classic serif with a handwritten script.
+  - It also had to meet Utah's Government Data Privacy Act, so I added ==a website privacy notice==, a cookie banner and a notice before anyone downloads a town form.
+
+situation: |
+  leamingtontown.gov holds the town's services, documents and a lot of local history.
+
+  It had three jobs. Residents need to find town services quickly. The site should feel like Leamington, not a generic government portal. And under Utah's Government Data Privacy Act it needed a privacy notice, plus a notice wherever a form collects personal information.
+
+myRole: |
+  I designed and built the town's custom WordPress theme.
+
+  Along with it I built the Website Privacy Notice page, the cookie banner and the notice that appears before a form download, fixed the color contrast that failed WCAG AA, and did a pass to make the site work properly on phones.
+
+atAGlance:
+  - value: Est. 1880
+    label: A small pioneer town in Millard County, Utah
+  - value: GDPA
+    label: Privacy notice, cookie consent and form notices under Utah's privacy law
+
+story:
+  - heading: A town, not a template
+    body: |
+      The home page opens on the town's "150 Years of Pioneer Heritage" mural, with a dark overlay so the title stays readable. There's ==one button, Explore Town Services==, instead of a row of equal choices.
+
+      Headings are Playfair Display and body text is Inter. Mrs Saint Delafield adds a handwritten script accent, like the "How Can We Help?" above Town Services.
+
+      The colors are warm cream, deep umber, ochre and sage, so the site feels western without being kitschy.
+  - heading: Services, heritage and the footer
+    body: |
+      Town Services is four groups: Town Council, Public Works, Planning & Zoning and Town Documents. Each one opens in place, so ==the page stays short and every link is one tap away==. Planning & Zoning holds the county building permit, the town zoning maps and land use applications.
+
+      The "A Legacy of Heritage" card puts the town's address, phone number and population beside its story, with an Est. 1880 mark.
+
+      The footer keeps the Town Hall details and quick links, with a legal strip underneath on every page: Privacy Notice, Contact and Public Records.
+  - heading: Privacy and consent
+    body: |
+      The Website Privacy Notice is split into numbered sections, from what the site collects to cookies, data retention and your rights. It opens with a list of the sections, names the town clerk as the contact, and cites the Utah Government Data Privacy Act.
+
+      The cookie banner is part of the theme, with no outside consent service. It offers "Decline non-essential" and "Accept all", and saves the choice so analytics only runs if someone accepts.
+
+      Town forms are PDF, Word, Excel and OpenDocument files. Clicking a link to one opens ==a Personal Data Collection Notice first==: what the form collects, why, how it's used and kept, and that it's voluntary. You can cancel or continue to the form, Escape closes it, focus stays inside it, and once you continue it doesn't ask again that session.
+  - heading: Contrast and phones
+    body: |
+      The ochre button and the cream footer labels didn't have enough contrast to pass WCAG AA. The button now uses a darker ochre, and the footer labels are white.
+
+      On phones, the hero title scales with the screen, the page can't scroll sideways, form fields are big enough that iOS doesn't zoom in when you tap one, buttons and links are easy to hit, and animation respects reduced motion.
+
+result: |
+  The site is live at leamingtontown.gov. It looks like Leamington, keeps town services a tap away, and has the privacy notice, cookie consent and form notices the town needed under Utah's privacy law.
+
+  - [Visit leamingtontown.gov](https://leamingtontown.gov/)
+
+fullStack:
+  - group: CMS and backend
+    items: [WordPress, PHP, ACF]
+  - group: Front end
+    items: [CSS, Vanilla JavaScript]
+
+next:
+  href: /work/prolook/
+  name: PROLOOK Sports
+  line: Building fast-moving marketing projects without waiting weeks for development.

@@ -1,0 +1,717 @@
+order: 4
+parent: prolook
+# Its own page at /work/all-in/. It stays in the PROLOOK family: the switcher, the
+# PROLOOK page and the work index still list it under PROLOOK, and the old
+# /work/prolook/all-in/ redirects here. See studyHref in src/lib/studies.ts.
+standalone: true
+# Approved for publication with the rest of PROLOOK.
+approved: true
+
+kind: SvelteKit · live tournament app
+name: ALL IN Tournament
+label: Redesigning a live tournament site and building its 2027 registration, without disrupting the app behind it
+role: Full-Stack Web Developer, Marketing Side
+company: PROLOOK Sports
+timeline: '2026'
+team: Marketing, Design, Engineering, and QA
+stack: SvelteKit, Svelte, Tailwind CSS, Node, JavaScript
+
+# A MacBook Neo mockup of the live home page.
+# Trimmed to the swing-in and the hold, so it plays once and stops on the
+# whole laptop. Edges are pure black, so the panel is too. The held laptop
+# sits at x 0.08–0.92, y 0.24–0.79 of the frame; the crop leaves room above
+# and below so the angled swing-in is never clipped.
+heroMedia:
+  video:
+    src: /video/all-in/macbook-neo.mp4
+    poster: /video/all-in/macbook-neo.webp
+    label: A pink MacBook Neo swings in and settles square-on, showing the ALL IN Tournament home page.
+    matte: '#000000'
+    once: true
+    width: 1600
+    height: 1600
+    crop: { x: 0, y: 0.13, w: 1, h: 0.76 }
+  size: medium
+live: https://allintournament.com
+
+# "In short" — every line is taken from this file: the situation and the
+# result.
+inShort:
+  - The Register button on the live site led to a page that still said ==“2025 Registration is full.”== There was no way for a team to register.
+  - I built ==a full registration form for 2027==, saved to the database rather than only emailed, with a staff board and three emails that did not exist before.
+  - I rebuilt the rules, brackets page, navigation, homepage, and footer of ==a live SvelteKit app== owned by an engineering team in the Philippines.
+  - Every change shipped through ==DEV, staging, QA, and production==, without getting in the way of the tournament systems the engineering team already owned.
+
+layout:
+  - inShort
+  - situation
+  - glance
+  - scroller
+  - mockup:rules-display
+  - feature:rules-phone
+  - viewer:brackets
+  - strip:details
+  - decisions
+  - story:0
+  - story:1
+  - mockup:register-phone
+  - viewer:registration
+  - mockup:nav-before
+  - mockup:nav-after
+  - story:2
+  - viewer:board
+  - feature:emails
+  - story:3
+  - viewer:prototypes
+  - role
+  - strip:shop-bug
+  - hardProblem
+  - result
+  - differently
+  - fullStack
+
+# Before and after, one page per run. Before shots of the home page come from
+# the site rebuilt out of git history; before shots of the rules come from
+# the live site; after shots from staging. Callout text is from the
+# decisions below.
+scroller:
+  heading: Old pages, new pages
+  intro: |
+    Scroll to move down each page. Both home pages were ==rebuilt from the real code at that point in git history==, run as a production build at the same screen size: 2.0.94, before any of my work, and 2.0.102. Both use today's database, so only the code differs, and the hero is a video, so both show a still frame.
+
+    For the rules and registration, the before shots come from the live site and the after shots from staging, taken the same day so the comparison is honest.
+  pages:
+    - id: home-before
+      label: The home page at 2.0.94
+      url: allintournament.com
+      src: all-in/build-history/01-homepage-whole-page/before-desktop.webp
+      alt: The whole home page at version 2.0.94 — a white header with partner logos, the April 30 to May 2 dates, the Tournament Tools icon row with Shop, the Custom Uniforms block, and the footer.
+      annotations:
+        - label: The old header
+          body: 2.0.94, before any of my work.
+          x: 0.5
+          y: 0.01
+        - label: Last year's dates
+          body: The homepage was still showing last year's dates.
+          x: 0.5
+          y: 0.394
+        - label: The icon row
+          body: Rules, Teams, Brackets and Shop, as a row of icons.
+          x: 0.5
+          y: 0.6
+        - label: The PROLOOK and Dick's section
+          body: Custom Uniforms, at the bottom of the page above the footer.
+          x: 0.5
+          y: 0.835
+    - id: home-now
+      label: The home page at 2.0.102
+      url: allintournament.com
+      src: all-in/build-history/01-homepage-whole-page/after-desktop.webp
+      alt: The whole home page at version 2.0.102 — the black navigation with the new logo, the 2027 dates, four photo tiles for Rules, Teams, Brackets and Sponsors, the staggered photo strip, and the footer with the WE ARE ALL IN wordmark.
+      annotations:
+        - label: The new ALL IN logo
+          body: The navigation got the new ALL IN logo.
+          x: 0.1
+          y: 0.007
+        - label: A dropdown that stays open
+          body: The dropdown stays open while you move to it.
+          x: 0.5
+          y: 0.007
+        - label: 2027 dates
+          body: 2027 DATES, Coming Soon to Utah County.
+          x: 0.5
+          y: 0.283
+        - label: Four photo tiles
+          body: The icon row was replaced with four photo tiles.
+          x: 0.74
+          y: 0.43
+        - label: Live text, not titles baked into images
+          body: Now the titles stay sharp, can scale with the layout, and can also be read by screen readers.
+          x: 0.26
+          y: 0.615
+        - label: The staggered photo strip
+          body: The PROLOOK and Dick's section at the bottom was replaced with the staggered photo strip, white above and grey below so it runs into the footer.
+          x: 0.6
+          y: 0.776
+        - label: A sharper footer wordmark
+          body: The WE ARE ALL IN wordmark was being stretched beyond the resolution of the original image on large screens, so I replaced it with a higher-resolution version.
+          x: 0.5
+          y: 0.955
+    - id: rules-before
+      label: The rules page, before
+      src: all-in/rules/before-desktop.webp
+      alt: The old rules page, white text on a solid red background.
+      annotations:
+        - label: Sections squeezed into a red bar
+          body: The sections squeezed into a red bar across a photo.
+          x: 0.5
+          y: 0.105
+        - label: White on red, top to bottom
+          body: Every rule, white on red, from the top of the page to the bottom. Hard to read, especially on a phone, and it looked dated.
+          x: 0.5
+          y: 0.4
+    - id: rules-after
+      label: The rules page, after
+      src: all-in/rules/after-desktop.webp
+      alt: The rebuilt rules page, black header and white page with the rules numbered down the margin.
+      annotations:
+        - label: A bar that stays with you
+          body: The sections sit in a bar that stays with you as you scroll.
+          x: 0.3
+          y: 0.125
+        - label: A bigger headline
+          body: White page, black text, bigger headline.
+          x: 0.2
+          y: 0.16
+        - label: Red as an accent
+          body: Red is now an accent, not the background.
+          x: 0.33
+          y: 0.294
+        - label: A printed rule book
+          body: The rules themselves read like a printed rule book, numbered down the margin with a line between each one.
+          x: 0.04
+          y: 0.45
+    - id: register-before
+      label: Registration, before
+      src: all-in/registration/before-dead-end.webp
+      alt: A page reading "2025 Registration is full".
+      annotations:
+        - label: “2025 Registration is full”
+          body: What the Register button led to. Wrong year, no way forward.
+          x: 0.5
+          y: 0.38
+    - id: register
+      label: Registration, after
+      src: all-in/registration/form-desktop.webp
+      alt: The 2027 registration form, with the team, coach and contact questions and the list of agreements.
+      annotations:
+        - label: Every question, all required
+          body: Every question the tournament asks, all required.
+          x: 0.3
+          y: 0.172
+        - label: Spots change with the division
+          body: Spots change with the division (12 for 8U and 14U, 32 for 9U to 13U).
+          x: 0.3
+          y: 0.255
+        - label: PROLOOK uniforms
+          body: Every team wears PROLOOK uniform tops in every game.
+          x: 0.3
+          y: 0.49
+        - label: What they're agreeing to
+          body: The list of agreements, each one ticked before the form will send.
+          x: 0.3
+          y: 0.56
+        - label: Shut until November 1
+          body: The form unlocks itself on the test sites and stays shut on the live site until the date.
+          x: 0.11
+          y: 0.84
+
+features:
+  - id: rules-phone
+    heading: The rules on a phone
+    body: |
+      The phone version is ==where the red background hurt most==.
+
+      After: white page, black text, bigger headline, and the sections sit in a bar that stays with you as you scroll.
+
+      Every button and section is the same as before, and so is the wording, apart from the rules that were updated.
+    media:
+      - src: all-in/rules/before-phone-screen.webp
+        alt: The old rules page on a phone, white text on a solid red background.
+        caption: Before.
+      - src: all-in/rules/after-phone-screen.webp
+        alt: The rebuilt rules page on a phone, black header and white page.
+        caption: After.
+  - id: emails
+    heading: The emails are the product
+    layout: stack
+    body: |
+      The form was a fifth of the work. ==What mattered was what happened after someone pressed submit.==
+
+      Three emails: a receipt to the coach that says plainly that registering does not reserve a spot, a notice to the tournament with every contact detail and a link straight to the board, and the acceptance email carrying the Venmo code and a card payment link with that team's own division and name written into the instructions, so a two hundred dollar payment can be matched to a team without anyone guessing.
+
+      Two things I got wrong on the first pass and caught before anyone saw them.
+
+      The images were linked using the address of the incoming request, which comes out as localhost behind the server's proxy — ==every email would have arrived with a broken Venmo code==, which is the one thing that email exists to carry.
+
+      And the emails were being sent before the page answered, so a coach would have sat watching a spinner while two mail servers took their time. On the first of November, with everyone submitting at once, that is how you get duplicate registrations. The form now answers in a third of a second and the emails follow behind it.
+    media:
+      - src: all-in/emails/1-received.webp
+        alt: The confirmation email a coach receives after registering.
+        caption: Sent the moment a coach registers. Says plainly that the form does not reserve a spot.
+      - src: all-in/emails/2-accepted-how-to-pay.webp
+        alt: The acceptance email, with Venmo and card payment options.
+        caption: Sent when staff accept a team. The division and team name are filled in for them, so the payment can be matched.
+      - src: all-in/emails/3-staff-notice.webp
+        alt: The notification the tournament receives when a team registers.
+        caption: What the tournament gets, with a link straight to the board.
+
+viewers:
+  - id: brackets
+    heading: The brackets page
+    steps:
+      - tab: Grey blocks
+        group: Before
+        title: Grey blocks for the divisions
+        src: all-in/brackets/before.webp
+        alt: The old brackets page with grey division buttons.
+        body: |
+          Grey blocks for the divisions that ==looked like unfinished placeholders==.
+      - tab: Outlined cards
+        group: After
+        title: The same picker, as outlined cards
+        src: all-in/extra/dev-brackets-after.webp
+        alt: The rebuilt brackets page, with the division buttons as outlined cards and the selected one filled red.
+        body: |
+          The same division picker, now outlined cards that lift when you hover, fill red when selected, and grey out when a division has no bracket yet.
+
+          Same picker, same search, same behavior.
+
+  - id: registration
+    heading: Building the form
+    intro: |
+      The form went through staging in versions. ==Spots change with the division==, and the submit button stays off until November 1.
+    steps:
+      - tab: 12 spots each
+        group: Earlier
+        title: Every age group with 12 team spots
+        src: all-in/extra/dev-registration-before.webp
+        alt: An earlier version of the 2027 form, saying each age group has 12 team spots, with a greyed-out Registration Opens November 1 button at the bottom.
+        body: |
+          An earlier version on the dev site. Every age group had the same number of spots, and the button at the bottom reads "Registration opens November 1".
+      - tab: Spots by division
+        group: Earlier
+        title: 12 for 8U and 14U, 32 for 9U to 13U
+        src: all-in/extra/dev-registration-after.webp
+        alt: The next version of the form, saying 8U and 14U have 12 team spots and 9U through 13U have 32.
+        body: |
+          Spots change with the division (12 for 8U and 14U, 32 for 9U to 13U). The submit button stays off until November 1.
+      - tab: Division level
+        group: Now
+        title: 9U to 13U pick their own level
+        src: all-in/registration/form-11u-divisions.webp
+        narrow: all-in/registration/form-phone-screen.webp
+        alt: The form showing the American and National division choice for 11U.
+        detail: { x: 0, y: 0.47, w: 0.62, h: 0.17 }
+        body: |
+          9U to 13U choose American or National themselves, with the tournament's description of each. 8U and 14U never see this.
+
+          Registrations are saved to the database rather than only emailed, and a team cannot register twice.
+
+          Most coaches register from a phone.
+
+  - id: board
+    heading: The staff board
+    intro: |
+      What the tournament director sees. Sample teams, not real ones.
+    steps:
+      - tab: Registrations
+        group: First version
+        title: Every registration in one place
+        src: all-in/extra/staff-registrations-screen.webp
+        alt: The staff registrations screen, a count against the cap for each division above a table of sample registrations with status and deposit columns.
+        body: |
+          Staff can see every registration, how full each division is against its own cap, approve or decline a team, tick off the deposit when it arrives, search, filter, and export the whole list to a spreadsheet.
+      - tab: The board
+        group: Now
+        title: One division at a time, against the cap
+        src: all-in/staff-board/desktop.webp
+        narrow: all-in/staff-board/phone-screen.webp
+        alt: The staff registrations board, one division at a time, with accepted teams on the left and teams waiting on the right.
+        body: |
+          Accept, waitlist or decline, singly or several at once, and ==send the acceptance emails in one go==.
+
+          Filter by who needs uniforms, who still owes a deposit, who played last year, who is new, and who has not been emailed.
+
+          Overrides for when something goes wrong: resend an email, correct an address, put a team on the site early, or remove a registration so they can start again.
+
+          Built for a phone, because that is where he will be on the day.
+
+  - id: prototypes
+    heading: What's next
+    intro: |
+      Pages built ahead of their launch, ==not live yet==. Each one carries a preview banner, and the products and prices are placeholders.
+    steps:
+      - tab: Team flags
+        group: Preview
+        title: Shop team flags
+        src: all-in/prototypes/1-team-flags-desktop.webp
+        narrow: all-in/prototypes/1-team-flags-phone-screen.webp
+        alt: A preview of the Shop Team Flags page — a flag preview panel beside division buttons, a team name dropdown, quantity and an Order Now button, under a yellow "Preview only, products and prices are placeholders" banner.
+        body: |
+          Pick a division, then the team, then a quantity. The flag preview fills in from the choices.
+      - tab: Tournament swag
+        group: Preview
+        title: Tournament swag
+        src: all-in/prototypes/2-tournament-swag-desktop.webp
+        narrow: all-in/prototypes/2-tournament-swag-phone-screen.webp
+        alt: A preview of the Tournament Swag page — an ALL IN T-shirt and an ALL IN hat with photo-coming-soon placeholders and Pre-order Now buttons.
+        body: |
+          A T-shirt and a hat to pre-order and pick up at the tournament.
+      - tab: Registration
+        group: Preview
+        title: An earlier registration page
+        src: all-in/prototypes/3-registration-desktop.webp
+        narrow: all-in/prototypes/3-registration-phone-screen.webp
+        alt: A preview of an earlier Register for 2027 page — a single Team Registration card with head parent contact fields and a pre-order swag checkbox, under a "Preview only, registration isn't open yet" banner.
+        body: |
+          An earlier take on registration, with a head parent contact and a box to pre-order swag. The form shown above replaced it.
+
+strips:
+  - id: details
+    heading: Every detail
+    intro: |
+      Smaller fixes, each one rebuilt from the real code at that point in git history, before and after.
+    items:
+      - src: all-in/build-history/04-banner-2027-dates/before.webp
+        alt: The home page banner at 2.0.94, reading April 30 to May 2, with the opening night details.
+        label: The banner at 2.0.94, still showing last year's dates
+      - src: all-in/build-history/04-banner-2027-dates/after.webp
+        alt: The home page banner at 2.0.102, reading 2027 Dates, Coming Soon to Utah County.
+        label: The banner at 2.0.102
+      - src: all-in/build-history/03-nav-dropdown-label-row-removed-lighter-type/before.webp
+        alt: The Tournament Info dropdown at 2.0.99, with a Tournament Info label row above the links.
+        label: The dropdown at 2.0.99, with its label row
+      - src: all-in/build-history/03-nav-dropdown-label-row-removed-lighter-type/after.webp
+        alt: The Tournament Info dropdown at 2.0.102, the links straight under the bar in lighter type.
+        label: Label row removed, lighter type
+      - src: all-in/build-history/13-nav-dropdown-stays-open-when-moving-to-the-links/before-top.webp
+        alt: Before — the dropdown has closed while the pointer passes over Shop on its way to the links.
+        label: Before, the menu closed on the way to the links
+      - src: all-in/build-history/13-nav-dropdown-stays-open-when-moving-to-the-links/after.webp
+        alt: After — the dropdown stays open with the pointer on Rules.
+        label: Now it stays open while you move to it
+      - src: all-in/build-history/17-custom-uniforms-section/before-rules-desktop.webp
+        alt: The bottom of the rules page at 2.0.94, with the Custom Uniforms block above the footer.
+        label: The Custom Uniforms block on every page
+      - src: all-in/build-history/17-custom-uniforms-section/after-rules-desktop.webp
+        alt: The bottom of the rules page at 2.0.102, straight from the last rule to the footer.
+        label: Removed, and replaced on the home page by the photo strip
+
+  - id: shop-bug
+    heading: The Shop bug, rebuilt
+    intro: |
+      Each version rebuilt from git history and run as a production build. ==The difference is where you end up==, not how the page looks.
+    items:
+      - src: all-in/build-history/08-shop-link-flicker-page-before-javascript-loads/before.webp
+        alt: 'Labeled: before, v2.0.99, what a visitor sees first — the navigation without a Shop link.'
+        label: 2.0.99, the first thing a visitor sees has no Shop link
+      - src: all-in/build-history/08-shop-link-flicker-page-before-javascript-loads/after.webp
+        alt: 'Labeled: after, v2.0.100, what a visitor sees first — the Shop link is already there.'
+        label: 2.0.100, the Shop link is already there
+      - src: all-in/build-history/09-shop-link-bug-new-tab-and-reload/before-new-tab.webp
+        alt: 'Labeled: before, v2.0.100, I opened the Shop link in a new tab and ended up on the home page.'
+        label: 2.0.100, Shop in a new tab lands on the home page
+      - src: all-in/build-history/09-shop-link-bug-new-tab-and-reload/after-new-tab.webp
+        alt: 'Labeled: after, v2.0.102, I opened the Shop link in a new tab and ended up on the Shop, loading.'
+        label: 2.0.102, the new tab opens the Shop
+      - src: all-in/build-history/09-shop-link-bug-new-tab-and-reload/before-reload.webp
+        alt: 'Labeled: before, v2.0.100, I clicked Shop, then reloaded the page, and ended up on the home page.'
+        label: 2.0.100, reloading the Shop lands on the home page
+      - src: all-in/build-history/09-shop-link-bug-new-tab-and-reload/after-reload.webp
+        alt: 'Labeled: after, v2.0.102, I clicked Shop, then reloaded the page, and stayed on the Shop.'
+        label: 2.0.102, reloading stays on the Shop
+
+mockups:
+  # Device mockups. The display is
+  # cropped above the grey block its stand sits on, so the stand runs out of
+  # the frame and the screen floats on the dark panel (`panel: true`). The
+  # phone's background is transparent, so
+  # it sits straight on the page with no band; the crop keeps a little room round the device (x 0.345–0.655,
+  # y 0.14–0.86 of the frame).
+  - id: rules-display
+    src: all-in/mockups/studio-display-xdr.webp
+    alt: A Studio Display XDR seen from below, showing the rebuilt rules page with the General Rules tab open.
+    caption: The rules page, on a Studio Display.
+    crop: { x: 0.12, y: 0.1, w: 0.76, h: 0.46 }
+    # The stand runs out of the bottom of the crop, so it needs the band
+    # to end against.
+    panel: true
+  - id: register-phone
+    src: all-in/mockups/iphone-18-pro.webp
+    alt: A black iPhone 18 Pro, angled, showing the Register for 2027 page with the dates, cost, payment and uniforms table.
+    caption: Register for 2027, on a phone. Most coaches register from a phone.
+    crop: { x: 0.29, y: 0.1, w: 0.42, h: 0.8 }
+  - id: nav-before
+    src: all-in/build-history/02-navigation/before.webp
+    alt: The navigation at version 2.0.94 — a white bar with the PROLOOK, UVU and Autism Council of Utah logos, a Donate Here button, a large ALL IN wordmark, Login and a menu button.
+    caption: Before, at 2.0.94, before any of my work. No route to registration at all.
+  - id: nav-after
+    src: all-in/nav/after.webp
+    alt: The navigation with Register for 2027 added.
+    caption: After. Donate Now, Shop, Register for 2027 across the top, with Register for 2027 also first under Tournament Info, on desktop and on a phone.
+    crop: { x: 0, y: 0, w: 0.75, h: 0.345 }
+
+situation: |
+  ALL IN is a youth baseball tournament run by PROLOOK, with profits going to the Autism Council of Utah.
+
+  The site was originally built in 2022 on an early version of SvelteKit and was still locked to an older version of Node. The app itself was owned by an engineering team in the Philippines, and upgrading the framework or dependencies was not something I could casually touch without risking other parts of the system.
+
+  ==Marketing needed a full redesign before the next tournament.==
+
+  The homepage was still showing last year's dates, the navigation needed to be rebuilt, and the overall site needed to feel much more current.
+
+  The people using the site are also not sitting at a desk.
+
+  A parent might be standing at the ballfield checking the bracket to see where their kid plays next. A coach might be pulling up the tiebreaker rules on their phone. A team manager might be trying to order gear between games.
+
+  If one of those paths breaks, the problem is immediate.
+
+myRole: |
+  I was the full-stack developer on the marketing side.
+
+  My job was the front end of the redesign, built from the designer's Figma files and shipped through the existing DEV, staging, QA, and release process.
+
+  Most of my work was in Svelte and Tailwind.
+
+  I rebuilt the navigation, homepage, footer, and shared components, then worked through QA issues as they came back. Some of those changes also touched how page data was loaded on the server, when the front end needed information before the page rendered.
+
+  I built the 2027 registration end to end, front end and back end: the form, saving each registration to the database, the staff board, and the three emails.
+
+  Engineering owned the rest of the application, including the API, bracket logic, team management, and production releases. I did not build those systems.
+
+atAGlance:
+  - value: 4 production releases
+    label: Included my work
+    note: Changes were released in smaller pieces instead of waiting for one large launch.
+  - value: 3 emails
+    label: That did not exist before
+    note: A receipt to the coach, a notice to the tournament, and the acceptance email.
+  - value: 3.5 MB → 1.8 MB
+    label: Homepage image weight
+    note: Without a visible change in quality.
+
+keyDecisions:
+  - heading: Work inside the old stack instead of turning the redesign into an upgrade project
+    body: |
+      My first instinct was to look at upgrading it.
+
+      ==That would have been the wrong project.==
+
+      The engineering team already deploys and maintains the application, and changing framework versions or dependencies would have affected parts of the system I did not own.
+
+      Instead, I pinned the exact Node version with Volta so this project always runs in the environment it expects without affecting anything else on my machine.
+
+      That let me focus on the redesign instead of creating a second project around tooling.
+  - heading: Load Shop and Brackets settings on the server
+    body: |
+      Marketing can turn the Shop and Brackets sections on or off.
+
+      Originally, the navigation checked those settings in the browser after the page had already loaded. That meant the Shop link could appear a moment late after every refresh.
+
+      I could have hidden the flicker visually, but that would not have fixed the reason it happened.
+
+      Instead, I moved those settings into the server-side load so ==the page already knows whether Shop and Brackets are active before the first render==.
+
+      That removed the flicker, removed two extra API calls from every page, and also fixed a quieter problem where the footer did not always know whether the Shop was enabled.
+  - heading: Use live text instead of titles baked into images
+    body: |
+      The design had RULES, TEAMS, BRACKETS, and SPONSORS built directly into the homepage images.
+
+      They looked good in the mockup but came out blurry when the images scaled. A larger image export would only fix one screen size.
+
+      I rebuilt those titles as live text instead.
+
+      I measured the placement from the design and matched the same proportions so the text stayed in the same visual position across different screen sizes.
+
+      Now the titles stay sharp, can scale with the layout, and can also be read by screen readers.
+  - heading: Scale the buttons with the layout instead of copying one fixed Figma size
+    body: |
+      The design called for a 265 by 83 pixel button.
+
+      That works at the exact screen size the mockup was designed for. It does not work everywhere else. At some widths it becomes too large. At others it feels too small.
+
+      Instead of locking it to one fixed size, I kept the same proportions and sized it relative to the tile.
+
+      That keeps the button visually consistent from smaller laptops up through large desktop screens.
+
+story:
+  - heading: Someone else's release process
+    body: |
+      Every change went through QA.
+
+      The tester would send back a spreadsheet with the problem, steps to reproduce it, and sometimes a screen recording.
+
+      The first rounds caught things like a missing profile icon, menus that stayed open after a link was tapped, and a footer that was not respecting the Shop setting.
+
+      Each one came back through the same cycle. Reproduce it. Find the cause. Fix it. Capture the before and after. Send it back through QA.
+
+      Some changes were less about bugs and more about making the new design hold up properly.
+
+      The WE ARE ALL IN wordmark in the footer was being stretched beyond the resolution of the original image on large screens, so I replaced it with a higher-resolution version.
+
+      I also reduced the homepage image weight ==from about 3.5 MB to 1.8 MB== without a visible change in quality.
+
+  - heading: Registration was just an email
+    body: |
+      The tournament sells out in about a day.
+
+      When they asked me to build registration for 2027, I went looking for what existed. There was a form on the teams page that collected five fields and emailed them to a staff address. Nothing was stored. Someone read the email and typed the team into the admin by hand.
+
+      ==So this was not reviving something. It was building it.==
+
+  - heading: What the site should decide
+    body: |
+      The tournament director wanted to pick which teams got in. Their own form said first come, first served.
+
+      I raised it once, then built what he asked for, because ==which teams play is his call and not mine==. What I could do was make the consequences visible: a board that shows each division against its cap, so accepting a seventeenth team into a sixteen-team division is not possible by accident, and a waitlist that keeps the order teams registered in, so the February deadline has an answer ready when someone does not pay.
+
+      The part I pushed back on was the interface. He asked for drag and drop. He will be using it on a phone, on the first of November. ==Dragging a card on a phone, in that hour, is worse than tapping a button.== I built buttons, and said I would revisit it after he had used it for real.
+
+  - heading: Testing a one-day sellout
+    body: |
+      Registration opens on the first of November and the tournament sells out that day. There is no second attempt.
+
+      So the form unlocks itself on the test sites and stays shut on the live site until the date, which meant QA could run the whole flow while the public page still said "Registration opens November 1". The notification that normally goes to the tournament director goes back to whoever filled in the form when it is sent from a test site, so ==testing it fifty times does not put fifty fake teams in his inbox==.
+
+hardProblem:
+  title: Passed every test, broke the Shop
+  punchline: I fixed a flickering Shop link, every test passed, and it still broke the Shop on the live site because the page trusted a value the server was sharing between visitors.
+  problem: |
+    Right after the Shop flicker fix shipped, QA found another problem. Opening Shop in a new tab or reloading the Shop page sent the user back to the homepage.
+
+    Clicking Shop normally from the homepage still worked. That made it look random.
+  assumption: |
+    The frustrating part was that I had already tested it.
+
+    Before the release, I opened Shop from the Rules and Sponsors pages on my local server and landed on Shop every time. Same code. Same data. Clean pass.
+
+    Because it worked locally but failed after deployment, I assumed something in the live environment, probably caching, was behaving differently.
+  found: |
+    The problem was not actually the Shop link.
+
+    The Shop page had a guard that checked a stored value before allowing the page to load. Only the homepage was setting that value.
+
+    The bigger problem was that ==the value lived in server state that was shared between visitors==. Once somebody loaded the homepage, that value became active and made later tests pass even when the logic was wrong.
+
+    The old navigation code had also been setting that value on every page as a side effect. When I removed that code to fix the flicker, I exposed the older bug underneath it.
+
+    There was even an old note above the guard saying:
+
+    > "fix redirection bug cannot visit page"
+
+    The redirect had been worked around before, but the dependency was still there.
+  fix: |
+    I changed the Shop guard so it used ==the activation flag the server already loads for every request==.
+
+    That is the same source of truth used by the navigation and footer. The actual change was only a few lines.
+
+    I could have put the old navigation behavior back, but that would have brought the flicker back and kept the Shop dependent on whatever state happened to be loaded on the server.
+  verified: |
+    My local development server could not reliably reproduce the bug, so I stopped using it as proof.
+
+    I built the application for production and ran it on a fresh server without opening the homepage first. That finally reproduced the real behavior. The old build redirected away from the Shop. The fixed build opened it correctly.
+
+    Then I went through every case from QA's sheet:
+
+    - Open Shop in a new tab
+    - Reload while already on Shop
+    - Open Shop from the homepage
+    - Open Shop from Rules
+    - Open Shop from Sponsors
+    - Check navigation and footer links
+    - Turn Shop off and confirm the redirect still happens when it should
+
+    After that, I repeated the checks on staging before the next release.
+  code:
+    - snippet: shopGuard
+      caption: The Shop guard uses the activation flag the server already loads for every request.
+    - snippet: shopNav
+      caption: The same source of truth used by the navigation and footer.
+
+# Opening day is November 1. How it went (teams registered, how fast the
+# divisions filled) can go in a paragraph after "Teams now have a real way to
+# register…" below, with real numbers only.
+result: |
+  The experience works better for the people actually using it during the tournament, especially on mobile.
+
+  Parents can get to brackets. Coaches can reach rules. Team managers can get to the Shop.
+
+  Marketing also has someone on the front-end side who can make updates without every request waiting on an engineering team working in another timezone.
+
+  Teams now have a real way to register for 2027, and staff have a board to decide who plays.
+
+  I do not have access to the site's analytics, so there is no traffic or conversion number here. I would rather say that than invent one.
+
+  What I can stand behind is that ==the redesign shipped through four production releases==, the major navigation and Shop issues were fixed, and the site is much easier to use and maintain than where it started.
+
+differently: |
+  When I removed the navigation's old Shop check, I should have searched the rest of the project for anything else depending on it.
+
+  There was exactly one other place. It already had a TODO note sitting above it.
+
+  ==That search would have taken a minute== and probably saved the production bug.
+
+  I would also test layout issues on a real phone earlier. At one point I spent hours chasing a mobile layout problem that only existed inside a simulated browser. On an actual phone, the page was fine.
+
+  Now I treat browser simulation as useful, but not proof.
+
+fullStack:
+  - group: Front end
+    items: [Svelte, SvelteKit, Tailwind CSS, JavaScript, HTML, HTML email]
+  - group: Runtime and tooling
+    items: [Node, Volta, npm]
+  - group: Development process
+    items: [DEV, Staging, Production, QA testing, Git / GitHub]
+  - group: Design and optimization
+    items: [Figma, Responsive layout work, Image optimization, Accessibility improvements]
+
+next:
+  href: /work/meal-planner/
+  name: Meal Planner
+  line: How I turned nutrition targets and meal data into something people can actually shop for, cook, and split between different needs.
+
+# Quick overview: the condensed read (2–3 minutes), shown by the
+# Quick overview / Full case study switch. The full study above is unchanged.
+overview:
+  glance: true
+  sections:
+    - heading: Overview
+      body: |
+        ALL IN is a youth baseball tournament run by PROLOOK. Its site is a SvelteKit app from 2022, owned by an engineering team in the Philippines.
+
+        I was the full-stack developer on the marketing side. I rebuilt the navigation, homepage, footer and shared components from the designer's Figma files, and I built the 2027 registration end to end, front end and back end. Engineering owned the rest: the API, bracket logic, team management and production releases.
+      labels: ['SvelteKit', 'Svelte', 'Tailwind CSS']
+    - heading: The Challenge
+      body: |
+        Marketing needed a full redesign before the next tournament, inside an older SvelteKit app locked to an old version of Node. Upgrading it would have touched parts of the system I didn't own.
+
+        Registration didn't really exist. The old form emailed five fields to a staff address and stored nothing, and the tournament sells out in about a day.
+      labels: ['Node', 'Existing codebase']
+      show: ['scroller']
+    - heading: The Solution
+      body: |
+        I didn't turn the redesign into an upgrade project. I pinned the exact Node version with Volta so the app always runs in the environment it expects.
+
+        Marketing can switch Shop and Brackets on or off. I moved those settings into the server-side load, which stopped the Shop link flickering in and removed two API calls from every page.
+
+        For registration I built the form, the database storage, a staff board and three emails. The form opens itself on the test sites but stays shut on the live site until the date, so QA could test the whole flow early.
+      labels: ['SvelteKit server load', 'Volta', 'HTML email', 'Database']
+      show: ['viewer:registration']
+    - heading: Engineering Deep Dive
+      body: |
+        Right after my Shop flicker fix shipped, QA found a new problem. Opening Shop in a new tab, or reloading it, sent people back to the homepage. Clicking Shop from the homepage still worked.
+
+        I had already tested it locally and it passed, so I assumed something in the live environment, probably caching.
+
+        It wasn't caching. The Shop page had a guard that checked a value only the homepage set, and that value lived in server state shared between visitors. Once anyone loaded the homepage, the check passed for everyone. The old navigation code had been setting it on every page, so removing that code exposed the bug underneath.
+
+        I changed the guard to use the activation flag the server already loads for every request. My dev server couldn't reproduce the bug, so I tested on a production build on a fresh server, without opening the homepage first. Then I ran QA's cases there and again on staging.
+      labels: ['SvelteKit', 'Server state']
+      show: ['hardProblem']
+    - heading: Results
+      body: |
+        **The redesign shipped through four production releases.**
+
+        I cut the homepage's image weight from about 3.5 MB to 1.8 MB without a visible change in quality.
+
+        Teams now have a real way to register for 2027, with three emails that didn't exist before: a receipt to the coach, a notice to the tournament, and the acceptance email.
+
+        I don't have access to the site's analytics, so there's no traffic number here.
+      labels: ['Performance', 'Image optimization', 'Email']
+    - heading: Reflection
+      body: |
+        When I removed the old Shop check, I should have searched the project for anything else depending on it. There was one other place, with a TODO above it. That search would have taken a minute.
+
+        I'd also test layouts on a real phone earlier. A simulated browser is useful, but it isn't proof.
+      labels: ['Code search', 'Real-device testing', 'QA', 'Release process']

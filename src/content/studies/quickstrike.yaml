@@ -1,0 +1,365 @@
+order: 7
+# Approved for publication.
+approved: true
+
+kind: Legacy PHP · dealer marketing site
+name: QuickStrike
+label: Rebuilding a dealer-focused marketing site inside an older production environment
+role: Contract Web Developer
+company: QuickStrike
+timeline: '2026'
+team: Marketing, Creative, Sales, and Development
+live: https://about.qstrike.com
+
+# A clean top-of-page capture of the live site.
+heroMedia:
+  image:
+    src: quickstrike/home-1440x900@2x.webp
+    alt: The top of the redesigned QuickStrike home page on desktop, with the QuickStrike mark and "Superior Custom Team Apparel".
+  size: large
+
+# Small study (2026-10-23): hero, in short, situation, role, the before and
+# after, phones, the hard problem, result, stack. The rest of the
+# sections (glance, decisions, the build, what I'd do differently) stay in this
+# file and can go back into `layout` at any time. The older beforeAfter and
+# gallery blocks below are not shown; the viewer replaces them.
+inShort:
+  - QuickStrike is mainly built for dealers looking for ==a manufacturing partner for custom team apparel==, and its marketing site had a full-screen parallax design that had not aged well, especially on mobile.
+  - I owned the rebuild from the development side — ==all seven pages==, the responsive behavior, the CSS and JavaScript, a preview for feedback, and deploying the finished work to production.
+  - The site is ==easier to use on mobile==, more consistent with the brand, easier to maintain, and safer to deploy than the version I started with.
+
+layout:
+  - inShort
+  - situation
+  - role
+  - viewer:redesign
+  - strip:phone
+  - hardProblem
+  - result
+  - fullStack
+
+viewers:
+  - id: redesign
+    heading: Before and after
+    intro: The old homepage, then the redesign page by page. On a phone, each step shows the phone layout.
+    steps:
+      - tab: Home
+        group: Before
+        title: One full-screen parallax panel
+        body: |
+          The original homepage: a dark full-screen panel with a headline and a customer quote. Captured from the site's June 23, 2026 backup.
+        url: about.qstrike.com
+        src: quickstrike/old/home-desktop.webp
+        alt: The original QuickStrike homepage, a single dark full-screen parallax panel with the headline "Elite Custom Private Labeling" and a customer quote.
+        narrow: quickstrike/old/home-mobile.webp
+      - tab: Home
+        group: Now
+        title: A scrolling, mobile-friendly homepage
+        body: |
+          The redesign opens on the QuickStrike mark and "Superior Custom Team Apparel", then scrolls into the company, its facilities, and customer reviews.
+        url: about.qstrike.com
+        src: quickstrike/new/home-desktop.webp
+        alt: The redesigned QuickStrike homepage, light and scrolling, with the brand mark at the top.
+        narrow: quickstrike/new/home-phone.webp
+      - tab: Tech
+        group: Now
+        title: Titles as live text
+        body: |
+          Instead of keeping those titles as images, ==I rebuilt them as live text using the actual brand font.==
+        url: about.qstrike.com/tech.php
+        src: quickstrike/new/tech-desktop.webp
+        alt: The QuickStrike Tech page, with a large "TECH" title and the "What it Enables" section.
+        narrow: quickstrike/new/tech-phone.webp
+      - tab: Facilities
+        group: Now
+        title: Live clocks for each facility
+        body: |
+          Instead of showing a static time beside each facility, ==I built live clocks using JavaScript's timezone tools.== The five clocks show the United States, the Philippines, China, Cambodia, and Vietnam.
+        url: about.qstrike.com/factories.php
+        src: quickstrike/new/facilities-desktop.webp
+        alt: The QuickStrike Facilities page, with five analog clocks for the United States, the Philippines, China, Cambodia, and Vietnam.
+        narrow: quickstrike/new/facilities-phone.webp
+      - tab: History
+        group: Now
+        title: The partner-logo wall
+        body: |
+          Instead of turning dozens of logos into one large image, I built them as individual elements in a responsive layout. On mobile they collapse into ==a layout that is still readable== instead of shrinking into tiny dots.
+        url: about.qstrike.com/history.php
+        src: quickstrike/new/history-desktop.webp
+        alt: The QuickStrike History page, "A Quick Glance at Our History", with a grid of partner brand logos.
+        narrow: quickstrike/new/history-phone.webp
+
+strips:
+  - id: phone
+    heading: On a phone
+    items:
+      - src: quickstrike/new/home-phone.webp
+        alt: The redesigned QuickStrike home page on a phone.
+        label: Home
+      - src: quickstrike/new/tech-phone.webp
+        alt: The QuickStrike Tech page on a phone.
+        label: Tech
+      - src: quickstrike/new/facilities-phone.webp
+        alt: The QuickStrike Facilities page on a phone, with the facility clocks in two columns.
+        label: Facilities
+      - src: quickstrike/new/history-phone.webp
+        alt: The QuickStrike partner-logo wall on a phone, two logos per row.
+        label: History
+      - src: quickstrike/new/contact-phone.webp
+        alt: The QuickStrike contact form on a phone.
+        label: Contact
+
+beforeAfter:
+  before: quickstrike/old/home-desktop.webp
+  after: quickstrike/new/home-desktop-fold.webp
+  beforeAlt: The original QuickStrike homepage — a single full-screen dark parallax panel with a headline and a customer quote.
+  afterAlt: The redesigned QuickStrike homepage — a light scrolling layout that leads with the brand mark and custom team apparel.
+  caption: The homepage's first screen, at the same width. The old site loaded one full-screen parallax panel; the redesign is a scrolling, mobile-friendly site. The old site was captured from its June 23, 2026 backup.
+
+gallery:
+  heading: All seven pages
+  intro: Every page of the redesign, on desktop and on a phone. Hover a desktop capture to scroll through the page.
+  desktop:
+    - src: quickstrike/new/home-desktop.webp
+      alt: The redesigned QuickStrike home page on desktop.
+      label: Home
+    - src: quickstrike/new/tech-desktop.webp
+      alt: The redesigned QuickStrike tech page on desktop.
+      label: Tech
+    - src: quickstrike/new/facilities-desktop.webp
+      alt: The redesigned QuickStrike facilities page on desktop.
+      label: Facilities
+    - src: quickstrike/new/contact-desktop.webp
+      alt: The redesigned QuickStrike contact page on desktop.
+      label: Contact
+    - src: quickstrike/new/history-desktop.webp
+      alt: The redesigned QuickStrike history page on desktop.
+      label: History
+    - src: quickstrike/new/login-desktop.webp
+      alt: The redesigned QuickStrike login page on desktop.
+      label: Login
+    - src: quickstrike/new/privacy-desktop.webp
+      alt: The redesigned QuickStrike privacy page on desktop.
+      label: Privacy
+  mobile:
+    - src: quickstrike/new/home-mobile.webp
+      alt: The redesigned QuickStrike home page on a phone.
+      label: Home
+    - src: quickstrike/new/tech-mobile.webp
+      alt: The redesigned QuickStrike tech page on a phone.
+      label: Tech
+    - src: quickstrike/new/facilities-mobile.webp
+      alt: The redesigned QuickStrike facilities page on a phone.
+      label: Facilities
+    - src: quickstrike/new/contact-mobile.webp
+      alt: The redesigned QuickStrike contact page on a phone.
+      label: Contact
+    - src: quickstrike/new/history-mobile.webp
+      alt: The redesigned QuickStrike history page on a phone.
+      label: History
+    - src: quickstrike/new/login-mobile.webp
+      alt: The redesigned QuickStrike login page on a phone.
+      label: Login
+    - src: quickstrike/new/privacy-mobile.webp
+      alt: The redesigned QuickStrike privacy page on a phone.
+      label: Privacy
+
+situation: |
+  I was brought in on the marketing-side web work because the team needed someone who could move quickly and get projects finished without waiting weeks for the normal development queue.
+
+  QuickStrike was one of the bigger examples.
+
+  The marketing site was built on an older PHP and Mustache setup with a full-screen parallax design that had not aged well, especially on mobile. The site still worked, but it did not match the way QuickStrike wanted to present itself anymore.
+
+  QuickStrike is mainly built for dealers looking for a manufacturing partner for custom team apparel.
+
+  Those dealers need to quickly understand what QuickStrike can manufacture, what its facilities look like, what technology and capabilities it has, and whether they can trust the company to handle their customers' orders.
+
+  That means the website has to do more than look good. It needs to make the company feel established, capable, and easy to work with before a dealer ever reaches out.
+
+  If the site feels dated, is hard to use on a phone, or does not clearly show what QuickStrike can do, that trust can disappear before a sales conversation even starts.
+
+  The challenge was rebuilding that public-facing experience while staying inside an older production environment that did not have a modern build pipeline and could not simply be replaced with whatever framework I wanted.
+
+myRole: |
+  I owned the QuickStrike marketing-site rebuild from the development side.
+
+  The design direction came from our designer. My job was to take those mockups and turn them into a working, responsive production site.
+
+  That included rebuilding all seven pages, handling responsive behavior, writing the CSS and JavaScript, optimizing the assets, building the interactive pieces, testing the site across screen sizes, setting up a preview for feedback, and deploying the finished work to production.
+
+  I also worked with the marketing team throughout the build as changes came in.
+
+  This was not a project where I just received a design file and copied it exactly.
+
+  Some parts of the design needed to change once they were put into a real browser. Text had to scale properly. Logo walls had to work on phones. Videos needed fallback behavior. Animations had to stay smooth. Navigation needed to work across the whole site.
+
+  My job was to keep the design feeling the way it was intended while still making the site practical and easy to use.
+
+  I did not own the original PHP and Mustache structure or the separate dealer login and customizer systems. Those were already in place and lived on different infrastructure.
+
+atAGlance:
+  - value: 7 pages
+    label: Rebuilt across the marketing site
+    note: Home, Tech, Facilities, Contact, Login, Privacy, and History.
+  - value: 48 partner logos
+    label: Built into a responsive logo system
+    note: Instead of using one large exported image, the logos can resize and reorganize properly across desktop and mobile.
+
+keyDecisions:
+  - heading: Keep the rebuild simple enough for the environment it actually had to live in
+    body: |
+      The production server was old and the existing site did not have a modern build system.
+
+      It would have been easy to look at that and decide I needed to rebuild everything in React, Next, or another framework.
+
+      That would have created more problems than it solved.
+
+      QuickStrike is a marketing site. It did not need a new application architecture just to look modern and work well.
+
+      I kept the existing PHP and Mustache structure and rebuilt the front end with plain HTML, CSS, and JavaScript.
+
+      That kept the site lightweight, removed unnecessary dependencies, and meant the existing team could still understand and deploy it without learning a completely different setup.
+
+      The goal was not to use the newest technology. The goal was to build the right thing for the environment I actually had.
+  - heading: Turn design files into something that works outside the mockup
+    body: |
+      Some of the original designs used exported images for large section titles and brand treatments.
+
+      That looked fine in a static design. It did not work nearly as well once the page had to scale down to a phone.
+
+      Instead of keeping those titles as images, I rebuilt them as live text using the actual brand font.
+
+      That gave me control over the size at every breakpoint, kept the text readable, made future wording changes much easier, and avoided loading another image just to display text.
+
+      I made the same kind of decision with the partner-logo section.
+
+      Instead of turning dozens of logos into one large image, I built them as individual elements in a responsive layout.
+
+      On desktop they can spread out. On mobile they collapse into a layout that is still readable instead of shrinking into tiny dots.
+  - heading: Use motion to support the brand without making the site harder to use
+    body: |
+      QuickStrike wanted the site to feel active.
+
+      There are videos, animated sections, logo movement, scrolling effects, and other visual pieces throughout the redesign.
+
+      But the animations still had to work on normal devices.
+
+      I used lightweight JavaScript where I needed movement and relied on browser features like IntersectionObserver and requestAnimationFrame instead of adding a large animation framework to a site that did not need one.
+
+      The goal was to give marketing the energy they wanted without making the site feel heavy.
+
+story:
+  - heading: The build
+    body: |
+      The project touched almost every part of the public-facing marketing site.
+
+      I rebuilt:
+
+      - The homepage
+      - Technology pages
+      - Facilities
+      - Contact
+      - Login
+      - Privacy
+      - Company history
+      - Main navigation
+      - Footer
+      - Partner-logo sections
+      - Customer reviews
+      - Video sections
+      - Responsive layouts
+      - Facility information
+      - Live local-time displays
+      - Forms
+      - Mobile navigation and behavior
+
+      One of my favorite pieces was the Facilities section.
+
+      QuickStrike operates across different locations, so instead of showing a static time beside each facility, I built live clocks using JavaScript's timezone tools.
+
+      Someone visiting the site can see the actual local time at each facility instead of having to work it out themselves.
+
+      It is a small feature, but it is the kind of detail I like adding when it actually makes the page more useful.
+
+hardProblem:
+  punchline: The site looked correct on preview. The exact same code went to production, and the brand font disappeared.
+  problem: |
+    After the redesigned site went live, every major heading and navigation item was suddenly using a fallback font instead of Gotham.
+
+    That was a big problem because typography was one of the most visible parts of the redesign.
+
+    The preview environment looked correct. Production did not.
+  assumption: |
+    My first thought was that it was either browser cache or a different asset path in production.
+
+    Production handled some CSS differently than the preview environment, so it made sense that the font URL might be resolving incorrectly.
+
+    I checked the CSS and the `@font-face` rules. They were correct.
+  found: |
+    I started checking the font files themselves.
+
+    Instead of returning successfully, the `.otf` files were returning a **403 Forbidden** response.
+
+    That meant the browser was asking for the right file, but the server would not let it read it.
+
+    I checked the file permissions and found the issue. The font files had been copied over with owner-only permissions. The image files were readable by the server. The fonts were not.
+
+    Nothing in the page itself threw a useful error. The browser simply fell back to the next available font.
+  fix: |
+    I changed the font-file permissions to `644` on production so nginx could read them.
+
+    I also fixed the permissions on my local copies.
+
+    That second part mattered because I did not want to fix production once and then accidentally deploy the same bad permissions again later.
+  verified: |
+    I checked each font file directly and confirmed they returned a successful response from production.
+
+    Then I loaded the live site and checked the navigation, headings, and footer to make sure Gotham was actually being rendered. The brand typography came back immediately.
+
+    I also added checking critical production assets to my deployment process instead of assuming that a working preview guarantees production will behave the same way.
+  code:
+    - snippet: fontPermissions
+
+result: |
+  QuickStrike went from an older full-screen parallax site to a much cleaner, responsive marketing experience that works across desktop and mobile.
+
+  The new site gives dealers a better way to understand what QuickStrike can manufacture, what its facilities look like, what technology it uses, and whether it is the right manufacturing partner for them.
+
+  It also gave the marketing team a much better way to present the company, its capabilities, its partners, and its customer proof.
+
+  The redesign also gave us a safer way to release work. Instead of going straight from my machine to production, I created a separate preview environment where the team could review the site first. Once everything was approved, I backed up the production version and pushed the final changes live.
+
+  That process is repeatable now.
+
+  I do not have traffic or conversion numbers that I can verify for this project, so I am not going to pretend the redesign increased sales by some percentage.
+
+  What I can stand behind is what changed. The site is easier to use on mobile, more consistent with the brand, easier to maintain, and safer to deploy than the version I started with.
+
+  It also became another example of why I kept getting larger projects. The team could hand me an older codebase I had never worked in before, give me the design and deadline, and trust me to figure out how to get it finished.
+
+differently: |
+  The biggest thing I would change is how early I test the real production environment.
+
+  The preview site was useful for design and stakeholder review, but it did not perfectly match production. That is why something like the font-permission issue could make it through every preview check and only appear after launch.
+
+  Now I know not to treat a working preview as proof that the production server will behave exactly the same.
+
+  I would also document more of the deployment process from the beginning. The site does not have a modern CI/CD pipeline, so having a clear written process for preview, backup, deployment, permissions, and production verification matters more than it would on a newer project.
+
+fullStack:
+  - group: Front end
+    items: [HTML, Mustache templates, CSS, JavaScript, IntersectionObserver, requestAnimationFrame, Intl timezone APIs, Bootstrap grid]
+  - group: Backend
+    items: [PHP, Mustache]
+  - group: Brand and media
+    items: [Self-hosted Gotham fonts, Background video, Responsive images, Poster images]
+  - group: Forms
+    items: [Web3Forms]
+  - group: Development and deployment
+    items: [SSH, rsync, AWS EC2, nginx, PHP-FPM, Hostinger preview environment]
+
+next:
+  href: /work/legends/
+  name: Legends
+  line: Building a branded team-uniform storefront for Legends.
