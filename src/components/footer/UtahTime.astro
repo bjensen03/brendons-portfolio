@@ -1,0 +1,44 @@
+---
+/*
+  My local time ("3:42 PM in Utah"). Filled in on the client from
+  the America/Denver zone, so it's right whatever the visitor's clock says,
+  and refreshed every 20 seconds. Without JavaScript it stays hidden rather
+  than showing a time that was true at build.
+*/
+interface Props {
+  class?: string;
+}
+const { class: cls } = Astro.props;
+---
+
+<p class:list={['pf-time', cls]} data-pf-time hidden>
+  <span data-pf-time-value></span> in Utah
+</p>
+
+<script>
+  import { registerMotion } from '../../scripts/motion';
+
+  registerMotion(
+    () => {
+      const els = Array.from(document.querySelectorAll<HTMLElement>('[data-pf-time]'));
+      if (!els.length) return;
+      const fmt = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Denver',
+        hour: 'numeric',
+        minute: '2-digit',
+      });
+      const tick = () => {
+        const t = fmt.format(new Date());
+        els.forEach((el) => {
+          const v = el.querySelector<HTMLElement>('[data-pf-time-value]');
+          if (v) v.textContent = t;
+          el.hidden = false;
+        });
+      };
+      tick();
+      const id = window.setInterval(tick, 20_000);
+      return () => window.clearInterval(id);
+    },
+    { reduced: true },
+  );
+</script>

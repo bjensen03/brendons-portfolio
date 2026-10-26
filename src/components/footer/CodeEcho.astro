@@ -1,0 +1,187 @@
+---
+import { fieldColumns } from '../home/snippets';
+
+/*
+  The hero's code field, coming back at the end of the page: the same case
+  study excerpts, drifting up just as slowly, and on a mouse the same
+  spotlight that brightens the code under the pointer. Decoration only
+  (aria-hidden). It drifts only while on screen, and not at all with
+  reduced motion or no JS.
+
+  Kept separate from home/CodeField.astro so the hero's tuning (its masks,
+  its spotlight setup in home-motion.ts) isn't touched by this preview.
+*/
+
+const columns = fieldColumns.map((col) =>
+  col.flatMap((snippet) => [
+    { text: `// ${snippet.lang}`, comment: true },
+    ...snippet.code.split('\n').map((text) => ({
+      text: text || ' ',
+      comment: /^\s*(\/\/|#|--|\{\{--|\{\{!)/.test(text),
+    })),
+    { text: ' ', comment: false },
+  ]),
+);
+---
+
+<div class="ce" aria-hidden="true" data-ce data-contrast-exempt>
+  {
+    ['base', 'lit'].map((layer) => (
+      <div class:list={['ce__layer', `ce__layer--${layer}`]}>
+        {columns.map((lines, c) => (
+          <div
+            class:list={['ce__col', c > 0 && 'ce__col--wide']}
+            style={`--ce-speed: ${[190, 230][c]}s; --ce-left: ${['-1rem', '52%'][c]}; --ce-top: ${['-4rem', '-12rem'][c]}`}
+          >
+            <div class="ce__track">
+              {[0, 1].map(() =>
+                lines.map((line) => <span class:list={['ce__line', line.comment && 'is-comment']} data-t={line.text} />),
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    ))
+  }
+</div>
+
+<script>
+  import { registerMotion } from '../../scripts/motion';
+
+  registerMotion(() => {
+    const field = document.querySelector<HTMLElement>('[data-ce]');
+    if (!field) return;
+    const host = field.parentElement as HTMLElement;
+
+    /* Drift only while visible. */
+    const io = new IntersectionObserver(([entry]) => field.classList.toggle('is-on', entry.isIntersecting));
+    io.observe(field);
+
+    /* Spotlight, mouse only. */
+    const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const move = (e: PointerEvent) => {
+      const r = field.getBoundingClientRect();
+      field.style.setProperty('--ce-x', `${e.clientX - r.left}px`);
+      field.style.setProperty('--ce-y', `${e.clientY - r.top}px`);
+      field.classList.add('is-lit');
+    };
+    const leave = () => field.classList.remove('is-lit');
+    if (fine) {
+      host.addEventListener('pointermove', move);
+      host.addEventListener('pointerleave', leave);
+    }
+    return () => {
+      io.disconnect();
+      host.removeEventListener('pointermove', move);
+      host.removeEventListener('pointerleave', leave);
+      field.classList.remove('is-on', 'is-lit');
+    };
+  });
+</script>
+
+<style>
+  .ce {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+    /* Densest behind the headline, gone by the email and the bar. */
+    mask-image: linear-gradient(to bottom, black 0%, black 35%, transparent 70%),
+      linear-gradient(to right, transparent, black 8%, black 85%, transparent);
+    mask-composite: intersect;
+  }
+  .ce__layer {
+    position: absolute;
+    inset: 0;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.75;
+    white-space: pre;
+    color: color-mix(in oklch, var(--color-fg) 7%, transparent);
+  }
+  /* The code is drawn from an attribute, not text nodes: it's a faint
+     texture, and as real text every line failed the contrast audit
+     (Lighthouse / axe check text even inside aria-hidden). Pseudo-content
+     looks the same and isn't text to them. */
+  .ce__line {
+    display: block;
+  }
+  .ce__line::before {
+    content: attr(data-t);
+  }
+  .ce__line.is-comment {
+    color: color-mix(in oklch, var(--color-fg) 5%, transparent);
+  }
+  .ce__col {
+    position: absolute;
+    top: var(--ce-top);
+    left: var(--ce-left);
+  }
+  .ce__col--wide {
+    display: none;
+  }
+  @media (min-width: 64rem) {
+    .ce__col--wide {
+      display: block;
+    }
+  }
+
+  .ce__layer--lit {
+    color: color-mix(in oklch, var(--color-fg) 42%, transparent);
+    opacity: 0;
+    transition: opacity var(--duration-base) var(--ease-out-soft);
+    mask-image: radial-gradient(circle 14rem at var(--ce-x, 50%) var(--ce-y, 50%), black 0%, transparent 100%);
+  }
+  .ce__layer--lit .ce__line.is-comment {
+    color: color-mix(in oklch, var(--color-fg) 28%, transparent);
+  }
+  .ce.is-lit .ce__layer--lit {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html.motion-ok) .ce__track {
+      animation: ce-drift var(--ce-speed) linear infinite;
+      animation-play-state: paused;
+    }
+    :global(html.motion-ok) .ce.is-on .ce__track {
+      animation-play-state: running;
+    }
+  }
+  @keyframes ce-drift {
+    to {
+      transform: translateY(-50%);
+    }
+  }
+
+  /* Phones: dimmer still, so the question over it reads as type on a
+     ground rather than type on type. */
+  @media (max-width: 47.999rem) {
+    .ce__layer {
+      color: color-mix(in oklch, var(--color-fg) 3.5%, transparent) !important;
+    }
+    .ce__line.is-comment {
+      color: color-mix(in oklch, var(--color-fg) 2.5%, transparent) !important;
+    }
+  }
+
+  @media (max-width: 63.999rem) {
+    .ce__col {
+      left: var(--grid-margin);
+      top: 0;
+    }
+    .ce {
+      mask-image: linear-gradient(to bottom, black 0%, black 20%, transparent 45%),
+        linear-gradient(to right, transparent, black 8%, black 85%, transparent);
+    }
+    .ce__layer {
+      font-size: 0.75rem;
+      color: color-mix(in oklch, var(--color-fg) 5%, transparent);
+    }
+    .ce__line.is-comment {
+      color: color-mix(in oklch, var(--color-fg) 4%, transparent);
+    }
+  }
+</style>

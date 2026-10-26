@@ -1,0 +1,565 @@
+---
+import { Image } from 'astro:assets';
+import { featuredProjects } from './home/data';
+import { fieldColumns } from './home/snippets';
+import { CONTACT } from '../config';
+import ExternalLink from './ExternalLink.astro';
+import { RESUME } from './footer/links';
+import markRaw from '../assets/logo/mark.svg?raw';
+import trekkersPhoto from '../content/projects/images/twilight-trekkers/img-0864.webp';
+
+/*
+  The full-screen menu. Lives inside the header (Nav.astro), behind the bar,
+  so the logo, the brightness button and the Menu/Close button stay on top
+  of it. Opened by the bar's Menu button at every width.
+
+  It is a contrast band (data-tone="dark"): a step lighter than the page in
+  the dark range, graphite with light type in the light range. The bar takes
+  the same tone while it's open.
+
+  Contents: Projects, The Twilight Trekkers, About and Contact as giant
+  display words, the featured projects under Projects, the email and GitHub
+  at the foot, and faint code behind (the same case-study snippets as the
+  hero field). On a fine pointer, hovering a word dims the others and a
+  small preview sits beside it, following the cursor: the project's
+  screenshot, the four screenshots for Projects, one of the trekkers' own
+  photos, the mark for About, the email for Contact. The preview is decoration (aria-hidden) and is skipped on
+  touch and under reduced motion.
+
+  State, focus and the scroll lock: Nav.astro. Motion: header-motion.ts
+  (menuOpen / menuClose / menuPointer). Styles: here (layout) and the Header
+  block in motion.css (states and motion).
+*/
+
+interface Props {
+  isCurrent: (href: string) => boolean;
+}
+
+const { isCurrent } = Astro.props;
+
+const projects = await featuredProjects();
+const markPath = markRaw.match(/\sd="([^"]+)"/)?.[1];
+const markBox = markRaw.match(/viewBox="([^"]+)"/)?.[1];
+
+/* Two columns of faint code, one bleeding off each side. */
+const codeColumns = fieldColumns.map((col) =>
+  col.flatMap((snippet) => [...snippet.code.split('\n').map((t) => t || ' '), ' ']),
+);
+
+/* The trekkers photo is portrait; its inline object-position keeps the
+   barn and the peaks in the 16:10 frame rather than the sky above them. */
+const pages = [
+  { href: '/work/', label: 'Projects', preview: 'work' },
+  { href: '/twilight-trekkers/', label: 'The Twilight Trekkers', preview: 'trekkers' },
+  { href: '/about/', label: 'About', preview: 'about' },
+  { href: '/contact/', label: 'Contact', preview: 'contact' },
+];
+
+const shotWidths = (w: number) => [480, 960].filter((x) => x <= w);
+/* The address may break only at the @ (a <wbr> there), never mid-word. */
+const [emailUser, emailHost] = (CONTACT.email ?? '').split('@');
+---
+
+<div id="site-menu" class="menu" data-tone="dark" hidden data-menu data-lenis-prevent>
+  <div class="menu__code" aria-hidden="true" data-menu-code>
+    {
+      codeColumns.map((lines, c) => (
+        <div class:list={['menu__code-col', c > 0 && 'menu__code-col--wide']}>
+          {lines.map((line) => (
+            <span>{line}</span>
+          ))}
+        </div>
+      ))
+    }
+  </div>
+
+  <div class="menu__inner container-bleed">
+    <nav class="menu__nav" aria-label="Menu">
+      <ul class="menu__list" data-menu-list>
+        {
+          pages.map((page) => (
+            <li class:list={['menu__row', page.preview === 'work' && 'menu__row--work']}>
+              <a
+                href={page.href}
+                class="menu__item"
+                aria-current={isCurrent(page.href) ? 'page' : undefined}
+                data-menu-item
+                data-preview={page.preview}
+              >
+                {/* One mask per word, so a long name can wrap and each
+                    line still rises on its own. */}
+                {page.label.split(' ').map((word, i) => (
+                  <>
+                    {i > 0 && ' '}
+                    <span class="menu__mask">
+                      <span class="menu__word" data-menu-word>
+                        {word}
+                      </span>
+                    </span>
+                  </>
+                ))}
+              </a>
+
+              {page.preview === 'work' && projects.length > 0 && (
+                <ul class="menu__subs" aria-label="Featured projects">
+                  {projects.map((p) => (
+                    <li>
+                      <a href={p.href} class="menu__sub" data-menu-item data-preview={p.id}>
+                        <span class="menu__mask">
+                          <span class="menu__sub-word" data-menu-word>
+                            {p.name}
+                          </span>
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="menu__foot" data-menu-foot>
+      {
+        CONTACT.email && (
+          <a href={`mailto:${CONTACT.email}`} class="link-reveal menu__foot-link menu__address">
+            {emailUser}<wbr />@{emailHost}
+          </a>
+        )
+      }
+      {
+        CONTACT.github && (
+          <ExternalLink href={CONTACT.github} class="link-reveal menu__foot-link" rel="me">
+            GitHub
+          </ExternalLink>
+        )
+      }
+      {
+        CONTACT.linkedin && (
+          <ExternalLink href={CONTACT.linkedin} class="link-reveal menu__foot-link" rel="me">
+            LinkedIn
+          </ExternalLink>
+        )
+      }
+      {
+        RESUME && (
+          <ExternalLink href={RESUME} newTab class="link-reveal menu__foot-link">
+            Résumé
+          </ExternalLink>
+        )
+      }
+      {/* Phones only: a second Close where the thumb already is, so the menu
+          can be dismissed one-handed. The bar's Close stays the main one. */}
+      <button type="button" class="menu__close" aria-label="Close menu" data-menu-close>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+      </button>
+    </div>
+  </div>
+
+  {/* The cursor preview. One frame, one slide per hover target. */}
+  <div class="menu__preview" aria-hidden="true" data-menu-preview>
+    <div class="menu__slide menu__slide--grid" data-preview-slide="work">
+      {
+        projects.slice(0, 4).map((p) =>
+          p.shot ? (
+            <Image src={p.shot.src} widths={shotWidths(p.shot.src.width)} sizes="11rem" alt="" loading="lazy" />
+          ) : (
+            <span class="menu__slide-empty">{p.shotNeeded ?? p.name}</span>
+          ),
+        )
+      }
+    </div>
+    {
+      projects.map((p) => (
+        <div class="menu__slide" data-preview-slide={p.id}>
+          {p.shot ? (
+            <Image src={p.shot.src} widths={shotWidths(p.shot.src.width)} sizes="22rem" alt="" loading="lazy" />
+          ) : (
+            <span class="menu__slide-empty">{p.shotNeeded ?? p.name}</span>
+          )}
+        </div>
+      ))
+    }
+    <div class="menu__slide" data-preview-slide="trekkers">
+      <Image src={trekkersPhoto} widths={[480, 960]} sizes="22rem" alt="" loading="lazy" style="object-position: 50% 74%" />
+    </div>
+    <div class="menu__slide menu__slide--mark" data-preview-slide="about">
+      <svg viewBox={markBox} fill="currentColor" fill-rule="evenodd" aria-hidden="true" focusable="false">
+        <path d={markPath}></path>
+      </svg>
+    </div>
+    <div class="menu__slide menu__slide--mail" data-preview-slide="contact">
+      <span>{CONTACT.email ? <>{emailUser}<wbr />@{emailHost}</> : 'Say hello'}</span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .menu {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .menu[hidden] {
+    display: none;
+  }
+
+  .menu__inner {
+    position: relative;
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--spacing-stack);
+    /* Sides come from container-bleed, so the words line up with the page. */
+    padding-top: calc(var(--spacing-nav) + clamp(1.5rem, 4svh, 3.5rem));
+    padding-bottom: clamp(1.5rem, 4svh, 2.5rem);
+  }
+
+  /* The list takes the height the foot leaves and sits in the middle of it. */
+  .menu__nav {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /*
+    The giant words. Sized so the longest single words (PROJECTS, TREKKERS,
+    ~6.6em in Archivo at 115% width) fit the column at 390, and from 1024 so
+    that THE TWILIGHT (~8.6em) holds one line and the four entries (five
+    lines) fit the screen's height.
+  */
+  .menu__list {
+    --menu-size: min(var(--text-mega), calc((100vw - 2 * var(--grid-margin)) / 7), 14svh);
+    display: flex;
+    flex-direction: column;
+    gap: 0.06em;
+    font-size: var(--menu-size);
+  }
+
+  /* The rows set their own line box; body leading at this size would open
+     a gap of a whole extra line between the words. */
+  .menu__row {
+    line-height: 0.86;
+  }
+
+  .menu__row--work {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .menu__item {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-stretch: var(--display-stretch);
+    font-weight: 900;
+    text-transform: var(--display-case);
+    font-size: 1em;
+    line-height: 0.86;
+    letter-spacing: -0.03em;
+  }
+
+  /* Word masks: the word rises into a box that clips at its own line. */
+  .menu__mask {
+    display: inline-block;
+    overflow: hidden;
+    padding-block: 0.08em;
+    margin-block: -0.08em;
+    vertical-align: top;
+  }
+  .menu__word,
+  .menu__sub-word {
+    display: inline-block;
+  }
+
+  .menu__subs {
+    line-height: 1.15;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem var(--grid-gutter);
+    font-size: var(--text-body);
+  }
+  .menu__sub {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    font-family: var(--font-body);
+    font-size: var(--text-lead);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  /* Tablet up: the project names in one wrapping row under PROJECTS. */
+  @media (min-width: 48rem) {
+    .menu__subs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0 clamp(1.5rem, 3vw, 2.5rem);
+    }
+  }
+
+  /* Tablets in a short window (834×600, a landscape split screen): the
+     same height term as 1024+, with more room for the project rows here,
+     so the menu fits instead of scrolling. Tall tablets are unchanged. */
+  @media (min-width: 48rem) and (max-width: 63.999rem) {
+    .menu__list {
+      --menu-size: min(
+        var(--text-mega),
+        calc((100vw - 2 * var(--grid-margin)) / 7),
+        14svh,
+        calc((100svh - 25rem) / 4.6)
+      );
+    }
+  }
+
+  /* Wide enough that THE TWILIGHT holds one line between the margins, so
+     the four entries make five lines. */
+  @media (min-width: 64rem) {
+    .menu__list {
+      /* The last term keeps all five lines, the project names and the foot
+         inside a short window (about 800px tall and under), so the menu
+         doesn't scroll there and nothing slides under the bar. */
+      --menu-size: min(
+        var(--text-mega),
+        calc((100vw - 2 * var(--grid-margin)) / 8.8),
+        13.5svh,
+        calc((100svh - 23rem) / 4.35)
+      );
+    }
+  }
+
+  /* Room beside PROJECTS for the longest name: the list moves up next to
+     it, one name per line, top-aligned with the cap height. */
+  @media (min-width: 80rem) {
+    .menu__row--work {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: clamp(2rem, 4vw, 5rem);
+    }
+    .menu__subs {
+      flex-direction: column;
+      flex-wrap: nowrap;
+      gap: 0.15rem;
+      padding-top: 0.6rem;
+      white-space: nowrap;
+    }
+  }
+
+  .menu__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem var(--grid-gutter);
+    border-top: 1px solid var(--color-edge);
+    padding-top: 1.25rem;
+    font-size: var(--text-body);
+    color: var(--color-fg-muted);
+  }
+  .menu__foot-link {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    color: var(--color-fg);
+  }
+
+  /* Faint code behind, as in the hero field. */
+  .menu__code {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.75;
+    white-space: pre;
+    color: color-mix(in oklch, var(--color-fg) 5%, transparent);
+    mask-image: radial-gradient(ellipse 70% 70% at 62% 40%, black 10%, transparent 100%);
+  }
+  .menu__code-col {
+    position: absolute;
+    top: calc(var(--spacing-nav) - 2rem);
+    left: 48%;
+  }
+  .menu__code-col--wide {
+    display: none;
+    top: 20%;
+    left: 74%;
+  }
+  .menu__code-col span {
+    display: block;
+  }
+  @media (min-width: 64rem) {
+    .menu__code-col--wide {
+      display: block;
+    }
+  }
+
+  /* Cursor preview. Positioned by header-motion.ts; only ever shown on a
+     fine pointer with motion allowed. */
+  .menu__preview {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    display: none;
+    width: clamp(15rem, 20vw, 24rem);
+    aspect-ratio: var(--aspect-shot);
+    overflow: hidden;
+    border-radius: var(--radius-media);
+    background-color: var(--color-surface-raised);
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+  }
+  .menu__slide {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background-color: var(--color-surface-raised);
+    clip-path: inset(100% 0 0 0);
+  }
+  /* Fill the frame whatever the photo's own ratio (the trekkers photo is
+     portrait); the 2×2 Work slide puts them back in its grid. */
+  .menu__slide :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+  }
+  .menu__slide--grid :global(img) {
+    position: static;
+    min-height: 0;
+  }
+  .menu__slide--grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: 2px;
+  }
+  .menu__slide-empty {
+    padding: 1rem;
+    text-align: center;
+    font-size: var(--text-small);
+    line-height: 1.3;
+    color: var(--color-fg-muted);
+  }
+  .menu__slide--grid .menu__slide-empty {
+    font-size: 0.6875rem;
+    display: grid;
+    height: 100%;
+    place-items: center;
+    background-color: var(--color-surface-sunken);
+  }
+  .menu__slide--mark svg {
+    width: auto;
+    height: 52%;
+    color: var(--color-fg);
+  }
+  .menu__slide--mail span {
+    padding-inline: 1.25rem;
+    text-align: center;
+    font-size: var(--text-body);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--color-fg);
+    /* Breaks only at the <wbr> before the @; a mid-word break is the last
+       resort for a card too narrow for either half. */
+    overflow-wrap: break-word;
+  }
+  .menu__address {
+    flex-wrap: wrap;
+    overflow-wrap: break-word;
+  }
+
+  /* ── Phones: thumb reach ────────────────────────────────────────────────
+     The words gather in the lower part of the screen instead of the
+     middle, closer to the thumb, and the foot gets a round Close at its
+     right end. Each word and project name stays a 44px+ target. */
+  .menu__close {
+    display: none;
+  }
+  @media (max-width: 47.999rem) {
+    .menu__inner {
+      padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+    }
+    .menu__nav {
+      justify-content: flex-end;
+    }
+    .menu__list {
+      gap: 0.12em;
+    }
+    .menu__item {
+      padding-block: 0.06em;
+    }
+    /* Email on its own line; GitHub and the round Close under it, the
+       Close in the bottom-right corner. */
+    .menu__foot {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 0 1.25rem;
+    }
+    /* Full-width rows split by a hairline, like the contact list, rather
+       than two underlines of different lengths. */
+    .menu__foot > * {
+      grid-column: 1;
+      justify-self: stretch;
+    }
+    .menu__foot-link {
+      background-image: none;
+    }
+    .menu__foot-link:first-child {
+      grid-column: 1 / -1;
+      border-bottom: 1px solid var(--color-edge);
+    }
+    /* The project names under PROJECTS: each starts at the top of its cell
+       (a two-line name no longer pushes its neighbour down to centre), with
+       a little air above and below the pair of rows. */
+    .menu__subs {
+      align-items: start;
+      margin-block: 0.4rem 0.7rem;
+    }
+    .menu__sub {
+      align-items: flex-start;
+      padding-block: 0.55rem;
+    }
+    .menu__foot > .menu__close {
+      grid-column: 2;
+      grid-row: span 2;
+      align-self: end;
+      display: grid;
+      flex: none;
+      place-items: center;
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 50%;
+      background: var(--color-accent-fill);
+      color: var(--color-on-accent);
+      cursor: pointer;
+      transition: scale var(--duration-fast) var(--ease-out-soft);
+    }
+    .menu__close:active {
+      scale: 0.92;
+    }
+    .menu__close svg {
+      width: 1.35rem;
+      height: 1.35rem;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.75;
+      stroke-linecap: round;
+    }
+  }
+</style>

@@ -1,149 +1,320 @@
 ---
-import Container from './Container.astro';
-import { NAV, SITE } from '../config';
+import Logo from './Logo.astro';
+import ThemeSlider from './ThemeSlider.astro';
+import MenuOverlay from './MenuOverlay.astro';
 
 /*
-  Site navigation.
+  Site navigation: the mark and name left; on the right the four links
+  (1024+; four don't fit beside the name and the buttons below that), the
+  brightness button (below 1024) and a Menu button at every
+  width that opens the full-screen menu (MenuOverlay). The bar runs edge to
+  edge, inset by --grid-margin.
 
-  The mobile panel is plain CSS and a handful of lines of vanilla JS rather
-  than anything from the motion module — navigation has to work whether or not
-  GSAP loaded, and it has to work identically under reduced motion.
+  Ground: transparent at the very top of the page, the surface colour (and a
+  hairline) once the page has scrolled.
+
+  Tone: while a contrast band (data-tone="dark") sits under the bar, the
+  header takes data-tone="dark" too, so it re-themes to the band's surface,
+  type and lines at whatever brightness the page is set to. The menu is a
+  band itself, so the bar takes the dark tone while it's open. The active
+  bar uses --color-focus, which clears 3:1 at every brightness.
+
+  Below 1024 the brightness control lives here as a 44px button that opens
+  a strip under the bar (ThemeSlider, variant "compact"); at 1024 and up it
+  is the fixed rail on the right edge instead.
 */
 
-const path = Astro.url.pathname;
-const isCurrent = (href: string) => path === href || path === href.replace(/\/$/, '');
+/* The bar's own list: Projects replaces Work, and
+   The Twilight Trekkers gets a tab. */
+const links = [
+  { href: '/work/', label: 'Projects' },
+  { href: '/twilight-trekkers/', label: 'Twilight Trekkers' },
+  { href: '/about/', label: 'About' },
+  { href: '/contact/', label: 'Contact' },
+];
+
+const path = Astro.url.pathname.replace(/\/?$/, '/');
+const isCurrent = (href: string) => path === href || (href !== '/' && path.startsWith(href));
 ---
 
-<!--
-  Not persisted across view transitions on purpose: a persisted header keeps
-  the DOM it was rendered with, which would leave aria-current pointing at the
-  page you just left.
--->
-<header class="sticky top-0 z-50 border-b border-edge/60 bg-surface/85 backdrop-blur-md">
-  <Container width="wide">
-    <nav class="flex h-16 items-center justify-between gap-6" aria-label="Main">
-      <a
-        href="/"
-        class="transition-soft font-display text-lg tracking-tighter text-fg-bright hover:text-signal"
-      >
-        {SITE.name}
-      </a>
+{/* Sits 8px down the page; once it scrolls out of view the bar gets its ground and rule. */}
+<div class="pointer-events-none absolute top-2 left-0 h-px w-px" aria-hidden="true" data-nav-sentinel>
+</div>
 
-      <ul class="hidden items-center gap-8 md:flex">
-        {
-          NAV.map((item) => (
-            <li>
-              <a
-                href={item.href}
-                aria-current={isCurrent(item.href) ? 'page' : undefined}
-                class="transition-soft text-sm tracking-wide text-fg-muted hover:text-fg-bright aria-[current=page]:text-signal"
-              >
-                {item.label}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
+<header class="site-header sticky top-0 z-50 text-fg" data-nav>
+  <nav class="site-header__bar container-bleed flex h-nav items-center justify-between" aria-label="Main">
+    <Logo />
 
+    <div class="flex items-center gap-1 lg:gap-8">
+      <div class="nav-links relative hidden lg:block" data-nav-links>
+        <ul class="flex items-center gap-8">
+          {
+            links.map((item) => (
+              <li>
+                {/* Two copies of the label in one mask: on hover the first
+                    rolls up and out, the second (aria-hidden, so the name is
+                    read once) rolls in from below. motion.css. */}
+                <a
+                  href={item.href}
+                  aria-current={isCurrent(item.href) ? 'page' : undefined}
+                  class="nav-link relative inline-flex text-small font-medium text-fg"
+                  data-nav-link
+                >
+                  <span class="nav-roll" data-nav-label>
+                    <span class="nav-roll__a">{item.label}</span>
+                    <span class="nav-roll__b" aria-hidden="true">{item.label}</span>
+                  </span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+        {/* The active bar: one element for all three links, moved with a
+            transform by header-motion.ts. */}
+        <span class="nav-indicator" aria-hidden="true" data-nav-indicator></span>
+      </div>
+
+      <ThemeSlider variant="compact" />
+
+      {/* The name stays "Menu"; aria-expanded carries the state. The
+          visible label rolls to "Close" while it's open. */}
       <button
         type="button"
-        class="transition-soft -mr-2 flex h-10 w-10 items-center justify-center rounded-card text-fg-muted hover:text-fg-bright md:hidden"
+        class="menu-toggle -mr-3 inline-flex min-h-11 min-w-11 items-center justify-center gap-2.5 px-2 min-[22.5rem]:px-3 text-small font-medium text-fg"
         aria-expanded="false"
-        aria-controls="mobile-nav"
+        aria-controls="site-menu"
         data-nav-toggle
       >
-        <span class="sr-only">Menu</span>
-        <svg
-          width="20"
-          height="14"
-          viewBox="0 0 20 14"
-          fill="none"
-          aria-hidden="true"
-          focusable="false"
-        >
-          <path d="M0 1h20M0 7h20M0 13h20" stroke="currentColor" stroke-width="1.5" />
-        </svg>
+        <span class="menu-toggle__icon" aria-hidden="true"><span></span><span></span></span>
+        <span class="nav-roll menu-toggle__roll">
+          <span class="nav-roll__a">Menu</span>
+          <span class="nav-roll__b" aria-hidden="true">Close</span>
+        </span>
       </button>
-    </nav>
-  </Container>
+    </div>
+  </nav>
 
-  <div
-    id="mobile-nav"
-    hidden
-    class="border-t border-edge bg-surface-raised md:hidden"
-    data-nav-panel
-  >
-    <Container width="wide">
-      <ul class="flex flex-col py-4">
-        {
-          NAV.map((item) => (
-            <li>
-              <a
-                href={item.href}
-                aria-current={isCurrent(item.href) ? 'page' : undefined}
-                class="transition-soft block py-3 text-lg text-fg hover:text-signal aria-[current=page]:text-signal"
-              >
-                {item.label}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </Container>
-  </div>
+  {/* Page progress along the bar's bottom edge. */}
+  <span class="nav-progress" aria-hidden="true" data-nav-progress></span>
+
+  <MenuOverlay isCurrent={isCurrent} />
 </header>
 
 <script>
+  import { motion, registerMotion, prefersReducedMotion } from '../scripts/motion';
+  import { logoEntrance, headerScroll, headerHover, menuOpen, menuClose, menuPointer } from '../scripts/header-motion';
+
   /*
-    Deliberately independent of the motion module. If GSAP fails to load, the
-    menu still opens. Re-runs on every view transition because the header is
-    persisted but its listeners are not re-attached by Astro.
+    The header is re-rendered on every view transition (not persisted, so
+    aria-current is always right), so element listeners are bound per page
+    and guarded; document-level listeners are bound once at module scope.
   */
-  const current = () => ({
+  const els = () => ({
+    header: document.querySelector<HTMLElement>('[data-nav]'),
     toggle: document.querySelector<HTMLButtonElement>('[data-nav-toggle]'),
-    panel: document.querySelector<HTMLElement>('[data-nav-panel]'),
+    menu: document.querySelector<HTMLElement>('[data-menu]'),
+    links: document.querySelector<HTMLElement>('[data-nav-links]'),
   });
 
-  const setOpen = (open: boolean) => {
-    const { toggle, panel } = current();
-    if (!toggle || !panel) return;
-    toggle.setAttribute('aria-expanded', String(open));
-    panel.hidden = !open;
+  const isOpen = () => els().toggle?.getAttribute('aria-expanded') === 'true';
+
+  let observer: IntersectionObserver | undefined;
+  let toneObserver: IntersectionObserver | undefined;
+  const darkUnderBar = new Set<Element>();
+
+  /* The tone the bar should have from what's under it; the open menu
+     overrides it. */
+  const applyTone = () => {
+    const { header } = els();
+    if (!header) return;
+    if (darkUnderBar.size > 0 || isOpen()) header.dataset.tone = 'dark';
+    else delete header.dataset.tone;
   };
+
+  /* ---- the page behind the open menu: inert, not scrollable ---- */
+
+  let inerted: HTMLElement[] = [];
+
+  const lockPage = (on: boolean) => {
+    const { header, links } = els();
+    const root = document.documentElement;
+    if (on) {
+      /* Keep the page where it is when the scrollbar goes away. */
+      const bar = window.innerWidth - root.clientWidth;
+      inerted = Array.from(document.body.children).filter(
+        (el): el is HTMLElement => el instanceof HTMLElement && el !== header && !el.inert && el.tagName !== 'SCRIPT',
+      );
+      if (links) inerted.push(links);
+      inerted.forEach((el) => (el.inert = true));
+      root.style.overflow = 'hidden';
+      if (bar > 0) document.body.style.paddingRight = `${bar}px`;
+      motion.lenis?.stop();
+    } else {
+      inerted.forEach((el) => (el.inert = false));
+      inerted = [];
+      root.style.overflow = '';
+      document.body.style.paddingRight = '';
+      motion.lenis?.start();
+    }
+  };
+
+  const setOpen = (open: boolean, opts: { returnFocus?: boolean; instant?: boolean } = {}) => {
+    const { header, toggle, menu } = els();
+    if (!header || !toggle || !menu || open === isOpen()) return;
+
+    toggle.setAttribute('aria-expanded', String(open));
+    header.toggleAttribute('data-menu-open', open);
+    applyTone();
+
+    const instant = opts.instant || prefersReducedMotion();
+    if (open) {
+      lockPage(true);
+      menu.hidden = false;
+      menu.scrollTop = 0;
+      header.removeAttribute('data-menu-scrolled');
+      menuOpen(menu, toggle, instant);
+      menu.querySelector<HTMLElement>('[data-menu-item]')?.focus({ preventScroll: true });
+    } else {
+      lockPage(false);
+      header.removeAttribute('data-menu-scrolled');
+      menuClose(menu, instant, () => {
+        /* Re-opened while closing: leave it up. */
+        if (!isOpen()) menu.hidden = true;
+      });
+      if (opts.returnFocus) toggle.focus({ preventScroll: true });
+    }
+  };
+
+  /*
+    Watches every dark section through a 1px line across the middle of the
+    bar, where its text sits: the root is shrunk from the top by half the
+    bar and from the bottom by the rest of the viewport, so a section
+    "intersects" exactly while it is behind the bar's text. (A line at the
+    bar's bottom edge used to flip the still-transparent bar to light text
+    whenever a dark section started directly under it, over a light page.)
+    Rebuilt on resize because the margins are in px.
+  */
+  const observeTone = () => {
+    const { header } = els();
+    toneObserver?.disconnect();
+    darkUnderBar.clear();
+    if (!header) return;
+    applyTone();
+
+    const probe = Math.round(header.getBoundingClientRect().height / 2);
+    const below = Math.max(0, window.innerHeight - probe - 1);
+    toneObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) darkUnderBar.add(entry.target);
+          else darkUnderBar.delete(entry.target);
+        }
+        applyTone();
+      },
+      { rootMargin: `-${probe}px 0px -${below}px 0px` },
+    );
+    document
+      .querySelectorAll('main [data-tone="dark"], footer[data-tone="dark"]')
+      .forEach((section) => toneObserver?.observe(section));
+  };
+
+  let resizeTimer: number | undefined;
+  window.addEventListener('resize', () => {
+    window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(observeTone, 150);
+  });
 
   const setupNav = () => {
-    const { toggle } = current();
-    if (!toggle) return;
+    const { header, toggle, menu } = els();
+    if (!header || !toggle || !menu) return;
 
-    /*
-      Bind once per button. `astro:page-load` also fires on the very first
-      load, so without this guard the initial page gets two click listeners —
-      the first opens the panel and the second immediately closes it again,
-      which looks exactly like a dead button.
-    */
-    if (toggle.dataset.navReady === 'true') return;
-    toggle.dataset.navReady = 'true';
+    if (toggle.dataset.navReady !== 'true') {
+      toggle.dataset.navReady = 'true';
+      toggle.addEventListener('click', () => setOpen(!isOpen()));
+      menu.addEventListener('click', (event) => {
+        const target = event.target as HTMLElement;
+        if (target.closest('a')) setOpen(false);
+        /* The thumb-reach Close at the foot of the menu on phones. */
+        else if (target.closest('[data-menu-close]')) setOpen(false, { returnFocus: true });
+      });
+      /* The bar sits over the menu with no ground of its own. When the menu
+         is scrolled (a short window, where its words don't all fit), the
+         bar takes the menu's ground and a rule, so nothing shows through
+         behind the logo and the words slide cleanly under it. */
+      menu.addEventListener(
+        'scroll',
+        () => header.toggleAttribute('data-menu-scrolled', menu.scrollTop > 2),
+        { passive: true },
+      );
+    }
 
-    toggle.addEventListener('click', () => {
-      setOpen(toggle.getAttribute('aria-expanded') !== 'true');
-    });
+    /* Off at the very top (the bar sits on the page's own ground), the
+       surface and its rule once the page has scrolled. */
+    observer?.disconnect();
+    const sentinel = document.querySelector('[data-nav-sentinel]');
+    if (sentinel) {
+      observer = new IntersectionObserver(([entry]) => {
+        header.classList.toggle('is-scrolled', !entry.isIntersecting);
+      });
+      observer.observe(sentinel);
+    }
+
+    observeTone();
   };
 
-  /*
-    Document-level listeners are bound exactly once. This script is a module,
-    so it executes once per session while setupNav runs again on every view
-    transition — binding these inside setupNav would stack a fresh listener on
-    every navigation.
-  */
+  /* Everything in the header that can take focus right now, in order: the
+     logo, the brightness button (below 1024), Close, then the menu. */
+  const focusStops = () => {
+    const { header } = els();
+    if (!header) return [];
+    return Array.from(
+      header.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input:not([disabled])'),
+    ).filter((el) => !el.closest('[inert], [hidden]') && el.getClientRects().length > 0);
+  };
+
   document.addEventListener('keydown', (event) => {
-    const { toggle } = current();
-    if (event.key !== 'Escape' || toggle?.getAttribute('aria-expanded') !== 'true') return;
-    setOpen(false);
-    toggle.focus();
+    if (!isOpen()) return;
+
+    if (event.key === 'Escape') {
+      /* The brightness strip closes first if it's the thing that's open. */
+      if (document.querySelector('[data-lum-toggle][aria-expanded="true"]')) return;
+      event.preventDefault();
+      setOpen(false, { returnFocus: true });
+      return;
+    }
+
+    if (event.key === 'Tab') {
+      const stops = focusStops();
+      if (!stops.length) return;
+      const first = stops[0];
+      const last = stops[stops.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      const inside = active !== null && stops.includes(active);
+      if (event.shiftKey && (active === first || !inside)) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (active === last || !inside)) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
   });
 
-  /* Close before navigating, so the panel isn't left open over the new page. */
-  document.addEventListener('astro:before-swap', () => setOpen(false));
+  /* Navigating away with the menu up (a link in it, the back button): the
+     new page arrives with its own closed header, so only the page-level
+     state needs undoing. */
+  document.addEventListener('astro:before-swap', () => {
+    if (inerted.length || document.documentElement.style.overflow) lockPage(false);
+  });
+
+  /* Entrance, active bar, progress line and hide-on-scroll. The scroll half
+     also runs under reduced motion (the bar and the progress line still
+     have a job); it skips the hiding itself. The hover work (magnetic
+     links, the menu's cursor preview) is motion only. */
+  registerMotion(logoEntrance);
+  registerMotion(headerScroll, { reduced: true });
+  registerMotion(headerHover);
+  registerMotion(menuPointer);
 
   setupNav();
   document.addEventListener('astro:page-load', setupNav);

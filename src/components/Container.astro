@@ -1,24 +1,18 @@
 ---
 /*
-  Horizontal container. Three widths, because three is all this site needs:
-  `measure` for reading, `content` for most layouts, `wide` for full-bleed-ish
-  work grids.
+  Horizontal container. One width: full. Content spans the viewport minus
+  --grid-margin on each side (the `container-bleed` utility in global.css),
+  the same as every section on the home page. Running copy inside it keeps
+  its own measure (`max-w-measure`); the container never caps the page.
 */
 
 interface Props {
-  width?: 'measure' | 'content' | 'wide';
   class?: string;
 }
 
-const { width = 'content', class: className = '' } = Astro.props;
-
-const widths = {
-  measure: 'max-w-measure',
-  content: 'max-w-content',
-  wide: 'max-w-wide',
-} as const;
+const { class: className = '' } = Astro.props;
 ---
 
-<div class:list={['mx-auto w-full px-gutter', widths[width], className]}>
+<div class:list={['container-bleed', className]}>
   <slot />
 </div>

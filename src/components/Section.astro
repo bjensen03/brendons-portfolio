@@ -10,7 +10,6 @@ import Container from './Container.astro';
 interface Props {
   id?: string;
   surface?: 'base' | 'sunken' | 'raised' | 'none';
-  width?: 'measure' | 'content' | 'wide';
   size?: 'default' | 'compact';
   /** Stagger any [data-reveal] children together rather than one at a time. */
   revealGroup?: boolean;
@@ -20,7 +19,6 @@ interface Props {
 const {
   id,
   surface = 'base',
-  width = 'content',
   size = 'default',
   revealGroup = false,
   class: className = '',
@@ -41,10 +39,11 @@ const sizes = {
 
 <section
   id={id}
-  class:list={[surfaces[surface], sizes[size], className]}
   data-reveal-group={revealGroup ? '' : undefined}
+  class:list={[surfaces[surface], sizes[size], className]}
+ 
 >
-  <Container width={width}>
+  <Container>
     <slot />
   </Container>
 </section>

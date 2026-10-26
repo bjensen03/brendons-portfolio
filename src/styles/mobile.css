@@ -1,0 +1,362 @@
+/*
+  Phones and tablets — the site-wide half of the mobile pass.
+
+  Component-specific touch layouts live in their own components (Selected
+  Work's carousel, the step viewers, the eras, the page scroller, the hero,
+  the menu); this file holds what cuts across pages. Every rule is behind a
+  touch-or-narrow media query, so a desktop window (1024+, mouse) renders
+  exactly what it did before. Colours come from the tokens only.
+*/
+
+/* ── Basics for touch ──────────────────────────────────────────────────── */
+
+html {
+  /* Stop iOS inflating text after an orientation change. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  /* The grey flash iOS paints on tap fights the site's own pressed states. */
+  a,
+  button,
+  [role='tab'] {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Pressed feedback on buttons, so a tap is felt as well as seen. The
+     primary button already has its own. */
+  button:not(:disabled):active {
+    opacity: 0.82;
+  }
+}
+
+/*
+  One vertical rhythm for phones and tablets, so there is no random
+  space. The desktop section padding (80–160px a side) left
+  a screen-tall gap between every pair of sections on a phone. Below 1024
+  every section, home and case study alike, uses this scale instead: 36px a
+  side on phones (72 between sections), 48 on tablets; a header sits 32/40
+  above its content. Desktop keeps the tokens from global.css.
+*/
+@media (max-width: 47.999rem) {
+  :root {
+    /* The 12px label step (dates, "Role", "Email") is a hair small held
+       at arm's length; 13px on phones. */
+    --text-label: 0.8125rem;
+    --spacing-section: 2.25rem;
+    --spacing-section-sm: 2.25rem;
+    --spacing-block: 2rem;
+  }
+}
+@media (min-width: 48rem) and (max-width: 63.999rem) {
+  :root {
+    --spacing-section: 3rem;
+    --spacing-section-sm: 3rem;
+    --spacing-block: 2.5rem;
+  }
+}
+
+/*
+  Sticky things below the header (the eras' year scrubber). The header slides
+  away while you scroll down and comes back on the way up; anything stuck to
+  the top follows it, so it is never hidden under the bar.
+*/
+:root {
+  --sticky-top: 0px;
+}
+@media (max-width: 63.999rem) {
+  :root:not([data-header-hidden]) {
+    --sticky-top: var(--spacing-nav);
+  }
+}
+
+/* ── Tap targets (44 × 44) ─────────────────────────────────────────────── */
+
+@media (pointer: coarse) {
+  /* The wordmark in the bar was 28px tall. ("Back to top" gets the hit
+     area below.) */
+  .site-header .logo {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Standalone text links (not links inside a sentence): "About me",
+     "More about me", the case-study jump links, "Live site". Their underline
+     sits at the bottom of the box, so the box can't simply grow — an
+     invisible hit area is centred on the link instead, 44px tall. */
+  .link-reveal:not(p .link-reveal, .cs-prose .link-reveal) {
+    position: relative;
+  }
+  .link-reveal:not(p .link-reveal, .cs-prose .link-reveal)::after {
+    content: '';
+    position: absolute;
+    inset: min(0px, calc((100% - 2.75rem) / 2)) min(0px, calc((100% - 2.75rem) / 2));
+  }
+
+  /* Links inside a sentence: the box grows upward (padding on an inline box
+     doesn't move the text or the lines), so the tappable height is close
+     to 44 without the underline moving off its baseline. */
+  p .link-reveal,
+  .cs-prose .link-reveal,
+  .cs-prose a {
+    padding-top: 0.5em;
+  }
+
+  /* The video play / pause button. */
+  .cs-video .cs-video__toggle {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+
+/* ── Reading sizes on phones ───────────────────────────────────────────── */
+
+/*
+  Running copy is never under 16px on a phone. The 15px "small" step stays
+  for captions, meta and labels; these are paragraphs that were set in it.
+*/
+@media (max-width: 47.999rem) {
+  .cs .max-w-measure.text-small,
+  .cs .ps-note__body {
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+}
+
+/* ── Case study reading pill (studyProgress, mobile-motion.ts) ─────────── */
+
+.cs-pill,
+.cs-pill__scrim {
+  display: none;
+}
+
+@media (max-width: 63.999rem) {
+  /* A section reached by a link (the pill's list, or a plain #anchor) lands
+     below the bar, not under it. */
+  .cs h2[id] {
+    scroll-margin-top: calc(var(--spacing-nav) + 1.5rem);
+  }
+
+  /* Behind the open list: the page dims, so the list reads as on top of
+     it, and a tap anywhere on the dim closes it. */
+  .cs-pill__scrim:not([hidden]) {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 39;
+    background: color-mix(in oklch, var(--color-surface) 72%, transparent);
+    animation: pill-scrim var(--duration-base) var(--ease-out-soft);
+  }
+}
+
+@keyframes pill-scrim {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 63.999rem) {
+  .cs-pill:not([hidden]) {
+    position: fixed;
+    left: 0;
+    right: 0;
+    margin-inline: auto;
+    bottom: max(0.875rem, env(safe-area-inset-bottom));
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: max-content;
+    max-width: calc(100vw - 2 * var(--grid-margin));
+    translate: 0 calc(100% + 1.5rem);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      translate var(--duration-snap) var(--ease-out-soft),
+      opacity var(--duration-fast) var(--ease-out-soft);
+  }
+  .cs-pill.is-shown {
+    translate: 0 0;
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .cs-pill.is-shown.is-tucked {
+    translate: 0 calc(100% + 1.5rem);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .cs-pill__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 2.75rem;
+    max-width: 100%;
+    padding: 0 1rem 0 0.7rem;
+    border: 1px solid var(--color-edge-strong);
+    border-radius: 999px;
+    background: var(--color-surface-raised);
+    color: var(--color-fg);
+    font-size: var(--text-small);
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.55);
+    transition: scale var(--duration-fast) var(--ease-out-soft);
+  }
+  .cs-pill__btn:active {
+    scale: 0.96;
+    opacity: 1;
+  }
+  .cs-pill__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .cs-pill__ring {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    rotate: -90deg;
+    fill: none;
+    stroke-width: 2.5;
+  }
+  .cs-pill__ring circle:first-child {
+    stroke: var(--color-edge-strong);
+  }
+  .cs-pill__ring circle + circle {
+    stroke: var(--color-accent-fill);
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    stroke-linecap: round;
+  }
+  .cs-pill__chev {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: rotate var(--duration-base) var(--ease-out-soft);
+  }
+  .cs-pill.is-open .cs-pill__chev {
+    rotate: 180deg;
+  }
+
+  .cs-pill__sheet {
+    width: min(22rem, calc(100vw - 2 * var(--grid-margin)));
+    max-height: min(60svh, 30rem);
+    margin-bottom: 0.6rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0.5rem;
+    border: 1px solid var(--color-edge-strong);
+    border-radius: var(--radius-frame);
+    background: var(--color-surface-raised);
+    box-shadow: 0 20px 50px -20px rgb(0 0 0 / 0.6);
+    transform-origin: 50% 100%;
+    animation: pill-sheet var(--duration-base) var(--ease-out-soft);
+  }
+  .cs-pill__sheet[hidden] {
+    display: none;
+  }
+  /* The list fades out at the bottom edge when there's more below; the
+     padding lets the last section scroll clear of the fade. */
+  .cs-pill__sheet {
+    -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 2rem), transparent);
+    mask-image: linear-gradient(to bottom, black calc(100% - 2rem), transparent);
+  }
+  .cs-pill__list {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 1.5rem;
+  }
+  .cs-pill__link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0.4rem 0.75rem 0.4rem 1.1rem;
+    border-radius: var(--radius-control);
+    color: var(--color-fg-muted);
+    font-size: var(--text-body);
+    line-height: 1.3;
+  }
+  .cs-pill__link:active {
+    background: var(--color-surface);
+  }
+  .cs-pill__link[aria-current='true'] {
+    color: var(--color-fg);
+    font-weight: 600;
+  }
+  .cs-pill__link[aria-current='true']::before {
+    content: '';
+    position: absolute;
+    left: 0.35rem;
+    top: 0.7rem;
+    bottom: 0.7rem;
+    width: 3px;
+    border-radius: 2px;
+    background: var(--color-accent-fill);
+  }
+}
+
+@keyframes pill-sheet {
+  from {
+    opacity: 0;
+    scale: 0.96;
+    translate: 0 0.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-pill:not([hidden]),
+  .cs-pill__btn,
+  .cs-pill__chev {
+    transition: none;
+  }
+  .cs-pill__sheet,
+  .cs-pill__scrim {
+    animation: none;
+  }
+}
+
+/* ── QuickStrike's page gallery on touch ───────────────────────────────── */
+
+/* On a mouse, hovering a tall capture scrolls it (CaseStudy.astro). There is
+   no hover on a touch screen, so the frame scrolls under the thumb instead,
+   handing the scroll back to the page at either end. */
+@media (hover: none) {
+  .cs-gallery__frame.is-tall {
+    overflow-y: auto;
+    overscroll-behavior-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ── The ↗ on outside links never wraps onto a line of its own ─────────── */
+
+/* It's an inline-block so it can lean on hover, and an inline-block is a
+   line-break opportunity: "lincoln-academy.org" one line, "↗" alone on the
+   next. Touch screens have no hover, so it goes back to plain inline and
+   stays glued to the last letter. */
+@media (hover: none) {
+  .ext-arrow {
+    display: inline;
+  }
+}
+
+/* ── Line breaks below 1024 ────────────────────────────────────────────── */
+
+/* Balanced lines for the big At a glance figures ("ABOUT 26 SECONDS TO
+   UNDER 2 SECONDS") and the hero's fact values, so a narrow column never
+   leaves one word on its own last line. */
+@media (max-width: 63.999rem) {
+  .cs .gl-value,
+  .cs .sh-meta dd {
+    text-wrap: balance;
+  }
+}

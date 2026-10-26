@@ -1,0 +1,66 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import { NEW_TAB_HINT, externalRel, isExternal } from '../lib/links';
+
+/*
+  A link that might leave the site. Use it anywhere an href can be an
+  off-site URL (a client's live site, GitHub, LinkedIn, a source file).
+
+  Off-site http(s): opens in a new tab with rel="noopener noreferrer", ends in
+  a ↗ that leans up and out on hover, and carries a visually hidden
+  "(opens in a new tab)" so a screen reader announces it too. Pass `rel` to
+  add tokens such as "me"; noopener/noreferrer are always kept.
+
+  Anything else (mailto:, tel:, /work/…, #top) renders as a plain link, so a
+  list that mixes email and social links can use this for every row.
+
+  `arrow={false}` drops the visible ↗ for links that aren't text, like a
+  screenshot. An aria-label, if given, gets the new-tab note appended.
+
+  `newTab` opens a same-site document (the résumé PDF) the same way: new
+  tab, noopener, the ↗ and the screen-reader note.
+*/
+
+type Props = Omit<HTMLAttributes<'a'>, 'href' | 'target'> & {
+  href: string;
+  arrow?: boolean;
+  newTab?: boolean;
+};
+
+const { href, arrow = true, newTab = false, rel, 'aria-label': ariaLabel, ...rest } = Astro.props;
+const external = newTab || isExternal(href);
+const label =
+  external && ariaLabel && !String(ariaLabel).includes(NEW_TAB_HINT.trim()) ? `${ariaLabel}${NEW_TAB_HINT}` : ariaLabel;
+---
+
+{
+  external ? (
+    <a href={href} target="_blank" rel={externalRel(rel ?? undefined)} aria-label={label} {...rest}>
+      <slot />
+      {!ariaLabel && <span class="sr-only">{NEW_TAB_HINT}</span>}
+      {arrow && <span class="link-arrow ext-arrow" aria-hidden="true">↗</span>}
+    </a>
+  ) : (
+    <a href={href} rel={rel} aria-label={ariaLabel} {...rest}>
+      <slot />
+    </a>
+  )
+}
+
+<style is:global>
+  /* The gap is a margin rather than a space so the link's underline stops
+     at the last letter instead of running on under the gap. */
+  .ext-arrow {
+    margin-inline-start: 0.25em;
+  }
+
+  /* The internal-link arrow (motion.css .link-arrow) slides right; this one
+     points out of the page, so it leans up and right instead. Covers prose
+     links from rehypeExternalLinks too, which is why it's global. */
+  a:hover > .ext-arrow,
+  a:focus-visible > .ext-arrow,
+  .group:hover .link-arrow.ext-arrow,
+  .group:focus-visible .link-arrow.ext-arrow {
+    translate: 0.15em -0.15em;
+  }
+</style>

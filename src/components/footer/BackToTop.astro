@@ -1,0 +1,53 @@
+---
+/*
+  Back to top. A real #top link (works without JS); with smooth scrolling on,
+  it hands the trip to Lenis so it eases instead of jumping.
+*/
+interface Props {
+  class?: string;
+  label?: string;
+}
+const { class: cls, label = 'Back to top' } = Astro.props;
+---
+
+<a href="#top" class:list={['pf-top group', cls]} data-pf-top>
+  <span>{label}</span>
+  <span class="pf-top__arrow" aria-hidden="true">↑</span>
+</a>
+
+<script>
+  import { motion, registerMotion } from '../../scripts/motion';
+
+  registerMotion(
+    () => {
+      const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-pf-top]'));
+      const onClick = (e: MouseEvent) => {
+        const lenis = motion.lenis;
+        if (!lenis) return;
+        e.preventDefault();
+        lenis.scrollTo(0, { duration: 1.4 });
+      };
+      links.forEach((l) => l.addEventListener('click', onClick));
+      return () => links.forEach((l) => l.removeEventListener('click', onClick));
+    },
+    { reduced: true },
+  );
+</script>
+
+<style>
+  .pf-top {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    min-height: 2.75rem;
+    font-weight: 500;
+    color: var(--color-fg);
+  }
+  .pf-top__arrow {
+    display: inline-block;
+    transition: translate var(--duration-base) var(--ease-out-soft);
+  }
+  .pf-top:hover .pf-top__arrow {
+    translate: 0 -0.25em;
+  }
+</style>

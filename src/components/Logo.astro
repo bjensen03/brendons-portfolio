@@ -1,0 +1,55 @@
+---
+/*
+  My mark (traced from src/assets/logo/mark-source.png) beside the
+  name. The paths fill with currentColor, so they follow the brightness
+  slider and the nav's dark-section tone with no extra rules.
+
+  The mark is inlined as its two shapes — the B, and the peak/J cut out of
+  it — so the peak can lift on its own on hover, and both can trace their
+  outline in the entrance (header-motion.ts, styles in motion.css). The name
+  sits in a horizontal mask so it can slide out from behind the mark.
+*/
+import markRaw from '../assets/logo/mark.svg?raw';
+
+const d = markRaw.match(/\sd="([^"]+)"/)?.[1];
+const viewBox = markRaw.match(/viewBox="([^"]+)"/)?.[1];
+if (!d || !viewBox) throw new Error('Logo needs the path and viewBox in src/assets/logo/mark.svg.');
+
+/* Subpath 1 is the B (with the gap for the J), subpath 2 the peak/J. */
+const [bowl, ...rest] = d.split(/(?=M )/);
+const peak = rest.join(' ');
+---
+
+<a
+  href="/"
+  aria-label="Brendon Jensen, home"
+  class="logo group inline-flex items-center gap-3 whitespace-nowrap font-display text-body font-semibold tracking-tighter text-fg"
+  data-logo
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox={viewBox}
+    aria-hidden="true"
+    focusable="false"
+    class="logo-mark relative z-10 h-7 w-auto shrink-0 overflow-visible"
+    fill="currentColor"
+    fill-rule="evenodd"
+  >
+    <path d={bowl} pathLength="1" data-logo-path></path>
+    <path class="logo-peak" d={peak} pathLength="1" data-logo-path></path>
+  </svg>
+  <span class="logo-name-mask"><span class="logo-name" data-logo-name>Brendon Jensen</span></span>
+</a>
+
+<script is:inline>
+  /* Park the mark and name before the bar paints, on a real page load with
+     motion allowed. View transitions re-run this after loading, so in-site
+     navigation never replays the entrance. html.motion-ok is removed by the
+     head failsafe if the motion module never boots, which lifts the gate. */
+  (function () {
+    var root = document.documentElement;
+    if (document.readyState === 'loading' && root.classList.contains('motion-ok')) {
+      root.setAttribute('data-logo-intro', '');
+    }
+  })();
+</script>

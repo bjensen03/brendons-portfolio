@@ -1,0 +1,399 @@
+---
+import { SITE } from '../../config';
+import { textLink } from '../home/data';
+import { wordEm, SPACE_EM } from '../../lib/display-fit';
+import ExternalLink from '../ExternalLink.astro';
+import CopyEmail from './CopyEmail.astro';
+import UtahTime from './UtahTime.astro';
+import BackToTop from './BackToTop.astro';
+import CodeEcho from './CodeEcho.astro';
+import { email, contactLinks, sitePages, year } from './links';
+
+/*
+  The site footer, on every page (Base.astro). It uses the layout of
+  one footer option, with the scroll fill of another moved onto the name. On the homepage it is also the
+  closing contact section (#contact, which the nav's active bar follows).
+
+  `contact={false}` drops the question and the contact row and keeps the
+  bar and the name; /contact/ uses it, since that page already is the
+  contact block.
+
+  - The code field from the hero drifts behind the closing question.
+  - The question is a lead-in, not the event: two lines from 1024
+    ("Have something that / needs building?"), sized so the first line
+    takes about 70% of the content width; smaller still on phones.
+  - The email is ordinary body-scale type with Copy email and the profiles.
+  - The last thing on the page is the name, edge to edge. Each line rests at
+    55% white and a full-strength copy wipes across it from the left as it
+    scrolls up, scrubbed, finishing exactly at the bottom of the page.
+    Reduced motion or no JS: solid white.
+
+  The name and the question are fitted from the Archivo advance table
+  (lib/display-fit), so nothing is measured in the browser.
+*/
+
+interface Props {
+  contact?: boolean;
+}
+const { contact = true } = Astro.props;
+
+const words = SITE.name.split(' ');
+const first = words[0];
+const last = words.slice(1).join(' ');
+const safety = 1.03;
+const nameWide = (wordEm(first) + SPACE_EM + wordEm(last)) * safety;
+const namePhone = Math.max(wordEm(first), wordEm(last)) * safety;
+const nameSets = { phone: [first, last], wide: [SITE.name] } as const;
+
+const Q1 = 'Have something that';
+const Q2 = 'needs building?';
+const lineEm = (s: string) => s.split(' ').reduce((sum, w, i) => sum + wordEm(w) + (i ? SPACE_EM : 0), 0);
+const qEm = Math.max(lineEm(Q1), lineEm(Q2)) * safety;
+---
+
+<footer data-tone="dark" class:list={['fd', !contact && 'fd--bare']}>
+  {contact && <CodeEcho />}
+
+  <div class="container-bleed">
+    {contact && (
+    <section id="contact" aria-labelledby="fd-title">
+    <h2 id="fd-title" class="fd-title type-display text-fg" style={`--fd-q: ${qEm.toFixed(3)}`} data-split>
+      <span class="fd-q">{Q1}</span>{' '}
+      <span class="fd-q">{Q2}</span>
+    </h2>
+
+    <div class="fd-contact mt-block" data-reveal-group>
+      {
+        email && (
+          <p class="fd-email text-lead" data-reveal>
+            <a href={`mailto:${email}`} class:list={[textLink, 'fd-address']}>
+              {email.split('@')[0]}<wbr />@{email.split('@')[1]}
+            </a>
+          </p>
+        )
+      }
+      <div class="fd-row" data-reveal>
+        <CopyEmail email={email} class="fd-copy" />
+        {
+          contactLinks.length > 0 && (
+            <ul class="fd-links">
+              {contactLinks.map((l) => (
+                <li>
+                  <ExternalLink href={l.href} rel={l.rel} newTab={l.newTab} class:list={[textLink, 'fd-link text-lead']}>
+                    {l.label}
+                  </ExternalLink>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </div>
+    </div>
+    </section>
+    )}
+
+    <div class="fd-foot">
+      <div class="fd-bar">
+        <nav aria-label="Footer">
+          <ul class="fd-pages">
+            {
+              sitePages.map((p) => (
+                <li>
+                  <a href={p.href} class="fd-page">{p.label}</a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+        <div class="fd-meta">
+          <UtahTime class="text-fg-muted" />
+          <BackToTop />
+        </div>
+      </div>
+
+      <div class="fd-sign" style={`--fd-wide: ${nameWide.toFixed(3)}; --fd-phone: ${namePhone.toFixed(3)}`}>
+        <p class="fd-name" data-fd-name>
+          <span class="sr-only">{SITE.name}</span>
+          {
+            (['phone', 'wide'] as const).map((set) => (
+              <span class:list={['fd-set', `fd-set--${set}`]} aria-hidden="true">
+                {nameSets[set].map((l) => (
+                  <span class="fd-line" data-fd-line data-text={l}>
+                    {l}
+                  </span>
+                ))}
+              </span>
+            ))
+          }
+        </p>
+        <p class="fd-copyright text-fg-muted">&copy; {year}</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  import { motion, registerMotion } from '../../scripts/motion';
+
+  const { gsap } = motion;
+
+  /* The name fills from the left as it rises: --fill 0 → 1 from the line
+     entering the screen to the bottom of the page (clamped, so it always
+     lands at 1 when the page can't scroll further).
+
+     Only the lines being scrubbed get the dim resting colour (is-scrubbed
+     is set per line), and the set is rebuilt when the phone/wide break is
+     crossed, so a line that isn't animated is always plain white. */
+  registerMotion(() => {
+    const name = document.querySelector<HTMLElement>('[data-fd-name]');
+    if (!name) return;
+    const { ScrollTrigger } = motion;
+    const wide = matchMedia('(min-width: 48rem)');
+    let tweens: gsap.core.Tween[] = [];
+    let lines: HTMLElement[] = [];
+
+    const teardown = () => {
+      tweens.forEach((t) => {
+        t.scrollTrigger?.kill();
+        t.kill();
+      });
+      lines.forEach((l) => {
+        l.classList.remove('is-scrubbed');
+        l.style.removeProperty('--fill');
+      });
+      tweens = [];
+      lines = [];
+    };
+    const setup = () => {
+      teardown();
+      lines = Array.from(name.querySelectorAll<HTMLElement>('[data-fd-line]')).filter((l) => l.offsetParent !== null);
+      lines.forEach((l) => l.classList.add('is-scrubbed'));
+      tweens = lines.map((line) =>
+        gsap.fromTo(
+          line,
+          { '--fill': 0 },
+          {
+            '--fill': 1,
+            ease: 'none',
+            scrollTrigger: { trigger: line, start: 'top bottom', end: 'clamp(bottom bottom-=40)', scrub: 0.6 },
+          },
+        ),
+      );
+    };
+    const onBreak = () => {
+      setup();
+      ScrollTrigger.refresh();
+    };
+
+    setup();
+    wide.addEventListener('change', onBreak);
+    return () => {
+      wide.removeEventListener('change', onBreak);
+      teardown();
+    };
+  });
+</script>
+
+<style>
+  .fd {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding-top: var(--spacing-section);
+  }
+
+  /* ── The question ────────────────────────────────────────────────────── */
+  .fd-title {
+    font-weight: 850;
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+    font-size: 1.75rem;
+  }
+  @media (min-width: 48rem) {
+    .fd-title {
+      font-size: 3rem;
+    }
+  }
+  /* From 1024: exactly two lines, the longer one ~70% of the content width
+     (64px at 1440, 85px at 1920). */
+  @media (min-width: 64rem) {
+    .fd-title {
+      font-size: calc((100vw - 2 * var(--grid-margin)) * 0.7 / var(--fd-q));
+    }
+    .fd-q {
+      display: block;
+      white-space: nowrap;
+    }
+  }
+
+  /* ── Contact ─────────────────────────────────────────────────────────── */
+  .fd-contact {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-stack);
+  }
+  .fd-address {
+    overflow-wrap: break-word;
+  }
+  .fd-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 2.5rem;
+  }
+  .fd-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 2rem;
+  }
+  .fd-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 3rem;
+  }
+
+  /* ── Bar ─────────────────────────────────────────────────────────────── */
+  .fd-foot {
+    margin-top: var(--spacing-section);
+  }
+  .fd--bare {
+    padding-top: 0;
+  }
+  .fd--bare .fd-foot {
+    margin-top: 0;
+  }
+  .fd-bar {
+    display: grid;
+    gap: 0.75rem 2rem;
+    padding-block: 1rem;
+    border-top: 1px solid var(--color-edge);
+    font-size: var(--text-small);
+  }
+  .fd-pages {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.75rem;
+  }
+  .fd-page {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-weight: 500;
+    color: var(--color-fg);
+    transition: color var(--duration-fast) var(--ease-out-soft);
+  }
+  .fd-page:hover {
+    color: var(--color-fg-muted);
+  }
+  .fd-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+
+  /* ── The name ────────────────────────────────────────────────────────── */
+  .fd-sign {
+    container-type: inline-size;
+    padding-top: 1rem;
+    padding-bottom: 1.25rem;
+  }
+  .fd-name {
+    display: block;
+  }
+  .fd-set {
+    display: block;
+  }
+  .fd-set--wide {
+    display: none;
+  }
+  .fd-line {
+    display: block;
+    width: fit-content;
+    font-family: var(--font-display);
+    font-stretch: var(--display-stretch);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    line-height: 0.86;
+    white-space: nowrap;
+    color: var(--color-fg);
+    font-size: calc(100cqi / var(--fd-phone));
+  }
+  @media (min-width: 48rem) {
+    .fd-set--phone {
+      display: none;
+    }
+    .fd-set--wide {
+      display: block;
+    }
+    .fd-line {
+      font-size: calc(100cqi / var(--fd-wide));
+    }
+  }
+
+  /* Scrubbed fill (only once the motion setup has run). The resting colour
+     is 55% white — the "What I build" dim floor; display-size text, 3:1+
+     at every brightness — and the ::after copy at full white wipes over it. */
+  .fd-line.is-scrubbed {
+    --fill: 0;
+    position: relative;
+    color: color-mix(in oklch, var(--color-fg) 55%, transparent);
+  }
+  .fd-line.is-scrubbed::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    color: var(--color-fg);
+    clip-path: inset(0 calc(100% - var(--fill) * 100%) 0 0);
+  }
+
+  .fd-copyright {
+    margin-top: 1rem;
+    font-size: var(--text-small);
+  }
+
+  @media (min-width: 64rem) {
+    .fd-bar {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+    }
+    .fd-meta {
+      justify-content: flex-end;
+    }
+  }
+
+  /* Phones: the question at the study heading step with a looser
+     leading (0.92 let the lines touch at 28px), and the three profiles on
+     one line at 375. */
+  @media (max-width: 47.999rem) {
+    .fd-title {
+      font-size: min(2.1rem, 8.6vw);
+      line-height: 0.97;
+    }
+    .fd-links {
+      gap: 0 1.25rem;
+    }
+    /* Four links (the profiles plus the résumé) don't fit one line at 375,
+       and the fourth would sit alone underneath: two by two instead, on the
+       same two columns as the page links below. */
+    .fd-links:has(> li:nth-child(4)) {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      width: 100%;
+    }
+    .fd-link {
+      font-size: var(--text-body);
+      white-space: nowrap;
+    }
+    .fd-row :global(.fd-copy) {
+      width: 100%;
+      justify-content: center;
+    }
+    .fd-pages {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

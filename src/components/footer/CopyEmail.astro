@@ -1,0 +1,131 @@
+---
+/*
+  Copy-the-address button. Copies on click and swaps its label to "Copied"
+  for two seconds (announced through the live region). If the clipboard API
+  isn't available (old browser, insecure context) it falls back to opening
+  the mail app, so the button always does something.
+
+  `tone`: "fill" is the tan primary button; "line" is an outlined control
+  for places where the tan would be one fill too many.
+*/
+interface Props extends Record<string, unknown> {
+  email: string;
+  tone?: 'fill' | 'line';
+  class?: string;
+}
+const { email, tone = 'fill', class: cls, ...rest } = Astro.props;
+---
+
+{
+  email && (
+    <button
+      type="button"
+      class:list={['pf-copy', `pf-copy--${tone}`, cls]}
+      data-pf-copy={email}
+      aria-label={`Copy email: ${email}`}
+      {...rest}
+    >
+      <span class="pf-copy__mask" aria-hidden="true">
+        <span class="pf-copy__label">Copy email</span>
+        <span class="pf-copy__label pf-copy__label--done">Copied</span>
+      </span>
+      <span class="sr-only" role="status" data-pf-copy-status></span>
+    </button>
+  )
+}
+
+<script>
+  import { registerMotion } from '../../scripts/motion';
+
+  registerMotion(
+    () => {
+      const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-pf-copy]'));
+      const timers = new Map<HTMLButtonElement, number>();
+      const onClick = async (e: Event) => {
+        const btn = e.currentTarget as HTMLButtonElement;
+        const address = btn.dataset.pfCopy ?? '';
+        const status = btn.querySelector<HTMLElement>('[data-pf-copy-status]');
+        try {
+          await navigator.clipboard.writeText(address);
+        } catch {
+          window.location.href = `mailto:${address}`;
+          return;
+        }
+        btn.classList.add('is-copied');
+        if (status) status.textContent = 'Email address copied';
+        window.clearTimeout(timers.get(btn));
+        timers.set(
+          btn,
+          window.setTimeout(() => {
+            btn.classList.remove('is-copied');
+            if (status) status.textContent = '';
+          }, 2000),
+        );
+      };
+      buttons.forEach((b) => b.addEventListener('click', onClick));
+      return () => {
+        buttons.forEach((b) => b.removeEventListener('click', onClick));
+        timers.forEach((t) => window.clearTimeout(t));
+      };
+    },
+    { reduced: true },
+  );
+</script>
+
+<style>
+  .pf-copy {
+    display: inline-flex;
+    align-items: center;
+    min-height: 3rem;
+    padding-inline: 1.5rem;
+    border-radius: var(--radius-control);
+    font-size: var(--text-small);
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      background-color var(--duration-fast) var(--ease-out-soft),
+      border-color var(--duration-fast) var(--ease-out-soft),
+      translate var(--duration-fast) var(--ease-out-soft);
+  }
+  .pf-copy:hover {
+    translate: 0 -2px;
+  }
+  .pf-copy:active {
+    translate: 0 0;
+  }
+  .pf-copy--fill {
+    background: var(--color-accent-fill);
+    color: var(--color-on-accent);
+  }
+  .pf-copy--line {
+    border: 1px solid var(--color-edge-strong);
+    color: var(--color-fg);
+  }
+  .pf-copy--line:hover {
+    border-color: var(--color-fg);
+  }
+
+  /* The two labels share one line; the done label rolls up from below. */
+  .pf-copy__mask {
+    display: grid;
+    overflow: hidden;
+  }
+  .pf-copy__label {
+    grid-area: 1 / 1;
+    transition: translate var(--duration-base) var(--ease-out-soft);
+  }
+  .pf-copy__label--done {
+    translate: 0 110%;
+  }
+  .pf-copy.is-copied .pf-copy__label:not(.pf-copy__label--done) {
+    translate: 0 -110%;
+  }
+  .pf-copy.is-copied .pf-copy__label--done {
+    translate: 0 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pf-copy__label {
+      transition: none;
+    }
+  }
+</style>

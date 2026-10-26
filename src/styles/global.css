@@ -6,158 +6,550 @@
   a duration or an easing curve. Everything downstream references a token —
   if you find yourself typing a hex value in a component, add a token instead.
 
-  The palette is monochrome by design: near-black rock, bone type, and exactly
-  one colour. The hero holds no colour at all, because light through a slot
-  canyon is just light. The blue is reserved for interaction — hover, focus,
-  buttons, selection — so it stays meaningful. If everything is highlighted,
-  nothing is.
+  Direction (PORTFOLIO_BRIEF.md, Decisions log 2026-10-21): dark first, with
+  a brightness slider that sweeps the whole page from "graphite & tan"
+  (#1A1A1A ground, white type) to "sand" (#EDE8DF ground, #1B1A17 type),
+  warm greys all the way. Archivo (wide, heavy, uppercase) for the display
+  steps, Geist for everything else, Geist Mono for short labels. Exactly one
+  accent — tan, from the single source --accent — used for the focus ring,
+  text selection, the active nav bar and the primary button. Nothing else is
+  coloured.
 
-  It is deliberately not the indigo that sits at #5c6cf5 and thereabouts: that
-  hue is the default accent of half the templates on the internet, and looking
-  generated is the one thing this site cannot afford.
+  The colours are not fixed hex values any more: every semantic token is
+  derived from --lum on <html> (0–1) in the "Brightness" block further down,
+  which also explains the mapping. The values in @theme below are static
+  fallbacks only (they are what a utility resolves to if the brightness block
+  were missing).
 
-  Contrast is measured, not guessed. Ratios against rock-900 (#08090B), the
-  default page surface, computed with the WCAG 2.1 formula:
+  Contrast, WCAG 2.1, measured in Chrome by compositing the computed colours
+  (scripts/verify-contrast.mjs and a token probe) on 2026-10-22, after the
+  dark-range type went to pure white (fg #FFFFFF, muted #D5D2CD). Text needs
+  4.5 (3.0 at 24px+ / 18.66px bold); a focus ring or other non-text UI needs
+  3.0 against what it sits on. "surf/raised" = surface and raised surface
+  (placeholders, mats) of that scope.
 
-    bone-100    17.48  AAA   body copy and the display type
-    bone-50     18.90  AAA
-    bone-300     7.58  AAA   muted copy
-    bone-500     4.55  AA    metadata only, never body text
-    flare-500    6.95  AA    interaction — also passes inverted, as a button
-                             background carrying surface-coloured text
-    flare-400    9.64  AAA   interaction, hovered
+  --lum  page surface   fg     muted surf/raised   focus surf/raised
+  0      #1A1A1A        17.40  11.54 / 10.17       7.25 / 6.39   (default)
+  0.12   #222121        16.06  10.65 / 9.24        6.69 / 5.80
+  0.30   #2E2D2B        13.76   9.13 / 7.76        5.94 / 5.05
+  0.47   #3A3836        11.67   7.74 / 6.46        5.91 / 4.93
+  0.50   #D5D0C8        11.34  6.01 / 5.26         4.49 / 3.93   (derived deeper tan)
+  0.53   #D7D1C9        11.48  5.99 / 5.25         4.48 / 3.92
+  0.70   #DFD9D1        12.42  5.82 / 5.12         4.34 / 3.82
+  1      #EDE8DF        14.26  5.54 / 4.91         4.16 / 3.68
+
+  Bands ([data-tone='dark']): #222120 at 0 (fg 16.07, muted 10.66/9.24),
+  lifting to #42403D at 0.47 (fg 10.33, muted 6.85/5.68); #1A1A1A across the
+  whole light range (fg 17.40, muted 11.54/10.17) — the same white type as
+  the dark range. The light range's own sand rows above are unchanged.
+
+  Accent fills: graphite type on #C2A27C 7.25 (dark range and bands); on the
+  deeper light-range fill ~#A98A65 5.39. Sand type on that fill would be
+  ~2.7 — that's why fills always carry graphite.
+
+  The whole page passes AA at every whole-percent step 0–100 (sweep run in
+  2% steps plus the eight positions above). Run it after any token change:
+    node scripts/verify-contrast.mjs --lum
 */
 
-@theme {
-  /* Rock — the surfaces, deepest to lightest */
-  --color-rock-950: #000000;
-  --color-rock-900: #08090b;
-  --color-rock-800: #121419;
-  --color-rock-700: #23262e;
-  --color-rock-600: #3a3f4a;
+/* `static` emits every token on :root even before a utility uses it, so
+   scoped <style> blocks, the motion module and the R3F island can read any
+   token with var() / getComputedStyle without it silently being tree-shaken. */
+@theme static {
+  /* ── Palette ───────────────────────────────────────────────────────────
+     The brief's seven values, by name. New components use these and the
+     semantic tokens below. */
+  --color-ground: #f8f8f6; /* page background */
+  --color-white: #ffffff; /* hero / alternating light sections, media mats */
+  --color-ink: #171717; /* all primary type on light */
+  --color-charcoal: #242424; /* Selected Work + Contact bands */
+  --color-secondary: #666666; /* muted type on light */
+  --color-line: #e3e3e0; /* hairlines and dividers on light */
+  --color-soft: #ededeb; /* soft surface: placeholders, tab track, image mats */
 
-  /* Bone — the type */
-  --color-bone-50: #ffffff;
-  --color-bone-100: #f2f0ea;
-  --color-bone-300: #9aa0ab;
-  --color-bone-500: #727986;
+  /* Dark sections (charcoal bands). Separate tokens rather than inverted
+     light ones, because a value that clears AA on white does not on #242424
+     — see the FAIL list in the header. */
+  --color-on-dark: #f8f8f6;
+  --color-on-dark-muted: #a3a3a0;
+  --color-dark-line: #3d3d3b;
+  --color-dark-raised: #2e2e2d; /* a panel/mat sitting on charcoal */
 
-  /* Flare — the one colour the site carries */
-  --color-flare-400: #77b9ff;
-  --color-flare-500: #3d9bff;
+  /* The accent's single source: tan / camel. The fill,
+     the type on it, the focus tint, ::selection and the active nav bar are
+     all derived from this one value in the
+     brightness rules below, so swapping the hex re-derives all of it.
+     Static fallbacks for the derived tokens: */
+  --accent: #c2a27c;
+  --color-accent-fill: #c2a27c;
+  --color-on-accent: #1b1a17;
 
-  /* Semantic aliases. Components use these; raw ramps are for exceptions.
-     Named `fg` rather than `text` so the generated utility reads `text-fg-muted`
-     instead of `text-text-muted`. */
-  --color-surface: var(--color-rock-900);
-  --color-surface-sunken: var(--color-rock-950);
-  --color-surface-raised: var(--color-rock-800);
-  --color-edge: var(--color-rock-700);
-  --color-edge-strong: var(--color-rock-600);
-  --color-fg: var(--color-bone-100);
-  --color-fg-bright: var(--color-bone-50);
-  --color-fg-muted: var(--color-bone-300);
-  --color-fg-faint: var(--color-bone-500);
+  /* The brightness slider's track: the grounds it actually sweeps, bottom
+     (0) to top (1), with the flip at the middle softened over 8%. Warm greys
+     only, no accent. Values are the computed grounds at 0, 0.25, 0.46, 0.54 and 1. */
+  --gradient-lum: #1a1a1a 0%, #2a2a28 25%, #393735 46%, #d7d2c9 54%, #ede8df 100%;
 
-  /* Accent is bone on purpose — the display type and the light shaft carry no
-     colour. Kept as its own token so the hero can be recoloured later without
-     touching every component. */
-  --color-accent: var(--color-bone-100);
-  --color-accent-bright: var(--color-bone-50);
-  --color-accent-secondary: var(--color-bone-300);
+  /* ── Semantic ──────────────────────────────────────────────────────────
+     What components reference. Light values here; [data-tone='dark'] (below)
+     re-points every one of them, so a component written with `text-fg-muted`
+     and `border-edge` is correct on both grounds without a second class. */
+  --color-fg: var(--color-ink);
+  --color-fg-bright: var(--color-ink);
+  --color-fg-muted: var(--color-secondary);
+  --color-fg-faint: var(--color-secondary);
+  --color-edge: var(--color-line);
+  --color-edge-strong: #d4d3cf; /* hover/active hairline; never text on light */
+  --color-focus: #785b37; /* static fallback; derived per scope below */
+  --color-surface: var(--color-white);
+  --color-surface-sunken: var(--color-ground);
+  --color-surface-raised: var(--color-soft);
 
-  /* Signal — the interaction colour, and only that: hover, focus, active nav,
-     buttons, selection. Separate from the accent so a monochrome palette still
-     has something that reads as clickable, and so a bone focus ring can't
-     vanish into bone text. */
-  --color-signal: var(--color-flare-500);
-  --color-signal-bright: var(--color-flare-400);
+  /* ── Type ──────────────────────────────────────────────────────────────
+     Geist for display and body, Geist Mono for short labels only. Both are
+     self-hosted variable fonts (OFL, src/assets/fonts/GEIST-OFL.txt) wired in
+     astro.config.mjs: Geist → --font-sans, Geist Mono → --font-mono-face. */
+  /* Astro's variables already carry the metric-matched fallback stack; the
+     var() fallback only applies if the <Font> tag is missing from Base. */
+  /* Archivo for the display steps (hero, display, heading, mega): heavy,
+     wide, uppercase. Everything else — body, nav, UI, titles — stays Geist. */
+  --font-display: var(--font-archivo, 'Arial Black', 'Helvetica Neue', Arial, sans-serif);
+  --font-body: var(--font-sans, 'Helvetica Neue', Arial, sans-serif);
+  --font-mono: var(--font-mono-face, ui-monospace, 'SF Mono', Menlo, monospace);
 
-  /* Type. Both faces are self-hosted by Astro's fonts API — see astro.config.mjs.
-     Big Shoulders Display is ultra-condensed and only works very large; anything
-     under about 2rem should use the body face. */
-  --font-display: var(--font-condensed), Impact, sans-serif;
-  --font-body: var(--font-grotesk), 'Helvetica Neue', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, monospace;
+  /* The scale. Each step carries its own line-height, tracking and weight, so
+     `text-hero` is the whole treatment — no extra leading-/tracking-/font-
+     classes needed. Fluid steps are clamp()ed against the viewport; the
+     values at the three spec widths are noted as 390 / 834 / 1440.
 
-  --text-2xs: 0.6875rem;
-  --text-2xs--line-height: 1.4;
-  --text-xs: 0.78125rem;
-  --text-xs--line-height: 1.5;
-  --text-sm: 0.875rem;
-  --text-sm--line-height: 1.6;
-  --text-base: 1rem;
-  --text-base--line-height: 1.65;
-  --text-lg: 1.1875rem;
-  --text-lg--line-height: 1.6;
-  --text-xl: 1.4375rem;
-  --text-xl--line-height: 1.45;
-  --text-2xl: 1.8125rem;
-  --text-2xl--line-height: 1.3;
-  --text-3xl: 2.375rem;
-  --text-3xl--line-height: 1.2;
-  --text-4xl: 3.125rem;
-  --text-4xl--line-height: 1.1;
-  --text-5xl: 4.1875rem;
-  --text-5xl--line-height: 1.04;
-  --text-6xl: 5.625rem;
-  --text-6xl--line-height: 1;
+     Use these eight. The old t-shirt sizes (text-xs … text-6xl) are gone;
+     Tailwind still knows its own defaults by those names, so don't use them
+     — they would render at Tailwind's sizes, outside this scale. */
 
-  /* Tracking for the oversized condensed display type. */
-  --tracking-display: -0.01em;
+  /* Mono labels: section kickers, project numbers, stack lists, metadata.
+     Always uppercase, always short (one line). */
+  --text-label: 0.75rem; /* 12px */
+  --text-label--line-height: 1.4;
+  --text-label--letter-spacing: 0.06em;
+  --text-label--font-weight: 500;
 
+  /* UI text: nav, buttons, captions, timeline dates in sans. */
+  --text-small: 0.9375rem; /* 15px */
+  --text-small--line-height: 1.5;
+
+  /* Running copy. 17 / 18 / 19px. */
+  --text-body: clamp(1.0625rem, 0.98rem + 0.3vw, 1.1875rem);
+  --text-body--line-height: 1.6;
+
+  /* Hero supporting line, intro paragraphs, panel lead-ins. 20 / 22 / 26px. */
+  --text-lead: clamp(1.25rem, 1.05rem + 0.75vw, 1.625rem);
+  --text-lead--line-height: 1.4;
+  --text-lead--letter-spacing: -0.01em;
+
+  /* Project names, tab panel headings, timeline roles. 28 / 34 / 44px. */
+  --text-title: clamp(1.75rem, 1.2rem + 1.8vw, 2.75rem);
+  --text-title--line-height: 1.1;
+  --text-title--letter-spacing: -0.025em;
+  --text-title--font-weight: 600;
+
+  /* Section headings (h2). 36 / 36 / 54px. Archivo wide caps run ~7.7em for
+     "EXPERIENCE", which has to fit a 4-of-12 column (293px at 1024, 432 at
+     1440), so this step is smaller than it was in Geist and still reads
+     larger. */
+  --text-heading: clamp(2.25rem, 4.2vw - 0.4rem, 3.4rem);
+  --text-heading--line-height: 0.9;
+  --text-heading--letter-spacing: -0.015em;
+  --text-heading--font-weight: 800;
+
+  /* Contact headline. 41 / 72 / 104px. The floor keeps the longest word on
+     one line at 390. */
+  --text-display: clamp(2.5rem, 0.6rem + 7.7vw, 6.5rem);
+  --text-display--line-height: 0.88;
+  --text-display--letter-spacing: -0.02em;
+  --text-display--font-weight: 850;
+
+  /* The H1 only. 52 / 104 / 100px (68 at 1024). Archivo at 900 / 115% width is far wider than
+     Geist was: "BRENDON." is the longest line and it has to fit the hero's
+     6-of-12 column at 1440 and the full column at 834 and 390. */
+  --text-hero: clamp(2.75rem, calc((100vw - 2 * var(--grid-margin)) / 6.8), 6.5rem);
+  --text-hero--line-height: 0.96;
+  --text-hero--letter-spacing: -0.02em;
+  --text-hero--font-weight: 900;
+
+  /* Mega: a full-screen hero line for the next phase. Up to 12rem. Not used
+     yet. 72 / 108 / 174px, 192 from ~1600. */
+  --text-mega: clamp(4.5rem, 1rem + 11vw, 12rem);
+  --text-mega--line-height: 0.9;
+  --text-mega--letter-spacing: -0.025em;
+  --text-mega--font-weight: 900;
+
+  /* Width and case for every display step, as tokens so the treatment can be
+     tuned in one place. Archivo's wdth axis runs 62–125%. */
+  --display-stretch: 115%;
+  --display-case: uppercase;
+
+  /* Tracking, for the rare case a step's built-in value needs overriding. */
+  --tracking-display: -0.04em;
   --tracking-tightest: -0.04em;
   --tracking-tighter: -0.02em;
+  --tracking-label: 0.06em;
   --tracking-wide: 0.04em;
   --tracking-widest: 0.16em;
 
-  /* Spacing — 4px base, plus named rhythm for vertical section spacing */
+  /* ── Spacing ───────────────────────────────────────────────────────────
+     4px base (Tailwind's numeric scale: p-4 = 16px) for anything inside a
+     component. The named steps below are the page rhythm. */
   --spacing: 0.25rem;
-  --spacing-section: 7.5rem;
-  --spacing-section-sm: 4.5rem;
-  --spacing-gutter: 1.5rem;
 
-  --radius-card: 0.375rem;
+  /* Vertical padding of a full section. 80 / 107 / 155px. Generous on
+     purpose — Adham-level air is most of what reads as "designed". */
+  --spacing-section: clamp(5rem, 2.5rem + 8vw, 10rem);
+  /* Tighter sections (Experience, About preview). 56 / 69 / 96px. */
+  --spacing-section-sm: clamp(3.5rem, 2rem + 4.5vw, 6rem);
+  /* Section header → section content. 40 / 53 / 71px. */
+  --spacing-block: clamp(2.5rem, 1.75rem + 3vw, 4.5rem);
+  /* Between related elements in a group (label → heading → paragraph →
+     actions). 24 / 28 / 32px. */
+  --spacing-stack: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  /* Fixed nav bar height. 64 / 68 / 72px. */
+  --spacing-nav: clamp(4rem, 3.6rem + 1vw, 4.5rem);
 
-  /* Motion. The motion module reads these off the document element so JS
-     timings and CSS timings can never drift apart. */
+  /* ── Shape ─────────────────────────────────────────────────────────────
+     Small radii only. Nothing on this site is a pill or a bubble. */
+  --radius-control: 0.375rem; /* buttons, tab buttons */
+  --radius-media: 0.5rem; /* screenshots, photos */
+  --radius-frame: 0.75rem; /* the browser-window frame in the hero */
+
+  /* The only shadow on the site: under the hero browser frame, so it reads
+     as an object rather than a picture. Neutral, low, no colour, no glow. */
+  --shadow-frame:
+    0 1px 2px rgb(23 23 23 / 0.06), 0 12px 24px -12px rgb(23 23 23 / 0.18),
+    0 40px 80px -40px rgb(23 23 23 / 0.28);
+
+  /* Hero viewer stage. The poster now and the R3F canvas in Phase 4 occupy
+     exactly this box, so swapping one for the other cannot shift layout. */
+  --aspect-viewer: 5 / 4;
+  --aspect-viewer-mobile: 4 / 3;
+  /* Project screenshots in Selected Work. The Rally captures are ~2.07:1;
+     16:10 crops them from the top without losing the header. */
+  --aspect-shot: 16 / 10;
+
+  /* ── Motion ────────────────────────────────────────────────────────────
+     The motion module reads these off the document element so JS timings
+     and CSS timings can never drift apart. Unchanged from the previous
+     system. */
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Overshoots slightly and settles. Everything that should feel like it
+     *lands* rather than drifts uses this — reveals, counters, hover states. */
+  --ease-snap: cubic-bezier(0.16, 1.32, 0.36, 1);
   --ease-out-strata: cubic-bezier(0.16, 0.84, 0.24, 1);
   --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
 
-  --duration-fast: 0.24s;
+  --duration-fast: 0.18s;
+  --duration-snap: 0.42s;
   --duration-base: 0.55s;
   --duration-slow: 0.9s;
   --duration-reveal: 1.1s;
+  /* One cycle of the hero scroll cue's idle loop: just under a second of movement,
+     then a rest. */
+  --duration-cue: 1.8s;
+  /* Brightness: keyboard/step changes ease over --duration-lum; crossing the
+     dark/light flip crossfades over --duration-lum-flip. Dragging has none. */
+  --duration-lum: 0.3s;
+  --duration-lum-flip: 0.24s;
 
-  /* Layout */
-  --container-measure: 42rem;
-  --container-content: 72rem;
-  --container-wide: 90rem;
+  /* ── Layout ────────────────────────────────────────────────────────────
+     Full width, stretched from one end to the other. There is no outer content cap any more: every
+     section's content spans the viewport minus --grid-margin on each side,
+     and the 12-column grid stretches with it. The one container is the
+     `container-bleed` utility below — use it for every section wrapper.
+
+     --container-site is kept only as an uncapped alias (`none`) so a stray
+     `max-w-site` can't bring the old 1360px cap back. Don't use it in new
+     code.
+
+     Readability guard: display type may run edge to edge; running copy may
+     not. Paragraphs keep `max-w-measure` (below) and sit on a column start
+     inside the stretched grid. Code keeps --measure-code. */
+  --container-site: none;
+  /* Readable measure for running copy — ~65–70 characters at text-body. */
+  --container-measure: 40rem;
+  /* Longest line a code block may run to, however wide its column gets. */
+  --measure-code: 80ch;
+}
+
+/*
+  The grid. Not in @theme because the values change per breakpoint and no
+  utility is generated from them — components read them with var().
+
+    < 768px    4 columns, 16px gutter, 20px margin
+    768–1023   6 columns, 20px gutter, 40px margin
+    ≥ 1024     12 columns, 24px gutter, margin 48px → 80px: 48 up to
+               1440, then 3.333vw (64 at 1920), capped at 80 from 2400
+
+  The grid is as wide as the viewport minus two margins — no max-width.
+
+  Breakpoints match Tailwind's md (48rem) and lg (64rem), so `md:` and `lg:`
+  prefixes line up with the column count changes.
+*/
+:root {
+  --grid-columns: 4;
+  --grid-gutter: 1rem;
+  --grid-margin: 1.25rem;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --grid-columns: 6;
+    --grid-gutter: 1.25rem;
+    --grid-margin: 2.5rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  :root {
+    /* The hero's column halves at 1024 (452px) and grows to 660 at 1440;
+       "BRENDON." is ~6.43em wide, so the step tracks that column. 68 / 100. */
+    --text-hero: clamp(4.25rem, 7.7vw - 0.7rem, 6.25rem);
+    --grid-columns: 12;
+    --grid-gutter: 1.5rem;
+    --grid-margin: clamp(3rem, 3.333vw, 5rem);
+  }
+}
+
+/*
+  The site container. Full width: the viewport minus --grid-margin on each
+  side, no max-width, no centring needed. Every section wrapper on every
+  page uses this and nothing else; put the grid (or anything) inside it.
+*/
+@utility container-bleed {
+  width: 100%;
+  padding-inline: var(--grid-margin);
+}
+
+/*
+  Brightness. One number drives the whole palette: --lum on <html>, 0 to 1.
+  The ThemeSlider writes it; the head script in Base.astro restores it before
+  first paint. Palette — "graphite & tan" at the dark
+  end, "sand" at the light end, warm greys between. Grounds are never pure
+  black or pure white; type on the graphite grounds is pure white:
+
+    0 (default) ground #1A1A1A graphite, type #FFFFFF, muted #D5D2CD,
+                bands a step lighter (#222120)
+    1           ground #EDE8DF sand, type #1B1A17, muted ~#5F5B54, bands
+                #1A1A1A graphite with the same white type
+
+  The default is the dark end and does not follow prefers-color-scheme.
+
+  A straight blend from graphite to sand would walk the ground through mid
+  grey, where neither light nor dark type clears 4.5:1. So the slider is two
+  ranges that each stay readable, with a flip between them:
+
+    0 → 0.495   dark range. Ground L 0.218 → 0.348 (#1A1A1A → #3a3835),
+                white type. --_d is progress through it.
+    0.495–0.5   the flip. --_s steps 0 → 1 here and is itself transitioned
+                (240ms), so crossing the middle crossfades instead of
+                snapping, and no resting value is ever mid grey.
+    0.505 → 1   light range. Surface L 0.86 → 0.932 (deep sand → #EDE8DF),
+                dark type. --_l is progress.
+
+  Every colour below is oklch() built from those numbers, hue 80-85 (warm),
+  so dragging re-themes the page with no script per element. The slider
+  steps are whole percent, so 0.49 is the last dark stop and 0.50 the first
+  light one.
+
+  Each scope (the root, and every [data-tone='dark'] band) supplies its
+  inputs — surface, sunken and raised lightness, chroma, and --_dark (1 =
+  light type) — and the shared rule turns them into the --color-* tokens.
+  The shared rule is declared on every scope, not just :root, because a
+  custom property that is itself a var() resolves where it is declared;
+  declaring it once on :root would freeze the root's values into the bands.
+
+  The accent's focus tint, hairlines and (on light grounds) muted type are
+  offsets from the raised surface (the lightest/darkest thing type sits on
+  in that scope), clamped, so they keep their margin as the ground moves.
+  Muted type on dark grounds is a fixed near-white instead (L 0.865,
+  #D5D2CD): one clear step under white that still clears 5.5 on the
+  lightest band raised surface. Measured numbers
+  are in the header comment at the top of this file.
+
+  Tan is the accent and only the accent: focus ring, selection, active nav
+  bar, primary button. Never headings, body text, panels or borders.
+*/
+@property --lum {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+/* Registered so it can be transitioned: this is the crossfade at the flip. */
+@property --_s {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+@layer base {
+  :root {
+    --lum: 0;
+    --_d: clamp(0, calc(var(--lum) / 0.495), 1);
+    --_l: clamp(0, calc((var(--lum) - 0.505) / 0.495), 1);
+    --_s: clamp(0, calc((var(--lum) - 0.495) * 10000), 1);
+
+    /* Dark-range ground, shared by the root and the bands. */
+    --_gd: calc(0.218 + 0.13 * var(--_d));
+    /* Light-range surface (the sections that were white). */
+    --_wl: calc(0.86 + 0.072 * var(--_l));
+
+    --_dark: calc(1 - var(--_s));
+    --_ls: calc(var(--_gd) * (1 - var(--_s)) + var(--_wl) * var(--_s));
+    --_lk: calc((var(--_gd) + 0.014) * (1 - var(--_s)) + (var(--_wl) - 0.02) * var(--_s));
+    --_lr: calc((var(--_gd) + 0.045) * (1 - var(--_s)) + (var(--_wl) - 0.04) * var(--_s));
+    /* Graphite is neutral at 0 and warms as it lifts; sand is warm. */
+    --_c: calc(0.005 * var(--_d) * (1 - var(--_s)) + 0.013 * var(--_s));
+
+    /* Keyboard and step changes ease; dragging turns this off (.lum-scrub)
+       so the page tracks the thumb with no lag. --_s always eases. */
+    transition:
+      --lum var(--duration-lum) var(--ease-out-soft),
+      --_s var(--duration-lum-flip) var(--ease-in-out-soft);
+  }
+
+  html.lum-scrub {
+    transition: --_s var(--duration-lum-flip) var(--ease-in-out-soft);
+  }
+
+  html.lum-instant {
+    transition: none;
+  }
+
+  /*
+    The contrast bands (Selected Work, Contact, footer, and the nav while one
+    is under it). Always light type. In the dark range a step lighter than
+    the ground (#222120 at 0); in the light range graphite #1A1A1A.
+  */
+  [data-tone='dark'] {
+    --_dark: 1;
+    --_ls: var(--_lb);
+    --_lk: calc(var(--_ls) - 0.02);
+    --_lr: calc(var(--_ls) + 0.045);
+    --_c: calc(0.0025 + 0.003 * var(--_d) * (1 - var(--_s)) - 0.0025 * var(--_s));
+    background-color: var(--color-surface);
+    color: var(--color-fg);
+  }
+
+  :root,
+  [data-tone] {
+    /* Band lightness, the same in every scope. */
+    --_lb: calc((var(--_gd) + 0.03) * (1 - var(--_s)) + 0.218 * var(--_s));
+
+    --color-surface: oklch(var(--_ls) var(--_c) 80);
+    --color-surface-sunken: oklch(var(--_lk) var(--_c) 80);
+    --color-surface-raised: oklch(var(--_lr) var(--_c) 80);
+
+    /* #1B1A17 on light grounds, pure white on dark. The chroma falls to 0 with --_dark so the
+       dark end is #FFFFFF, not a tinted near-white. */
+    --color-fg: oklch(calc(0.218 + 0.782 * var(--_dark)) calc(0.006 * (1 - var(--_dark))) 88);
+    --color-fg-bright: var(--color-fg);
+    --color-fg-muted: oklch(
+      calc(
+        clamp(0.36, calc(var(--_lr) - 0.42), 0.49) * (1 - var(--_dark)) +
+          0.865 * var(--_dark)
+      )
+      calc(0.011 - 0.003 * var(--_dark)) 82
+    );
+    --color-fg-faint: var(--color-fg-muted);
+
+    --color-edge: oklch(calc(var(--_ls) + 0.085 * var(--_dark) - 0.085 * (1 - var(--_dark))) var(--_c) 80);
+    --color-edge-strong: oklch(calc(var(--_ls) + 0.17 * var(--_dark) - 0.14 * (1 - var(--_dark))) var(--_c) 80);
+
+    /*
+      The accent, all derived from the one hex in --accent.
+        fill   what selection, the primary button and other filled shapes
+               paint: the tan itself on dark grounds (#C2A27C), a deeper tan
+               on light ones (~#A88B64).
+        on-accent  type on a fill: graphite. Dark type on tan reads better
+               than white, and sand-on-tan would fail AA.
+        focus  outlines and the active nav bar: the tan where it clears 3:1
+               on the raised surface, otherwise pushed lighter (dark grounds)
+               or darker (light grounds) along the same hue.
+      --_dark picks between the light and dark variants.
+    */
+    --_fill-on-light: oklch(from var(--accent) calc(l - 0.078) c h);
+    --color-accent-fill: color-mix(in oklab, var(--_fill-on-light), var(--accent) calc(var(--_dark) * 100%));
+    --color-on-accent: oklch(0.218 0.004 88);
+    --_focus-on-light: oklch(from var(--accent) min(calc(l - 0.078), clamp(0.4, calc(var(--_lr) - 0.35), 0.6)) c h);
+    --_focus-on-dark: oklch(from var(--accent) max(l, clamp(0.6, calc(var(--_lr) + 0.4), 0.88)) c h);
+    --color-focus: color-mix(in oklab, var(--_focus-on-light), var(--_focus-on-dark) calc(var(--_dark) * 100%));
+
+    /* The brief's palette names now follow the scope they're used in, so
+       components written against the light palette (bg-white, bg-soft,
+       bg-ground) re-theme without edits. */
+    --color-white: var(--color-surface);
+    --color-ground: var(--color-surface-sunken);
+    --color-soft: var(--color-surface-raised);
+    --color-ink: var(--color-fg);
+    --color-secondary: var(--color-fg-muted);
+    --color-line: var(--color-edge);
+
+    /* Band values for code that names them directly (bg-charcoal,
+       bg-dark-raised, the on-dark tokens). */
+    --color-charcoal: oklch(var(--_lb) 0.003 80);
+    --color-dark-raised: oklch(calc(var(--_lb) + 0.045) 0.003 80);
+    --color-dark-line: oklch(calc(var(--_lb) + 0.085) 0.003 80);
+    --color-on-dark: oklch(1 0 0);
+    --color-on-dark-muted: oklch(0.865 0.008 82);
+  }
+}
+
+@layer components {
+  /* Animated-in elements start hidden ONLY when motion is allowed and JS is
+     running. Without both guards, a JS failure or a reduced-motion user is
+     left staring at invisible content. The head script in Base.astro adds
+     .motion-ok before first paint and arms a timeout that removes it again if
+     the motion module never boots. */
+  html.motion-ok [data-reveal]:not(.is-revealed) {
+    opacity: 0;
+  }
+
+  html.motion-ok [data-mask]:not(.is-revealed) {
+    clip-path: inset(100% 0% 0% 0%);
+  }
+
 }
 
 @layer base {
   html {
     /* Lenis drives scrolling. Native smooth scroll would fight it. */
     scroll-behavior: auto;
-    background-color: var(--color-surface-sunken);
+    background-color: var(--color-surface);
     color-scheme: dark;
+  }
+
+  /* Set alongside --lum by the head script and the slider, so scrollbars and
+     native controls match the ground. */
+  html[data-scheme='light'] {
+    color-scheme: light;
   }
 
   body {
     background-color: var(--color-surface);
     color: var(--color-fg);
     font-family: var(--font-body);
-    font-size: var(--text-base);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2 {
+    font-family: var(--font-display);
   }
 
   h1,
   h2,
   h3,
   h4 {
-    font-family: var(--font-display);
     color: var(--color-fg-bright);
     letter-spacing: var(--tracking-tighter);
     text-wrap: balance;
@@ -167,28 +559,40 @@
     text-wrap: pretty;
   }
 
-  /* Focus is an interaction state, so it uses the signal colour — on a
-     monochrome palette a bone focus ring would vanish into the text. */
+  /* One of the accent's three jobs. --color-focus is azure on light and the
+     lit azure inside [data-tone='dark'], so the ring clears 3:1 on every
+     ground (4.98 on soft is the lowest). */
   :focus-visible {
-    outline: 2px solid var(--color-signal);
+    outline: 2px solid var(--color-focus);
     outline-offset: 3px;
     border-radius: 2px;
   }
 
+  /* The accent's second job. Selection paints its own background, so one
+     rule works on every ground: white on azure is 5.84. */
   ::selection {
-    background-color: var(--color-signal);
-    color: var(--color-surface);
+    background-color: var(--color-accent-fill);
+    color: var(--color-on-accent);
   }
 }
 
 @layer components {
-  /* Elements that animate in start hidden ONLY when motion is allowed and JS
-     is running. Without both guards, a JS failure or a reduced-motion user
-     would be left staring at invisible content. The head script in Base.astro
-     adds .motion-ok before first paint and arms a timeout that removes it
-     again if the motion module never boots. */
-  html.motion-ok [data-reveal]:not(.is-revealed) {
-    opacity: 0;
+  /*
+    The display treatment: Archivo, heavy, wide, uppercase. Attached to the
+    display type steps themselves (including responsive variants such as
+    md:text-heading), so a component gets it by using the step — no extra
+    class. .type-display applies it to anything else. Plain text-transform,
+    so SplitText's word/line masks still split real words. In the components
+    layer, so a utility on the same element (normal-case, font-body) wins.
+  */
+  .type-display,
+  [class*='text-hero'],
+  [class*='text-mega'],
+  [class*='text-display'],
+  [class*='text-heading'] {
+    font-family: var(--font-display);
+    font-stretch: var(--display-stretch);
+    text-transform: var(--display-case);
   }
 
   /* Hover and focus transitions, tied to the motion tokens so component code
@@ -197,74 +601,6 @@
     transition-property: color, background-color, border-color, opacity, transform;
     transition-duration: var(--duration-fast);
     transition-timing-function: var(--ease-out-soft);
-  }
-
-  /*
-    Long-form case study prose.
-
-    Child selectors are wrapped in :where() so they carry no specificity. Study
-    components render inside this container, and without that a rule like
-    `.prose-study ul` would beat a component's own `list-none` class and put
-    bullets on the stack pills.
-  */
-  .prose-study :where(h2) {
-    margin-top: 4rem;
-    margin-bottom: 1.25rem;
-    font-family: var(--font-display);
-    font-size: var(--text-3xl);
-    text-transform: uppercase;
-    letter-spacing: var(--tracking-display);
-  }
-
-  .prose-study :where(h3) {
-    margin-top: 2.5rem;
-    margin-bottom: 0.75rem;
-    font-family: var(--font-body);
-    font-size: var(--text-xl);
-    color: var(--color-fg-bright);
-  }
-
-  .prose-study :where(p) {
-    margin-block: 1.25rem;
-    color: var(--color-fg-muted);
-  }
-
-  .prose-study :where(ul) {
-    margin-block: 1.25rem;
-    padding-left: 1.25rem;
-    list-style: disc;
-    color: var(--color-fg-muted);
-  }
-
-  .prose-study :where(li) {
-    margin-block: 0.5rem;
-  }
-
-  .prose-study :where(a) {
-    color: var(--color-signal);
-  }
-
-  .prose-study :where(a):hover {
-    color: var(--color-signal-bright);
-  }
-
-  .prose-study :where(pre) {
-    margin-block: 2rem;
-    overflow-x: auto;
-    border: 1px solid var(--color-edge);
-    border-radius: var(--radius-card);
-    padding: 1.25rem;
-    font-size: var(--text-sm);
-  }
-
-  .prose-study :where(code) {
-    font-family: var(--font-mono);
-  }
-
-  @media (min-width: 768px) {
-    .prose-study :where(h2) {
-      font-size: var(--text-4xl);
-    }
   }
 
   /* Skip link — visually out of the way until focused. */

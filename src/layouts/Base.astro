@@ -2,26 +2,73 @@
 import { ClientRouter } from 'astro:transitions';
 import { Font } from 'astro:assets';
 import Nav from '../components/Nav.astro';
-import Footer from '../components/Footer.astro';
+import SiteFooter from '../components/footer/SiteFooter.astro';
+import ThemeSlider from '../components/ThemeSlider.astro';
 import { SITE } from '../config';
+
+const OG_DEFAULT = '/og/default.png';
 import '../styles/global.css';
+/* The CSS half of the motion system: link reveals, the header, the home
+   choreography. Every page uses some of it. */
+import '../styles/motion.css';
+/* Phones and tablets: touch basics, tap targets, reading sizes, the case
+   study reading pill. Every rule is behind a touch or narrow query. */
+import '../styles/mobile.css';
 
 interface Props {
   title?: string;
   description?: string;
-  /** Page-specific social image. Per-study OG images land in Phase 6. */
+  /** Page-specific social image, from public/og/ (scripts/og-images.mjs).
+      Everything else shares the site card, /og/default.png. */
   ogImage?: string;
+  /** Alt text for the share image. */
+  ogImageAlt?: string;
+  /** Keep the page out of search results. */
+  noindex?: boolean;
+  /** false on /contact/: the footer keeps its bar and name but drops the
+      contact question and row the page already shows. */
+  footerContact?: boolean;
+  /** Preload Geist Mono. Only the homepage paints mono above the fold (the
+      hero's code field); everywhere else it's the footer's code echo and
+      code panels far down the page, so it loads when they need it. */
+  preloadMono?: boolean;
 }
 
-const { title, description = SITE.description, ogImage } = Astro.props;
+const {
+  title,
+  description: rawDescription = SITE.description,
+  ogImage = OG_DEFAULT,
+  ogImageAlt,
+  footerContact = true,
+  preloadMono = false,
+} = Astro.props;
+const noindex = Astro.props.noindex;
 
 const pageTitle = title ? `${title} — ${SITE.name}` : SITE.title;
+/* Search results cut a description at about 160 characters. A few pages
+   pass a longer one (their intro line), so it is trimmed here at a word
+   boundary rather than mid-word by the search engine. */
+const DESCRIPTION_MAX = 160;
+const clampDescription = (text: string): string => {
+  const flat = text.replace(/\s+/g, ' ').trim();
+  if (flat.length <= DESCRIPTION_MAX) return flat;
+  const cut = flat.slice(0, DESCRIPTION_MAX - 1);
+  return `${cut.slice(0, cut.lastIndexOf(' ')).replace(/[\s,;:—–-]+$/, '')}…`;
+};
+const description = clampDescription(rawDescription);
 const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url);
-const ogUrl = ogImage ? new URL(ogImage, Astro.site ?? SITE.url) : undefined;
+const ogUrl = new URL(ogImage, Astro.site ?? SITE.url);
+/* The generated cards are all 1200 × 630; size is only stated for those. */
+const ogSized = ogImage.startsWith('/og/');
+const ogAlt =
+  ogImageAlt ??
+  (ogImage === OG_DEFAULT
+    ? 'Brendon Jensen, web developer, designer and marketer. brendonjensen.dev'
+    : `${title ?? SITE.name}, by Brendon Jensen. brendonjensen.dev`);
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-scheme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -29,39 +76,116 @@ const ogUrl = ogImage ? new URL(ogImage, Astro.site ?? SITE.url) : undefined;
 
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical.href} />
+    {noindex && <meta name="robots" content="noindex" />}
+    {/* A noindex page (the 404) has no canonical: it isn't a page to index. */}
+    {!noindex && <link rel="canonical" href={canonical.href} />}
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical.href} />
-    <meta name="twitter:card" content={ogUrl ? 'summary_large_image' : 'summary'} />
-    {ogUrl && <meta property="og:image" content={ogUrl.href} />}
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:image" content={ogUrl.href} />
+    {ogSized && <meta property="og:image:width" content="1200" />}
+    {ogSized && <meta property="og:image:height" content="630" />}
+    <meta property="og:image:alt" content={ogAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogUrl.href} />
+    <meta name="twitter:image:alt" content={ogAlt} />
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     {
       /* Astro emits the @font-face rules, the metric-matched fallbacks and the
-         preload links. Both faces are preloaded because both paint above the
-         fold on every page. */
+         preload links. Geist and Archivo (the display face) paint above the
+         fold on every page, so they're always preloaded; Geist Mono only on
+         the homepage (preloadMono). The fonts are subsets of the full files
+         in src/assets/fonts/source (scripts/subset-fonts.py). */
     }
-    <Font cssVariable="--font-condensed" preload />
-    <Font cssVariable="--font-grotesk" preload />
+    <Font cssVariable="--font-sans" preload />
+    <Font cssVariable="--font-mono-face" preload={preloadMono} />
+    <Font cssVariable="--font-archivo" preload />
 
+    {/* Case studies with a Quick overview / Full case study switch keep
+        both views on one URL (?view=full). Back/Forward between them must
+        not reach Astro's router, which would reload the page; this listener
+        is registered before the router's so it can stop it, and hands the
+        move to viewSwitch (study-motion.ts). Once per document. */}
+    <script is:inline>
+      if (!window.__csPopGuard) {
+        window.__csPopGuard = true;
+        window.addEventListener('popstate', function (e) {
+          var s = window.__csView;
+          if (s && s.path === location.pathname && document.querySelector('[data-vw]')) {
+            e.stopImmediatePropagation();
+            document.dispatchEvent(new Event('cs:view-pop'));
+          }
+        });
+      }
+    </script>
     <ClientRouter />
+
 
     <script is:inline>
       /*
-        Runs before first paint. Two jobs:
+        Page brightness, before first paint. --lum drives every colour token
+        (global.css); ThemeSlider writes it and saves it. Default is the dark
+        value whatever the OS prefers — dark first, on purpose.
 
-        1. Add .motion-ok so elements that animate in can start hidden without
-           a flash of content. Reduced-motion users never get the class, so
-           their content is visible from the first frame.
+        ClientRouter copies the new page's <html> attributes over on every
+        navigation, which drops the inline style, so it is put back on
+        astro:after-swap — before that page paints, with transitions off so
+        it doesn't ease in from the default. Bound once per session.
+      */
+      (function () {
+        var root = document.documentElement;
+        var read = function () {
+          if (typeof window.__bjLum === 'number') return window.__bjLum;
+          try {
+            var n = parseFloat(localStorage.getItem('bj:lum'));
+            if (n >= 0 && n <= 1) return n;
+          } catch (e) {
+            /* Storage blocked. */
+          }
+          return 0;
+        };
+        var apply = function () {
+          var v = read();
+          window.__bjLum = v;
+          root.style.setProperty('--lum', String(v));
+          root.dataset.scheme = v >= 0.5 ? 'light' : 'dark';
+        };
+        apply();
+        if (window.__bjLumBound) return;
+        window.__bjLumBound = true;
+        document.addEventListener('astro:after-swap', function () {
+          root.classList.add('lum-instant');
+          apply();
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              root.classList.remove('lum-instant');
+            });
+          });
+        });
+      })();
+    </script>
 
-        2. Arm a failsafe. If the motion module fails to load — a bad deploy, a
-           blocked bundle, an error in a dependency — nothing would ever remove
-           the hidden state and the page would render blank. The timeout
-           guarantees content appears regardless. initMotion() disarms it.
+    <script is:inline>
+      /* Marks the page as scripted before first paint, so components with a
+         no-JS fallback (the Expertise tabs) can render the scripted layout
+         straight away instead of swapping after load. */
+      document.documentElement.classList.add('js');
+    </script>
+
+    <script is:inline>
+      /*
+        Runs before first paint. Adds .motion-ok so elements that animate in can
+        start hidden without a flash of content, and arms a failsafe: if the
+        motion module never loads, nothing would remove the hidden state and the
+        page would render blank. initMotion() disarms it.
       */
       (function () {
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -71,25 +195,39 @@ const ogUrl = ogImage ? new URL(ogImage, Astro.site ?? SITE.url) : undefined;
         }, 3000);
       })();
     </script>
+
   </head>
 
-  <body class="min-h-screen">
-    <a href="#main" class="skip-link bg-surface-raised px-4 py-3 text-sm text-fg-bright">
+  {/* A column at least a screen tall with main taking the slack, so on a
+      short page (the 404) the footer still sits at the bottom (BUG-020). */}
+  <body id="top" class="flex min-h-dvh flex-col">
+    <a href="#main" class="skip-link bg-surface-raised px-4 py-3 text-small text-fg-bright">
       Skip to content
     </a>
 
     <Nav />
+    <ThemeSlider variant="rail" />
 
-    <main id="main">
+    <main id="main" class="grow">
       <slot />
     </main>
 
-    <Footer />
+    <SiteFooter contact={footerContact} />
 
     <script>
-      import { initMotion } from '../scripts/motion';
+      import { initMotion, registerMotion } from '../scripts/motion';
+      import { fitHeadings } from '../scripts/fit-headings';
 
       initMotion();
+      /* Phones: section headings sized to the screen (not motion, so it
+         also runs with reduced motion). */
+      registerMotion(fitHeadings, { reduced: true });
+
+      /* ClientRouter replaces the root attributes on navigation. Bound once,
+         at module scope (this script runs once per session). */
+      document.addEventListener('astro:after-swap', () =>
+        document.documentElement.classList.add('js'),
+      );
     </script>
   </body>
 </html>

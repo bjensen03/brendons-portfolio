@@ -1,0 +1,433 @@
+/*
+  Motion styles — the CSS half of src/scripts/motion.ts and home-motion.ts.
+
+  Rules for this file: no colours except currentColor and existing tokens
+  (the page is re-themed live), and nothing here may hide content unless
+  html.motion-ok is set — that class needs JavaScript running and motion
+  allowed, and the head script removes it if the motion module never boots.
+*/
+
+/* Headings split into masked words/lines start hidden until the split has
+   happened and the words are parked below their masks. */
+html.motion-ok [data-split]:not(h1):not(.is-revealed) {
+  opacity: 0;
+}
+
+/* The largest text on the first screen — the page title (h1) and the home
+   intro ([data-settle]) — is never hidden: the browser times the page's load
+   by when it first paints at any opacity (LCP). It paints at full opacity,
+   a little low, and the script settles it up into place from this offset
+   (settleOffset() in motion.ts reads it). Transform only, so nothing moves
+   in the layout. */
+html.motion-ok h1[data-split]:not(.is-revealed) {
+  translate: 0 0.35em;
+}
+
+html.motion-ok [data-settle]:not(.is-revealed) {
+  translate: 0 14px;
+}
+
+@media (max-width: 47.999rem) {
+  html.motion-ok [data-settle]:not(.is-revealed) {
+    translate: 0 8px;
+  }
+}
+
+/* SplitText's masks clip at the line box. Display type is set tight, so give
+   descenders and the apostrophe's top some room without moving anything. */
+.split-word-mask,
+.split-line-mask {
+  padding-block: 0.1em;
+  margin-block: -0.1em;
+}
+
+/* WebKit puts the baseline of an inline-block with overflow: clip (SplitText
+   sets it inline on the masks) at its bottom edge, as it does for hidden, so
+   every masked word sat high on the baseline and each line of a split
+   heading grew about 0.13em until the split reverted. The mask is exactly
+   one line tall, so pinning it to the top of the line box puts the word
+   where the plain text sits in every engine. */
+.split-word-mask {
+  vertical-align: top;
+}
+
+/* Line masks are blocks, and stacked blocks collapse their margins: the
+   -0.1em under one line and the -0.1em over the next merge into a single
+   -0.1em, so each line added 0.1em while split and the block shrank when the
+   split reverted (the Next project name moved 12px at 390). Asking for
+   -0.2em between lines collapses to -0.2em, which cancels both paddings. */
+.split-line-mask + .split-line-mask {
+  margin-top: -0.2em;
+}
+
+/*
+  Underline reveal: draws in left → right on hover, leaves to the right.
+
+  The resting underline is kept (body-text links have to look like links), as
+  a second, faint layer under the moving one. Both are backgrounds, so they
+  sit at the same offset and the text never reflows. The Tailwind `underline`
+  utilities on textLink stay as a fallback when this file isn't loaded.
+*/
+.link-reveal {
+  --link-line: 1px;
+  text-decoration-line: none;
+  padding-bottom: 0.3em;
+  background-image:
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(var(--color-edge-strong), var(--color-edge-strong));
+  background-repeat: no-repeat;
+  background-position:
+    100% 100%,
+    0 100%;
+  background-size:
+    0% var(--link-line),
+    100% var(--link-line);
+  transition: background-size var(--duration-base) var(--ease-out-soft);
+}
+
+.link-reveal:hover,
+.link-reveal:focus-visible,
+.group:hover .link-reveal {
+  background-position:
+    0 100%,
+    0 100%;
+  background-size:
+    100% var(--link-line),
+    100% var(--link-line);
+}
+
+/* The big contact email: same reveal, heavier line. */
+.link-reveal--lg {
+  --link-line: 2px;
+  padding-bottom: 0.12em;
+}
+
+/* "View case study →" — the arrow leans toward where the link goes. */
+.link-arrow {
+  display: inline-block;
+  transition: translate var(--duration-base) var(--ease-out-soft);
+}
+.group:hover .link-arrow,
+.group:focus-visible .link-arrow {
+  translate: 0.3em 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link-reveal,
+  .link-arrow {
+    transition: none;
+  }
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────
+   The CSS half of src/scripts/header-motion.ts. */
+
+/* Hide on scroll down, back on scroll up: a short rise and a fade, with no
+   blur. Translate only, so nothing below moves; `none` when shown so the
+   bar's fixed children (the menu, the brightness strip) stay positioned
+   against the viewport.
+
+   Ground: transparent at the top of the page, the scope's surface and a
+   hairline once scrolled (Nav.astro toggles .is-scrolled). Unlayered, so it
+   beats the band rule's background when the bar takes data-tone="dark". */
+.site-header {
+  background-color: transparent;
+  border-bottom: 1px solid transparent;
+  transition:
+    translate var(--duration-base) var(--ease-out-strata),
+    opacity var(--duration-base) var(--ease-out-soft),
+    background-color var(--duration-fast) var(--ease-out-soft),
+    color var(--duration-fast) var(--ease-out-soft),
+    border-color var(--duration-fast) var(--ease-out-soft);
+}
+.site-header.is-scrolled {
+  background-color: var(--color-surface);
+  border-bottom-color: var(--color-edge);
+}
+.site-header[data-hidden] {
+  translate: 0 -100%;
+  opacity: 0;
+  transition-duration: var(--duration-snap);
+  transition-timing-function: var(--ease-in-out-soft);
+}
+.site-header.is-snapping {
+  transition: none;
+}
+
+/* The bar sits over the menu; the menu is the ground while it's open. */
+.site-header__bar {
+  position: relative;
+  z-index: 2;
+}
+.site-header[data-menu-open] {
+  background-color: transparent;
+  border-bottom-color: transparent;
+}
+.site-header[data-menu-open] .nav-progress {
+  opacity: 0;
+}
+/* The open menu scrolled (a short window): the bar takes the menu's ground
+   and a rule, so the words pass under it instead of behind the logo. */
+.site-header[data-menu-open][data-menu-scrolled] .site-header__bar {
+  background-color: var(--color-surface);
+  box-shadow: 0 1px 0 var(--color-edge);
+}
+
+/* The inline links step aside while the menu is up (they're inert then
+   too); the menu has the same three, bigger. */
+.nav-links {
+  transition:
+    opacity var(--duration-fast) var(--ease-out-soft),
+    visibility 0s linear 0s;
+}
+.site-header[data-menu-open] .nav-links {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--duration-fast) var(--ease-out-soft),
+    visibility 0s linear var(--duration-fast);
+}
+
+/* Menu / Close. The label rolls to Close; the two lines cross into an X.
+   Both words share one grid cell, so the mask is as wide as the wider. */
+.menu-toggle .menu-toggle__roll {
+  display: inline-grid;
+}
+.menu-toggle__roll > .nav-roll__a,
+.menu-toggle__roll > .nav-roll__b {
+  grid-area: 1 / 1;
+  position: static;
+}
+.menu-toggle[aria-expanded='true'] .nav-roll__a {
+  translate: 0 -115%;
+}
+.menu-toggle[aria-expanded='true'] .nav-roll__b {
+  translate: 0 0;
+}
+.menu-toggle__icon {
+  position: relative;
+  display: inline-block;
+  width: 1.125rem;
+  height: 0.5rem;
+}
+.menu-toggle__icon span {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  background-color: currentColor;
+  transform-origin: 50% 50%;
+  transition:
+    translate var(--duration-snap) var(--ease-out-strata),
+    rotate var(--duration-snap) var(--ease-out-strata),
+    scale var(--duration-snap) var(--ease-out-strata);
+}
+.menu-toggle__icon span:first-child {
+  top: 0;
+}
+.menu-toggle__icon span:last-child {
+  bottom: 0;
+  transform-origin: 0 50%;
+  scale: 0.6 1;
+}
+@media (hover: hover) {
+  .menu-toggle:hover .menu-toggle__icon span:last-child {
+    scale: 1 1;
+  }
+}
+.menu-toggle[aria-expanded='true'] .menu-toggle__icon span:first-child {
+  translate: 0 calc(0.25rem - 0.75px);
+  rotate: 45deg;
+}
+.menu-toggle[aria-expanded='true'] .menu-toggle__icon span:last-child {
+  transform-origin: 50% 50%;
+  translate: 0 calc(-0.25rem + 0.75px);
+  rotate: -45deg;
+  scale: 1 1;
+}
+
+/* The menu's words. Hovering (or focusing) one dims the rest to the muted
+   type colour (still AA) and nudges the one under the pointer along. */
+.menu__item,
+.menu__sub {
+  transition: color var(--duration-fast) var(--ease-out-soft);
+}
+.menu__item > .menu__mask,
+.menu__sub > .menu__mask {
+  transition: translate var(--duration-snap) var(--ease-out-strata);
+}
+.menu__list:has([data-menu-item]:hover) [data-menu-item]:not(:hover),
+.menu__list:has([data-menu-item]:focus-visible) [data-menu-item]:not(:focus-visible) {
+  color: var(--color-fg-muted);
+}
+.menu__item:hover > .menu__mask,
+.menu__item:focus-visible > .menu__mask {
+  translate: 0.12em 0;
+}
+.menu__sub:hover > .menu__mask,
+.menu__sub:focus-visible > .menu__mask {
+  translate: 0.4em 0;
+}
+/* The current page: a tan bar under its word, as in the bar. */
+.menu__item[aria-current='page'] > .menu__mask {
+  position: relative;
+}
+.menu__item[aria-current='page'] > .menu__mask::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0.04em;
+  bottom: 0.04em;
+  height: max(3px, 0.035em);
+  background-color: var(--color-focus);
+}
+
+/* The preview exists only where menuPointer runs it. */
+.menu[data-preview='on'] .menu__preview {
+  display: block;
+}
+
+/* Logo entrance: parked until header-motion.ts plays it. */
+html.motion-ok[data-logo-intro] [data-logo] [data-logo-path] {
+  fill-opacity: 0;
+}
+html.motion-ok[data-logo-intro] [data-logo] .logo-name {
+  transform: translateX(-104%);
+}
+
+/* The name's mask clips sideways only, so tall glyphs keep their tops. */
+.logo-name-mask {
+  display: inline-block;
+  clip-path: inset(-0.4em 0 -0.4em 0);
+}
+.logo-name {
+  display: inline-block;
+}
+
+/* Hover: the peak/J lifts out of the B (the whole mark also tilts toward
+   the pointer, headerHover in header-motion.ts). */
+.logo-peak {
+  transform-box: fill-box;
+  transition: translate var(--duration-snap) var(--ease-snap);
+}
+.logo:hover .logo-peak,
+.logo:focus-visible .logo-peak {
+  translate: 0 -22%;
+}
+
+/* Rolling labels: the word rolls up out of its mask and its copy rolls in
+   from below. Whole word, not letters. */
+.nav-roll {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  /* Room for the glyphs inside the mask without changing the line box. */
+  padding-block: 0.15em;
+  margin-block: -0.15em;
+}
+.nav-roll__a,
+.nav-roll__b {
+  display: block;
+  transition: translate var(--duration-snap) var(--ease-out-strata);
+}
+.nav-roll__b {
+  position: absolute;
+  inset: 0.15em 0 auto;
+  translate: 0 115%;
+}
+@media (hover: hover) {
+  .nav-link:hover .nav-roll__a {
+    translate: 0 -115%;
+  }
+  .nav-link:hover .nav-roll__b {
+    translate: 0 0;
+  }
+}
+.nav-link:focus-visible .nav-roll__a {
+  translate: 0 -115%;
+}
+.nav-link:focus-visible .nav-roll__b {
+  translate: 0 0;
+}
+
+/* The active bar: 1px wide at rest, scaled to the word's width and moved
+   along with one transform. --color-focus clears 3:1 at every brightness. */
+.nav-indicator {
+  position: absolute;
+  bottom: -0.5rem;
+  left: 0;
+  width: 1px;
+  height: 2px;
+  background-color: var(--color-focus);
+  transform-origin: 0 50%;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--duration-base) var(--ease-out-strata),
+    opacity var(--duration-fast) var(--ease-out-soft);
+}
+.nav-indicator.is-shown {
+  opacity: 1;
+}
+.nav-indicator.is-instant {
+  transition-property: opacity;
+}
+
+/* Without JavaScript there's no bar to move; underline the current link. */
+html:not(.js) .nav-link[aria-current='page'] {
+  text-decoration: underline 2px var(--color-focus);
+  text-underline-offset: 0.5rem;
+}
+
+/* Page progress: a hairline on the bar's bottom edge, over the rule. */
+.nav-progress {
+  position: absolute;
+  inset: auto 0 -1px;
+  height: 1px;
+  background-color: var(--color-focus);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--ease-out-soft);
+}
+.nav-progress.is-shown {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header,
+  .logo-peak,
+  .nav-roll__a,
+  .nav-roll__b,
+  .nav-indicator,
+  .nav-links,
+  .menu-toggle__icon span,
+  .menu__item,
+  .menu__sub,
+  .menu__item > .menu__mask,
+  .menu__sub > .menu__mask {
+    transition: none;
+  }
+  .menu__item:hover > .menu__mask,
+  .menu__item:focus-visible > .menu__mask,
+  .menu__sub:hover > .menu__mask,
+  .menu__sub:focus-visible > .menu__mask {
+    translate: none;
+  }
+  .logo:hover .logo-peak,
+  .logo:focus-visible .logo-peak,
+  .nav-link .nav-roll__a {
+    translate: none;
+  }
+  .nav-roll__b {
+    display: none;
+  }
+  /* Menu swaps to Close in place. */
+  .menu-toggle[aria-expanded='true'] .nav-roll__a {
+    visibility: hidden;
+  }
+  .menu-toggle[aria-expanded='true'] .nav-roll__b {
+    display: block;
+  }
+}
