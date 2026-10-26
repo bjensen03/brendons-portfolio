@@ -1,0 +1,46 @@
+---
+/*
+  The top of a Quick overview: the study's At a glance figures as one band
+  of big numbers, then the one-line hook, then a quiet way into the full
+  study. It's the first thing under the hero, so it has to land on a phone
+  without scrolling far: figures stack as tight rows there and sit side by
+  side from tablet up. Type only, no tiles. The figures count up once on
+  arrival like the full view's Glance.
+*/
+
+import { longestWordEm } from '../../lib/display-fit';
+
+interface Props {
+  items: Array<{ value: string; label: string }>;
+  hookHtml?: string;
+}
+
+const { items, hookHtml } = Astro.props;
+/* One size for the whole band, set so the longest word of any figure fits
+   its column (no word breaks mid-way). */
+const fit = Math.max(4, ...items.map((g) => Number(longestWordEm(g.value))));
+---
+
+<section class="cs-sec ovr" aria-labelledby="ovr-title">
+  <div class="container-bleed">
+    <h2 id="ovr-title" class="sr-only">Results</h2>
+    {
+      items.length > 0 && (
+        <ul class="ovr__list" style={`--n: ${items.length}; --fit: ${fit.toFixed(3)}`} data-reveal-group>
+          {items.map((g) => (
+            <li class="ovr__item" data-reveal>
+              <p class="ovr__value" data-count>
+                {g.value}
+              </p>
+              <p class="ovr__label text-small text-fg-muted">{g.label}</p>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+    {hookHtml && <p class="ovr__hook text-lead text-fg" set:html={hookHtml} data-reveal />}
+    <a href="?view=full" class="ovr__more link-reveal group text-small font-medium text-fg" data-reveal>
+      Read the full case study<span class="link-arrow ml-1.5" aria-hidden="true">→</span>
+    </a>
+  </div>
+</section>

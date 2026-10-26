@@ -67,7 +67,7 @@ const steps = items.flatMap((era, e) => era.shots.map((shot, s) => ({ ...shot, e
           <div class="er-texts">
             {items.map((era, i) => (
               <div class="er-text" data-eras-text={i}>
-                <h3 class="text-title text-fg">{era.title}</h3>
+                <h3 class="text-sub text-fg">{era.title}</h3>
                 <div class="cs-prose cs-prose--sm mt-4" set:html={era.html} />
               </div>
             ))}
@@ -110,7 +110,7 @@ const steps = items.flatMap((era, e) => era.shots.map((shot, s) => ({ ...shot, e
         <li class="er-stack__item" data-er-item>
           <div class="er-stack__text">
             <p class="er-stack__year" aria-hidden="true">{era.year}</p>
-            <h3 class="mt-3 text-title text-fg">
+            <h3 class="mt-3 text-sub text-fg">
               <span class="sr-only">{era.year}: </span>
               {era.title}
             </h3>

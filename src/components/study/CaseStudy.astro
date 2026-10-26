@@ -26,6 +26,7 @@ import { LIST_SOURCES } from '../../lib/study-lists';
 import NextStudy from './NextStudy.astro';
 import ViewSwitch from './ViewSwitch.astro';
 import StudyOverview from './StudyOverview.astro';
+import OverviewResults from './OverviewResults.astro';
 import Namespaced from './Namespaced.astro';
 import ViewPanel from './ViewPanel.astro';
 
@@ -264,12 +265,14 @@ type Item =
   | Block
   | { kind: 'ovSection'; number: number; heading: string; html: string; labels?: string[]; image?: { src: string; alt: string; crop?: { x: number; y: number; w: number; h: number } }; id: string }
   | { kind: 'ovHard'; heading: string; html: string }
-  | { kind: 'ovMore' };
+  | { kind: 'ovMore' }
+  | { kind: 'ovResults'; hookHtml?: string };
 
 const ov = d.overview;
 const ovItems: Item[] = [];
 if (ov) {
-  if (ov.glance) ovItems.push({ kind: 'glance' });
+  /* The payoff first: figures, hook, a way into the full study. */
+  ovItems.push({ kind: 'ovResults', hookHtml: ov.hook ? await mdInline(ov.hook) : undefined });
   for (const [i, sec] of ov.sections.entries()) {
     const body = await md(sec.body);
     const shows = sec.show ?? [];
@@ -291,7 +294,7 @@ const minutes = (n: number) => Math.max(1, Math.round(n / 230));
 const sharedWords = words(d.label, ...(inShortInHero ? html.inShort : []));
 const glanceWords = words(...d.atAGlance.flatMap((g) => [g.value, g.label, g.note]));
 const overviewMinutes = ov
-  ? minutes(sharedWords + (ov.glance ? glanceWords : 0) + words(...ov.sections.map((x) => x.body)))
+  ? minutes(sharedWords + (ov.glance ? glanceWords : 0) + words(ov.hook, ...ov.sections.map((x) => x.body)))
   : 0;
 const fullMinutes = minutes(
   sharedWords +
@@ -377,6 +380,8 @@ if (!nextBuilt) {
       switch (b.kind) {
         case 'ovSection':
           return <StudyOverview number={b.number} heading={b.heading} html={b.html} labels={b.labels} image={b.image} id={b.id} />;
+        case 'ovResults':
+          return <OverviewResults items={ov?.glance ? d.atAGlance : []} hookHtml={b.hookHtml} />;
         case 'ovMore':
           return (
             <div class="cs-sec cs-sec--tight">

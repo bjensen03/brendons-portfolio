@@ -29,6 +29,6 @@ if (study.data.standalone) return Astro.redirect(studyHref(study), 301);
 const parent = await getEntry('studies', 'prolook');
 ---
 
-<Base title={`${study.data.name} — case study`} description={study.data.label} ogImage={`/og/${study.id}.jpg`}>
+<Base title={`${study.data.name} — case study`} description={study.data.description ?? study.data.label} ogImage={`/og/${study.id}.jpg`}>
   <CaseStudy study={study} parentHref="/work/prolook/" parentName={parent?.data.name ?? 'PROLOOK'} />
 </Base>

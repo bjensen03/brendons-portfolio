@@ -147,14 +147,16 @@ const COVER = SHOTS.archSunrise;
     line-height: 0.86;
     letter-spacing: -0.03em;
     text-transform: uppercase;
-    font-size: calc((100vw - 2 * var(--grid-margin)) / 6.7);
+    /* A display exception (the cover), but never bigger than a page title
+       at the same width (the heading scale). */
+    font-size: min(var(--text-page), calc((100vw - 2 * var(--grid-margin)) / 6.7));
   }
   .td-the {
     display: block;
   }
   @media (min-width: 64rem) {
     .td-name {
-      font-size: min(calc(((100vw - 2 * var(--grid-margin)) * 8 / 12 - var(--grid-margin)) / 8.7), 9rem);
+      font-size: min(var(--text-page), calc(((100vw - 2 * var(--grid-margin)) * 8 / 12 - var(--grid-margin)) / 8.7), 9rem);
     }
     .td-the {
       display: inline;

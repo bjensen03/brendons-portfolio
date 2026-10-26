@@ -24,7 +24,7 @@ const full = study && (study.data.approved || showDrafts());
 
 {
   full && study ? (
-    <Base title={`${study.data.name} — case study`} description={study.data.label} ogImage="/og/prolook.jpg">
+    <Base title={`${study.data.name} — case study`} description={study.data.description ?? study.data.label} ogImage="/og/prolook.jpg">
       <CaseStudy study={study} />
     </Base>
   ) : (

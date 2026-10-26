@@ -5,12 +5,11 @@ export const SITE = {
   /* The live domain (apex, no www). Keep `SITE` in astro.config.mjs the
      same: the sitemap and canonical tags read it from there. */
   url: 'https://brendonjensen.dev',
-  /* Deliberately not "Frontend Developer" alone. The work spans development,
-     design, marketing and automation, and a title that names a third of it
-     invites being screened out for the other two thirds. */
-  title: 'Brendon Jensen — Web Developer, Designer & Marketer',
+  /* Site title (2026-10-26): full-stack developer first. Design and
+     marketing are background, so they come second, never in the title. */
+  title: 'Brendon Jensen | Full-Stack Developer',
   description:
-    'I build the website and the machine behind it — design, development, marketing and automation for businesses that need theirs to actually work.',
+    'Full-stack developer in Utah building custom websites, web apps, integrations and automations, with a background in design and marketing.',
   locale: 'en-US',
 } as const;
 

@@ -141,7 +141,7 @@ const phone = viewer.device === 'phone';
                 {step.group && <span>{step.group} · </span>}
                 Step {i + 1} of {total}
               </p>
-              <h3 class="mt-2 text-title text-fg">{step.title}</h3>
+              <h3 class="mt-2 text-sub text-fg">{step.title}</h3>
               <div class="cs-prose mt-4" set:html={stepHtml[i]} />
               {step.detail && step.src && (
                 <figure class="sv-detail">

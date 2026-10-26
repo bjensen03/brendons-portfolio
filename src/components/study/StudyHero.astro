@@ -62,6 +62,8 @@ const nameFit = Math.max(
 ).toFixed(3);
 const longName = isLong(d.name);
 
+/* The first At a glance figure, shown under the hero picture on phones. */
+const top = d.atAGlance?.[0];
 const liveLabel = d.live?.replace(/^https?:\/\//, '').replace(/\/$/, '');
 const media = d.heroMedia;
 const size = media?.size ?? 'full';
@@ -99,6 +101,19 @@ const imageSizes =
 
     <div class="sh-grid">
       <p class="sh-label text-lead" data-reveal>{d.label}</p>
+
+      {/* Phones only: the study's first At a glance figure, under the hero
+          picture, so the best result is on the first screen. A visual
+          preview of the row further down, so it's hidden from assistive
+          tech (it would be read twice). */}
+      {
+        top && (
+          <div class="sh-glance" aria-hidden="true">
+            <p class="sh-glance__value">{top.value}</p>
+            <p class="mt-1 text-small text-fg-muted">{top.label}</p>
+          </div>
+        )
+      }
 
       <dl class="sh-meta" data-reveal-group>
         {
@@ -194,6 +209,7 @@ const imageSizes =
     .sh--split .sh-media {
       order: -6;
     }
+    .sh--split .sh-glance,
     .sh--split .sh-meta {
       order: -5;
     }
@@ -372,6 +388,41 @@ const imageSizes =
     }
     .sh-short {
       order: 6;
+    }
+    /* Same order as the facts, earlier in the markup, so it lands between
+       the picture and the facts. */
+    .sh-glance {
+      display: block;
+      order: 5;
+      position: relative;
+      margin: var(--spacing-stack) var(--grid-margin) 0;
+      padding-top: 0.875rem;
+      border-top: 1px solid var(--color-edge);
+    }
+    .sh-glance::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: 0;
+      width: 3rem;
+      height: 3px;
+      background: var(--color-accent-fill);
+    }
+    .sh-glance__value {
+      font-family: var(--font-display);
+      font-stretch: var(--display-stretch);
+      text-transform: var(--display-case);
+      font-weight: 850;
+      font-size: clamp(1.5rem, 1rem + 2.5vw, 1.9rem);
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+      color: var(--color-fg);
+      text-wrap: balance;
+    }
+  }
+  @media (min-width: 40rem) {
+    .sh-glance {
+      display: none;
     }
   }
 

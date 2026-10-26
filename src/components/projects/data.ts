@@ -1,5 +1,5 @@
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
-import { homeShot, published, stackItems, SHOT_NEEDED, pad, type Shot } from '../home/data';
+import { homeShot, published, stackItems, SHOT_NEEDED, RESULTS, pad, type Shot } from '../home/data';
 /* The shared helper, so a standalone family member (ALL IN) links to its own
    page rather than the redirect at its old nested URL. */
 import { studyHref } from '../../lib/studies';
@@ -45,6 +45,8 @@ export type ProjectRow = {
   number: string;
   name: string;
   line: string;
+  /** One verified result, shown as a single small line (home/data RESULTS). */
+  result?: string;
   meta: string;
   year?: string;
   tags: Tag[];
@@ -159,6 +161,7 @@ const fromStudy = async (s: Study, number: string, tags: Tag[], link = true): Pr
   number,
   name: s.data.name,
   line: s.data.label,
+  result: RESULTS[s.id] || undefined,
   meta: metaLine(s.data.role, stackItems(s)),
   year: s.data.timeline,
   tags,

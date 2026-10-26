@@ -145,7 +145,7 @@ const [emailUser, emailHost] = (CONTACT.email ?? '').split('@');
       }
       {
         RESUME && (
-          <ExternalLink href={RESUME} newTab class="link-reveal menu__foot-link">
+          <ExternalLink href={RESUME} newTab class="link-reveal menu__foot-link" data-astro-prefetch="false">
             Résumé
           </ExternalLink>
         )

@@ -3,6 +3,7 @@ import { Picture } from 'astro:assets';
 import ExternalLink from '../ExternalLink.astro';
 import { FILTERS, flatRows, projectCount, projectGroups, type ProjectRow } from './data';
 import { longestWordEm } from '../../lib/display-fit';
+import Result from './Result.astro';
 
 /*
   Projects. A different shape from the homepage's Selected Work on purpose:
@@ -162,6 +163,7 @@ const THUMB_SIZES = '(min-width: 64rem) 38vw, (min-width: 48rem) calc(83.33vw - 
                         <p class="text-body text-fg">{r.line}</p>
                         <p class="mt-2 text-small text-fg-muted">{r.meta}</p>
                         {r.year && <p class="text-small text-fg-muted">{r.year}</p>}
+                        {r.result && <p class="prow__result mt-2 text-small font-medium text-fg"><Result text={r.result} /></p>}
                         {r.href && (
                           <p class="mt-3 text-small font-medium text-fg">
                             <span class="link-reveal">{r.href.startsWith('/work/') ? 'View case study' : 'Open the page'}</span>
@@ -203,6 +205,7 @@ const THUMB_SIZES = '(min-width: 64rem) 38vw, (min-width: 48rem) calc(83.33vw - 
                             <p class="text-body text-fg">{c.line}</p>
                             <p class="mt-2 text-small text-fg-muted">{c.meta}</p>
                             {c.year && <p class="text-small text-fg-muted">{c.year}</p>}
+                            {c.result && <p class="prow__result mt-2 text-small font-medium text-fg"><Result text={c.result} /></p>}
                             <p class="mt-3 text-small font-medium text-fg">
                               <span class="link-reveal">View case study</span>
                               <span class="link-arrow ml-1" aria-hidden="true">→</span>
@@ -563,6 +566,11 @@ const THUMB_SIZES = '(min-width: 64rem) 38vw, (min-width: 48rem) calc(83.33vw - 
     display: inline-flex;
     align-items: baseline;
     min-height: 1.5rem;
+    /* A 44px tap target ("Visit the site" was 35px): the padding grows the
+       hit area and the negative margin takes the space back. */
+    --hit: max(0px, calc((2.75rem - 1lh) / 2));
+    padding-block: var(--hit);
+    margin-block: calc(-1 * var(--hit));
   }
 
   .pset-toggle {

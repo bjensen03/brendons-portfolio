@@ -10,9 +10,10 @@ approved: true
 kind: Next.js · private web app
 name: Meal Planner
 label: A meal planner I built to fuel trail running, canyoneering and backpacking, splitting the same meals between two people's protein targets
+description: 'A Next.js and TypeScript meal planner on Postgres and Drizzle, with a Google sign-in allowlist that fails closed and 1,491 automated tests, built to fuel trail running and canyoneering.'
 role: Solo Developer / Designer
 company: Personal project
-timeline: August to September 2026
+timeline: August 2026 to Present
 team: Solo
 stack: Next.js, TypeScript, Tailwind CSS, Postgres, Drizzle
 
@@ -156,7 +157,9 @@ myRole: |
 
   I had wanted to build my own application for a while, but I knew it was going to be a bigger project than what I had worked on before. I used Claude Code to help with development, work through technical challenges, and understand things as I was building.
 
-  AI was a big part of the development process, but ==the project came from something I personally wanted to create and use==. I was involved in shaping the features, figuring out what worked, and making changes based on how we actually used the app.
+  AI was a big part of the development process, but ==the project came from something I personally wanted to create and use==. I was involved in shaping the features, figuring out what worked, and making changes based on how we used the app.
+
+  I didn't take what it wrote on trust. The 1,491 automated tests are how I checked the code, and anything the app generates itself, like a recipe draft, is checked again on the server before it's saved.
 
   One of the biggest things I took away from the project was ==how much I learned throughout the process==. It gave me experience working through a larger application, and it's something I want to keep improving and building on.
 
@@ -269,53 +272,30 @@ next:
 # Quick overview / Full case study switch. The full study above is unchanged.
 overview:
   glance: true
+  hook: I'm constantly **trail running, canyoneering and backpacking**, so I built my own full-stack app to make sure I eat enough, and we still use it regularly.
   sections:
-    - heading: Overview
+    - heading: What I built
       body: |
-        I'm constantly trail running, hiking, canyoneering, backpacking and traveling, and I need enough food and protein to keep that up. I wanted an app that keeps track of it for me, so I built one.
+        It plans one set of meals for two people with different calorie and protein targets and splits each pot into **two portions**, then turns the week into a grocery list and budget.
 
-        I built it on my own, from the spec and the design to the code. The first version took 17 days. Claude Code helped me with development, and the features came from how we actually used the app.
+        It's covered by **1,491 automated tests**.
       labels: ['Next.js', 'TypeScript']
-    - heading: The Challenge
-      body: |
-        Kaylee and I have different calorie and protein targets, and we're not going to cook two different dinners every night. One set of meals has to feed both of us.
-
-        That has to work standing at the stove, deciding how much of tonight's pot is whose. It also has to work when I'm packing food for a canyoneering day, where everything gets carried.
-      labels: ['PWA', 'Phone-first screens']
-      show: ['mockup:week-setup']
-    - heading: The Solution
-      body: |
-        It's a Next.js App Router app in TypeScript. Every write goes through a server action, and the data lives in Postgres on Neon through Drizzle, across 16 tables.
-
-        Each day's targets start from the Mifflin-St Jeor equation, scaled by the kind of day, from a rest day to a backpacking day. Each person's share of a meal is rounded to a quarter serving, and the cooking screen splits one pot into two plates.
-
-        Sign-in is Google through Auth.js, plus a two-email allowlist that fails closed: if the list is missing, nobody gets in. I tested it with another Google account, and it was denied.
-
-        The app also uses the Anthropic API to draft recipes. A draft is only saved after I approve it, and the server checks it again before writing it.
-      labels: ['Next.js App Router', 'Server actions', 'Postgres (Neon)', 'Drizzle ORM', 'Auth.js']
       show: ['viewer:week']
+    - heading: How it's built
+      body: |
+        Every write goes through a server action into Postgres on Neon through Drizzle, across 16 tables. Sign-in is Google with an allowlist that **fails closed**.
+
+        Claude Code helped me with development, and the test suite is how I checked what it wrote.
+      labels: ['Server actions', 'Postgres (Neon)', 'Drizzle ORM', 'Auth.js']
+      show: ['mockup:week-setup']
     - heading: Engineering Deep Dive
       body: |
-        The weekly budget said $437.16. The receipt said $250. That's 75% too high, on the only screen about money. One line showed it: 1,020 g of salmon, charged as three 1 lb packs at $36.00.
+        The budget said $437 for a week that cost $250, because the app priced weighed items as whole packages. I added a `soldByWeight` flag to the 18 weighed ingredients so they're charged for the share they use, while jars and sealed packs still round up.
 
-        It was hard to see because the feature worked. It just wasn't calculating correctly.
-
-        The cause was one rule for two kinds of item. The app priced everything as whole packages, but a meat counter charges for exactly what the scale weighs. Eighteen of the ingredients are sold by weight.
-
-        I added a `soldByWeight` flag to those 18, so they're charged for the exact share they use. Jars, cartons and sealed bacon still round up, because you really do buy the whole thing.
-
-        I don't have a verified before-and-after total for that week, so I won't claim one. The tests are the check. They pin the edge cases, like bacon and shrimp that are priced per pound but come sealed.
-      labels: ['TypeScript', 'Vitest', 'Money in cents']
+        The tests pin the edge cases. I don't have a verified after-total, so I don't claim one.
+      labels: ['TypeScript', 'Vitest']
       show: ['hardProblem']
-    - heading: Results
-      body: |
-        We still use it regularly. It turned into something we actually use, not a project I finished and forgot about.
-
-        **1,491 automated tests across 67 files, all passing.** They cover the targets, portions, pricing, the grocery list, sign-in and the main screens.
-
-        The grocery list now buys each recipe once per batch instead of once per portion, and weighed items are priced by weight. The app models 104 ingredients, 36 of them with a piece weight.
-      labels: ['Vitest', '1,491 tests']
     - heading: Reflection
       body: |
-        I'd make sure the grocery budget and the meal planning work together correctly from the start, and I'd organize food groups better. Building features is one thing; making sure they work together in everyday use matters just as much.
+        Building features is one thing. Making sure the budget and the planning work together in everyday use matters just as much.
       labels: ['Testing', 'Everyday use']

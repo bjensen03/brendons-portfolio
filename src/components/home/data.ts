@@ -96,12 +96,11 @@ export const homeShot = async (id: string): Promise<Shot | undefined> => {
 const FEATURED = ['rally-trailer', 'prolook', 'lincoln-academy', 'meal-planner'];
 
 /*
-  Featured entries that keep their own name but open a different study.
-  PROLOOK's entry opens ALL IN, the biggest piece of work there and the one
-  I want seen first. The entry names ALL IN under PROLOOK
-  so nobody is surprised by where the click lands, takes ALL IN's line,
-  role, stack and screenshot to match, and keeps a smaller link to the
-  PROLOOK page itself.
+  Featured entries that open a different study. PROLOOK's entry opens ALL
+  IN, the biggest piece of work there and the one I want seen first. The
+  entry is titled "ALL IN Tournament, for PROLOOK Sports", so the name
+  matches where the click lands, takes ALL IN's line, role, stack and
+  screenshot, and keeps a smaller link to the PROLOOK page itself.
 */
 const OPENS: Record<string, { study: string; moreLabel: string }> = {
   prolook: { study: 'all-in', moreLabel: 'All PROLOOK work' },
@@ -119,13 +118,27 @@ export type FeaturedProject = {
   shot?: Shot;
   /** Label for the placeholder panel shown when there's no shot yet. */
   shotNeeded?: string;
-  /** Name of the study the entry opens, when it isn't the entry's own. */
+  /** "for <client>", when the entry opens a study nested under its own. */
   opens?: string;
+  /** One verified result, shown as a single small line. */
+  result?: string;
   /** A second, smaller link back to the entry's own study. */
   more?: { label: string; href: string };
 };
 
 export const pad = (n: number): string => String(n).padStart(2, '0');
+
+/*
+  One plain result per study, shown under the line on the homepage cards and
+  the /work/ rows. Only figures the study itself backs up; a study with no
+  strong one gets no line. An empty string shows nothing.
+*/
+export const RESULTS: Record<string, string> = {
+  'rally-trailer': 'Load time: about 26 s → under 2 s',
+  'all-in': '4 production releases · homepage images 3.5 MB → 1.8 MB',
+  'lincoln-academy': "Kitchen's own account: about half the time",
+  'meal-planner': '1,491 automated tests · still in regular use',
+};
 
 export const featuredProjects = async (): Promise<FeaturedProject[]> => {
   const all = await getCollection('studies');
@@ -144,7 +157,7 @@ export const featuredProjects = async (): Promise<FeaturedProject[]> => {
     out.push({
       id: study.id,
       number: pad(out.length + 1),
-      name: study.data.name,
+      name: d.name,
       category: d.kind ?? '',
       line: d.label,
       role: d.role,
@@ -152,8 +165,9 @@ export const featuredProjects = async (): Promise<FeaturedProject[]> => {
       href: studyHref(target),
       shot: await homeShot(target.id),
       shotNeeded: SHOT_NEEDED[target.id],
+      result: RESULTS[target.id] || undefined,
       ...(target !== study && swap
-        ? { opens: d.name, more: { label: swap.moreLabel, href: studyHref(study) } }
+        ? { opens: `for ${study.data.name}`, more: { label: swap.moreLabel, href: studyHref(study) } }
         : {}),
     });
   }

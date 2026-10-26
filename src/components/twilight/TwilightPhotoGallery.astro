@@ -106,7 +106,7 @@ const widths = (t: Tile, big: boolean) => [400, 800, ...(big ? [1200] : [])].fil
         <div class="tg-group" role="group" aria-labelledby={`tg-${g.id}`}>
           {!g.labelInRow && (
             <h3 id={`tg-${g.id}`} class="tg-label" data-reveal>
-              <span class="text-title text-fg">{g.label}</span>
+              <span class="text-sub text-fg">{g.label}</span>
               <span class="tg-count text-body text-fg-muted">{g.count} photos</span>
             </h3>
           )}

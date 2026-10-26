@@ -10,6 +10,7 @@ approved: true
 kind: SvelteKit · live tournament app
 name: ALL IN Tournament
 label: Redesigning a live tournament site and building its 2027 registration, without disrupting the app behind it
+description: 'A redesign and the 2027 registration for a live SvelteKit tournament app: server-side settings, a database-backed form, a staff board and three emails, shipped through four production releases.'
 role: Full-Stack Web Developer, Marketing Side
 company: PROLOOK Sports
 timeline: '2026'
@@ -665,53 +666,28 @@ next:
 # Quick overview / Full case study switch. The full study above is unchanged.
 overview:
   glance: true
+  hook: Inside a live SvelteKit app owned by another engineering team, I rebuilt the front end and **built its 2027 registration end to end**.
   sections:
-    - heading: Overview
+    - heading: What I built
       body: |
-        ALL IN is a youth baseball tournament run by PROLOOK. Its site is a SvelteKit app from 2022, owned by an engineering team in the Philippines.
+        The registration is the form, its database storage, a staff board and three emails, front end and back end.
 
-        I was the full-stack developer on the marketing side. I rebuilt the navigation, homepage, footer and shared components from the designer's Figma files, and I built the 2027 registration end to end, front end and back end. Engineering owned the rest: the API, bracket logic, team management and production releases.
+        The front end comes from the designer's Figma files, and the redesign shipped through **four production releases**, with the homepage images cut from 3.5 MB to 1.8 MB.
       labels: ['SvelteKit', 'Svelte', 'Tailwind CSS']
-    - heading: The Challenge
-      body: |
-        Marketing needed a full redesign before the next tournament, inside an older SvelteKit app locked to an old version of Node. Upgrading it would have touched parts of the system I didn't own.
-
-        Registration didn't really exist. The old form emailed five fields to a staff address and stored nothing, and the tournament sells out in about a day.
-      labels: ['Node', 'Existing codebase']
       show: ['scroller']
-    - heading: The Solution
+    - heading: Working inside their app
       body: |
-        I didn't turn the redesign into an upgrade project. I pinned the exact Node version with Volta so the app always runs in the environment it expects.
-
-        Marketing can switch Shop and Brackets on or off. I moved those settings into the server-side load, which stopped the Shop link flickering in and removed two API calls from every page.
-
-        For registration I built the form, the database storage, a staff board and three emails. The form opens itself on the test sites but stays shut on the live site until the date, so QA could test the whole flow early.
-      labels: ['SvelteKit server load', 'Volta', 'HTML email', 'Database']
+        Engineering owns the API, brackets, team management and releases, and the app runs on an early SvelteKit and an old Node. I pinned Node with Volta instead of upgrading, and moved the Shop and Brackets settings into the server-side load, which ended the Shop link flicker.
+      labels: ['Volta', 'SvelteKit server load']
       show: ['viewer:registration']
     - heading: Engineering Deep Dive
       body: |
-        Right after my Shop flicker fix shipped, QA found a new problem. Opening Shop in a new tab, or reloading it, sent people back to the homepage. Clicking Shop from the homepage still worked.
+        Right after my flicker fix shipped, Shop started sending some visitors back to the homepage, though every test had passed. The guard read a value only the homepage set, kept in **server state shared between visitors**, so one homepage visit made the check pass for everyone.
 
-        I had already tested it locally and it passed, so I assumed something in the live environment, probably caching.
-
-        It wasn't caching. The Shop page had a guard that checked a value only the homepage set, and that value lived in server state shared between visitors. Once anyone loaded the homepage, the check passed for everyone. The old navigation code had been setting it on every page, so removing that code exposed the bug underneath.
-
-        I changed the guard to use the activation flag the server already loads for every request. My dev server couldn't reproduce the bug, so I tested on a production build on a fresh server, without opening the homepage first. Then I ran QA's cases there and again on staging.
-      labels: ['SvelteKit', 'Server state']
+        I switched it to the activation flag the server loads for every request, and proved it on a fresh production build that never opened the homepage.
+      labels: ['SvelteKit', 'Server state', 'Production builds']
       show: ['hardProblem']
-    - heading: Results
-      body: |
-        **The redesign shipped through four production releases.**
-
-        I cut the homepage's image weight from about 3.5 MB to 1.8 MB without a visible change in quality.
-
-        Teams now have a real way to register for 2027, with three emails that didn't exist before: a receipt to the coach, a notice to the tournament, and the acceptance email.
-
-        I don't have access to the site's analytics, so there's no traffic number here.
-      labels: ['Performance', 'Image optimization', 'Email']
     - heading: Reflection
       body: |
-        When I removed the old Shop check, I should have searched the project for anything else depending on it. There was one other place, with a TODO above it. That search would have taken a minute.
-
-        I'd also test layouts on a real phone earlier. A simulated browser is useful, but it isn't proof.
-      labels: ['Code search', 'Real-device testing', 'QA', 'Release process']
+        I should have searched the project for anything else using the old Shop check. There was one other place, with a TODO above it.
+      labels: ['Code search', 'QA']

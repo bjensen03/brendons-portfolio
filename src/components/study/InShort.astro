@@ -16,7 +16,7 @@ const { lines } = Astro.props;
 ---
 
 <section class="cs-short" aria-labelledby="in-short-title">
-  <h2 id="in-short-title" class="cs-short__h" data-reveal>In short</h2>
+  <h2 id="in-short-title" class="cs-short__h cs-h2" data-reveal>In short</h2>
   <ul class="cs-short__list" data-reveal-group>
     {lines.map((html) => <li set:html={html} data-reveal />)}
   </ul>

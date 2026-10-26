@@ -6,7 +6,8 @@ approved: true
 kind: Custom WordPress theme · dealer platform
 name: Rally Trailer Manufacturing
 label: Turning a website into a tool for customers, dealers, marketing, and operations
-role: Web Developer / Web & Marketing
+description: 'A custom WordPress theme for Rally Trailer Manufacturing, with ZIP-code dealer routing and a private dealer portal. Load time went from about 26 seconds to under 2, tested in GTmetrix, PageSpeed Insights and Lighthouse.'
+role: Full-Stack Web Developer & Marketing Specialist
 company: Rally Trailer Manufacturing
 timeline: 2025 to Present
 team: Marketing, Sales, Operations, Leadership, and Dealers
@@ -63,8 +64,8 @@ heroMedia:
 # "Building the dealer portal"; result, For performance.
 inShort:
   - What started as a website I was maintaining became ==a platform I designed== around how Rally actually markets, sells trailers, works with dealers, and supports its operations.
-  - I built a ZIP-code system that connected a customer with the correct dealer based on their location — I built ==a private dealer portal== inside the website.
-  - The site that once took around 26 seconds to load ==now loads in under two seconds== after the rebuild and continued optimization.
+  - I built a ZIP-code system that connected a customer with the correct dealer based on their location, and ==a private dealer portal== inside the website.
+  - The site that once took around 26 seconds to load ==now loads in under two seconds== after the rebuild and continued optimization, tested in GTmetrix, PageSpeed Insights and Lighthouse.
 
 layout:
   - inShort
@@ -427,9 +428,9 @@ myRole: |
   Once the plan was approved, I was given control of the project, including the site structure, development approach, page system, trailer experience, dealer tools, and how the different parts of the website worked together.
 
 atAGlance:
-  - value: About 26 seconds to under 2 seconds
+  - value: 26 s → under 2 s
     label: Website load time
-    note: The original site had major performance problems. After the rebuild and continued optimization, load time dropped to under two seconds.
+    note: After the rebuild and continued optimization. Tested in GTmetrix, PageSpeed Insights and Lighthouse.
   - value: 30+ trailer models
     label: Structured product pages
     note: Each trailer has its own specifications, images, options, upgrades, documents, and buying information.
@@ -499,7 +500,7 @@ keyDecisions:
 
       Customers can ==compare up to three trailers side by side==.
 
-      That lets someone actually evaluate the differences instead of opening several tabs and trying to remember which trailer had which specification.
+      That lets someone evaluate the differences instead of opening several tabs and trying to remember which trailer had which specification.
 
 story:
   - heading: How the project evolved
@@ -641,7 +642,7 @@ hardProblem:
 
     My own admin session kept getting a freshly generated page with a valid nonce.
 
-    The people actually using the portal were getting cached versions with expired ones.
+    The people using the portal were getting cached versions with expired ones.
 
     The save code was fine.
 
@@ -681,9 +682,7 @@ hardProblem:
       caption: And if a save does fail, the portal says so instead of acting like it worked.
 
 result: |
-  The biggest change is not just that the new site is faster.
-
-  It is that the website can do much more for the business.
+  The new site is faster, but the bigger change is that it does much more for the business.
 
   The original site was a mix of themes, builders, caches, and forms that needed a lot of manual help.
 
@@ -731,52 +730,33 @@ next:
 # Every line is sourced from this file; see his notes for line numbers.
 overview:
   glance: true
+  hook: I replaced a slow mix of WordPress page builders with **one custom theme** that loads in under 2 seconds and sends each lead to the right dealer.
   sections:
-    - heading: Overview
+    - heading: What I built
       body: |
-        I'm the main person responsible for Rally's website and most of the web work around it. I work directly with marketing, sales, operations, leadership and dealers.
+        Leads arrive with the trailer and the customer's ZIP code already attached, and dealers work them in **a private portal** I built, along with their trailer requests and builds in production.
 
-        When adding more to the old setup stopped making sense, I put together a plan to rebuild the site as one custom WordPress theme. Once it was approved, I owned the rebuild, from the site structure to the dealer tools.
-      labels: ['WordPress', 'Custom theme']
+        The load time was tested in GTmetrix, PageSpeed Insights and Lighthouse.
+      labels: ['WordPress', 'PHP', 'ACF Pro']
+      show: ['viewer:buy-now']
     - heading: The Challenge
       body: |
-        The site I inherited was a mix of WordPress systems. It started on Salient and WPBakery, Elementor and Hello Elementor were added later, and more than one caching system ran at the same time.
-
-        Every new feature made it harder to maintain, and Rally kept asking for things a page builder was never meant to handle, like dealer territories, lead routing and a dealer portal. The website was becoming part of how Rally sold trailers.
-      labels: ['WPBakery', 'Elementor', 'Hello Elementor', 'LiteSpeed']
+        I inherited a mix of page builders, themes and caches, and every new feature made it harder to maintain. I proposed the rebuild and owned it.
+      labels: ['WPBakery', 'Elementor']
       show: ['eras']
-    - heading: The Solution
-      body: |
-        I rebuilt it as one custom WordPress theme that runs the public site, trailer data, dealer routing and lead management in one system.
-
-        The forms stopped asking customers for things the site already knew. On a trailer page the trailer is filled in, and the customer's ZIP code decides their state and dealer territory.
-
-        I also built a private dealer portal, where each dealer has their own login and only sees their dealership, and a production board for the shop floor.
-      labels: ['PHP', 'ACF Pro', 'Dealer routing', 'Custom roles']
-      show: ['viewer:buy-now']
     - heading: Engineering Deep Dive
       body: |
-        The operations team reported that changes in the dealer portal weren't saving. Trailers added to a dealer's lot disappeared, and lead statuses went back to "New." I couldn't reproduce it; on production, my changes stuck.
+        Portal saves failed for the operations team but never for me. The network requests showed **403 Forbidden**: LiteSpeed was serving logged-in users cached pages with old security tokens, while my admin session always got a fresh page.
 
-        I first suspected the save logic, but the status handler and database updates were working. So I checked the affected accounts' network requests. The portal's AJAX calls were returning 403 Forbidden, because WordPress was rejecting the security nonce.
-
-        The host's LiteSpeed cache was serving logged-in users cached portal pages with old tokens. My admin session always got a fresh page, which is why it worked for me.
-
-        I excluded the portal and its AJAX endpoints from the cache, kept the nonce checks, and made the portal show a retry message when a save fails. Then I ran the full dealer workflow on production with a separate account, confirmed the 403s were gone, and checked the response headers for caching.
-      labels: ['LiteSpeed Cache', 'WordPress nonces', 'AJAX']
+        I excluded the portal and its AJAX calls from the cache and kept the nonce checks. A run on production with a separate account confirmed the 403s were gone.
+      labels: ['LiteSpeed Cache', 'WordPress nonces', 'AJAX', 'Debugging']
       show: ['hardProblem']
     - heading: Results
       body: |
-        **Load time: about 26 seconds → under 2 seconds.** That came from the rebuild and the optimization work after it.
-
-        More than 30 trailer models now have structured product pages, and marketing builds and rearranges pages from 27 reusable modules without needing a developer for every layout change.
-
-        I don't own Rally's sales analytics, so I won't claim a sales increase I can't verify.
+        More than 30 trailer models have structured product pages, and marketing builds pages from 27 reusable modules without a developer. I don't own Rally's sales analytics, so I don't claim a sales number.
       labels: ['Performance', 'Reusable modules']
       show: ['mockup:ipad']
     - heading: Reflection
       body: |
-        I'd set up a staging environment that matches production first. The portal bug only showed up on production, because that's where LiteSpeed behaved differently.
-
-        I'd also move deployments toward Git-driven releases and write the internal documentation earlier, so the next developer doesn't have to reverse-engineer why everything works the way it does.
-      labels: ['Staging', 'Git-driven releases', 'Documentation', 'Deployment']
+        Next time I'd start with a staging environment that matches production. The portal bug only showed up on production.
+      labels: ['Staging', 'Git-driven releases']

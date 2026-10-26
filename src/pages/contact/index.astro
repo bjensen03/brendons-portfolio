@@ -86,7 +86,7 @@ const field =
           </div>
           <p class="mt-stack text-body text-fg-muted">Based in Utah. I reply to everything.</p>
           <p class="mt-3 text-body">
-            <ExternalLink href={RESUME} newTab class={textLink}>Résumé (PDF)</ExternalLink>
+            <ExternalLink href={RESUME} newTab class={textLink} data-astro-prefetch="false">Résumé (PDF)</ExternalLink>
           </p>
           {
             !formKey && import.meta.env.DEV && (

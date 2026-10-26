@@ -280,8 +280,11 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss(), devImages()],
   },
+  /* Prefetch a page when its link is hovered or focused (or tapped), not
+     every link that scrolls into view: on / that fetched every page in the
+     menu, footer and Selected Work, and the résumé PDF, on load. */
   prefetch: {
     prefetchAll: true,
-    defaultStrategy: 'viewport',
+    defaultStrategy: 'hover',
   },
 });

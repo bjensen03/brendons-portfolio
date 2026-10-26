@@ -1,7 +1,8 @@
 /*
   Social share images (og:image / twitter:image) and the touch icon.
 
-    node scripts/og-images.mjs
+    node scripts/og-images.mjs             every card
+    node scripts/og-images.mjs --default   only public/og/default.png
 
   Writes, all 1200 × 630 unless noted:
     public/og/default.png            the site card (home, About, Contact, …)
@@ -34,7 +35,7 @@ mkdirSync(OUT, { recursive: true });
 
 const font = (f) => pathToFileURL(join(ROOT, 'src/assets/fonts/source', f)).href;
 const mark = readFileSync(join(ROOT, 'src/assets/logo/mark.svg'), 'utf8');
-const LINE = 'Web developer, designer and marketer';
+const LINE = 'Full-stack developer';
 
 /* Which capture each card uses, when it isn't the study's
    images/<id>/home-1440x900@2x.webp. `plain` drops the browser frame (a
@@ -187,8 +188,9 @@ const shoot = async (html, file) => {
 };
 
 await shoot(defaultCard(), 'default.png');
-for (const s of studies()) await shoot(studyCard(s), `${s.id}.jpg`);
-await shoot(
+const onlyDefault = process.argv.includes('--default');
+if (!onlyDefault) for (const s of studies()) await shoot(studyCard(s), `${s.id}.jpg`);
+if (!onlyDefault) await shoot(
   photoCard({
     name: 'The Twilight Trekkers',
     line: 'Travel and adventure photos, reels and stories',
@@ -199,14 +201,16 @@ await shoot(
 );
 
 /* Touch icon: the mark in white on graphite. iOS rounds the corners. */
-await p.setViewportSize({ width: 180, height: 180 });
-writeFileSync(
-  tmp,
-  `<!doctype html><style>html,body{margin:0;width:180px;height:180px;background:#1a1a1a;display:grid;place-items:center;color:#fff}svg{width:96px;height:auto;display:block}</style>${mark}`,
-);
-await p.goto(pathToFileURL(tmp).href);
-await p.screenshot({ path: join(ROOT, 'public/apple-touch-icon.png') });
-console.log('public/apple-touch-icon.png');
+if (!onlyDefault) {
+  await p.setViewportSize({ width: 180, height: 180 });
+  writeFileSync(
+    tmp,
+    `<!doctype html><style>html,body{margin:0;width:180px;height:180px;background:#1a1a1a;display:grid;place-items:center;color:#fff}svg{width:96px;height:auto;display:block}</style>${mark}`,
+  );
+  await p.goto(pathToFileURL(tmp).href);
+  await p.screenshot({ path: join(ROOT, 'public/apple-touch-icon.png') });
+  console.log('public/apple-touch-icon.png');
+}
 
 rmSync(tmp, { force: true });
 await browser.close();

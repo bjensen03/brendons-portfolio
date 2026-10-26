@@ -22,7 +22,7 @@ const { study } = Astro.props;
 const parent = study.data.parent ? await getEntry('studies', study.data.parent) : undefined;
 ---
 
-<Base title={`${study.data.name} — case study`} description={study.data.label} ogImage={`/og/${study.id}.jpg`}>
+<Base title={`${study.data.name} — case study`} description={study.data.description ?? study.data.label} ogImage={`/og/${study.id}.jpg`}>
   <CaseStudy
     study={study}
     parentHref={study.data.parent ? `/work/${study.data.parent}/` : undefined}

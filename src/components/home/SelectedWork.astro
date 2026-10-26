@@ -2,6 +2,7 @@
 import { Picture } from 'astro:assets';
 import { featuredProjects } from './data';
 import { longestWordEm } from '../../lib/display-fit';
+import Result from '../projects/Result.astro';
 
 /*
   Selected Work — index and stage.
@@ -68,8 +69,8 @@ const ratio = (p: (typeof projects)[number]) => (p.shot ? `${p.shot.src.width} /
               <li>
                 <a href={p.href} class="work-item group" data-work-item={i}>
                   <span class="work-item__num text-small tabular-nums" aria-hidden="true">{p.number}</span>
-                  <h3 class="work-item__name text-list">{p.name}</h3>
-                  {p.opens && <span class="work-item__opens text-body">{p.opens}</span>}
+                  <h3 class="work-item__name text-list">{p.name}{p.opens && <span class="sr-only">, {p.opens}</span>}</h3>
+                  {p.opens && <span class="work-item__opens text-body" aria-hidden="true">{p.opens}</span>}
                 </a>
               </li>
             ))
@@ -118,11 +119,16 @@ const ratio = (p: (typeof projects)[number]) => (p.shot ? `${p.shot.src.width} /
                     <p class="mt-2 text-small text-fg-muted">
                       <span class="work-mask"><span class="block" data-work-line>{roleLine(p.role, p.stack)}</span></span>
                     </p>
+                    {p.result && (
+                      <p class="work-result mt-2 text-small font-medium text-fg">
+                        <span class="work-mask"><span class="block" data-work-line><Result text={p.result} /></span></span>
+                      </p>
+                    )}
                     <p class="mt-4 text-small">
                       <span class="work-mask">
                         <span class="block" data-work-line>
                           <a href={p.href} class="group link-reveal font-medium text-fg">
-                            View case study<span class="sr-only">: {p.opens ?? p.name}</span>
+                            View case study<span class="sr-only">: {p.name}</span>
                             <span class="link-arrow ml-1" aria-hidden="true">→</span>
                           </a>
                           {p.more && (
@@ -186,12 +192,13 @@ const ratio = (p: (typeof projects)[number]) => (p.shot ? `${p.shot.src.width} /
             <div class="work-card__text mt-6 md:col-span-6 md:grid md:grid-cols-subgrid" data-reveal>
               <div class="md:col-span-3">
                 <p class="text-title leading-none text-fg-muted tabular-nums" aria-hidden="true">{p.number}</p>
-                <h3 class="work-stack__name mt-3 text-list text-fg">{p.name}</h3>
-                {p.opens && <p class="mt-2 text-body text-fg-muted">{p.opens}</p>}
+                <h3 class="work-stack__name mt-3 text-list text-fg">{p.name}{p.opens && <span class="sr-only">, {p.opens}</span>}</h3>
+                {p.opens && <p class="mt-2 text-body text-fg-muted" aria-hidden="true">{p.opens}</p>}
               </div>
               <div class="work-meta__text mt-4 min-w-0 md:col-span-3 md:mt-0">
                 <p class="text-body text-fg">{p.line}</p>
                 <p class="mt-2 text-small text-fg-muted">{roleLine(p.role, p.stack)}</p>
+                {p.result && <p class="work-result mt-2 text-small font-medium text-fg"><Result text={p.result} /></p>}
                 <p class="mt-4 text-small font-medium text-fg">
                   <span class="link-reveal">View case study</span>
                   <span class="link-arrow ml-1" aria-hidden="true">→</span>

@@ -44,7 +44,8 @@ const {
 } = Astro.props;
 const noindex = Astro.props.noindex;
 
-const pageTitle = title ? `${title} — ${SITE.name}` : SITE.title;
+/* "<Page> | Brendon Jensen"; the home page uses SITE.title. */
+const pageTitle = title ? `${title} | ${SITE.name}` : SITE.title;
 /* Search results cut a description at about 160 characters. A few pages
    pass a longer one (their intro line), so it is trimmed here at a word
    boundary rather than mid-word by the search engine. */
@@ -63,7 +64,7 @@ const ogSized = ogImage.startsWith('/og/');
 const ogAlt =
   ogImageAlt ??
   (ogImage === OG_DEFAULT
-    ? 'Brendon Jensen, web developer, designer and marketer. brendonjensen.dev'
+    ? 'Brendon Jensen, full-stack developer. brendonjensen.dev'
     : `${title ?? SITE.name}, by Brendon Jensen. brendonjensen.dev`);
 ---
 

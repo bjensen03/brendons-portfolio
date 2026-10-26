@@ -24,7 +24,7 @@ const { items } = Astro.props;
               <li class="kd-row">
                 <div class="kd-head">
                   <p class="kd-no" aria-hidden="true">{String(i + 1).padStart(2, '0')}</p>
-                  <h3 class="kd-title text-title" data-reveal>{k.heading}</h3>
+                  <h3 class="kd-title text-sub" data-reveal>{k.heading}</h3>
                 </div>
                 <div class="kd-body cs-prose" set:html={k.html} data-reveal />
               </li>

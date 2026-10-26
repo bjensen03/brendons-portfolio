@@ -77,7 +77,13 @@ const Q2 = 'needs building?';
             <ul class="fd-links">
               {contactLinks.map((l) => (
                 <li>
-                  <ExternalLink href={l.href} rel={l.rel} newTab={l.newTab} class:list={[textLink, 'fd-link text-lead']}>
+                  <ExternalLink
+                    href={l.href}
+                    rel={l.rel}
+                    newTab={l.newTab}
+                    class:list={[textLink, 'fd-link text-lead']}
+                    data-astro-prefetch={l.label === 'Résumé' ? 'false' : undefined}
+                  >
                     {l.label}
                   </ExternalLink>
                 </li>
@@ -262,6 +268,8 @@ const Q2 = 'needs building?';
     display: inline-flex;
     align-items: center;
     min-height: 2.75rem;
+    /* "About" was 42px wide. */
+    min-width: 2.75rem;
     font-weight: 500;
     color: var(--color-fg);
     transition: color var(--duration-fast) var(--ease-out-soft);

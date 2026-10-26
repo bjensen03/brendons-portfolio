@@ -6,7 +6,8 @@ approved: true
 kind: Custom WordPress theme · school systems
 name: Lincoln Academy
 label: Rebuilding a school website around the parents, teachers, and staff who use it every day
-role: Solo Web Developer / Designer
+description: 'A custom WordPress theme and three custom plugins for a K–9 school, with Google staff sign-in and Zapier automations; about 200 pages rebuilt, migrated or reorganized.'
+role: Communications & Website Specialist
 company: Lincoln Academy
 timeline: 2025 to Present
 team: Operations, Administration, Finance, Lunch, Teachers, and Staff
@@ -17,7 +18,7 @@ live: https://lincoln-academy.org
 # screenshots of the rebuilt site. Each one is a system described in the study.
 highlights:
   - name: Staff directory
-    note: One directory — family-facing in public, more detail for logged-in staff
+    note: One directory, family-facing in public, with more detail for logged-in staff
   - name: Lunch ordering
     note: Class orders, missing students, meal totals, labels and CSV export
   - name: Staff portal
@@ -43,9 +44,9 @@ heroMedia:
 # paragraphs); my notes on the overall study and on the lunch system.
 inShort:
   - Lincoln Academy is a K through 9 charter school in Utah. During the summer, I was given the job of ==rebuilding its website==.
-  - I was the solo developer and designer for the rebuild — I planned the new structure, designed the experience, built the custom WordPress theme, migrated the content, built the internal tools, and handled the launch.
-  - Inside it, ==a lunch ordering system== for the kitchen and a field trip and event request system — plus the newsletter I send every Monday and a staff login connected through Google.
-  - With the new lunch dashboard, the kitchen can add custom labels to every item, ==so they cut their time in half==.
+  - I was the solo developer and designer for the rebuild. I planned the new structure, designed the experience, built the custom WordPress theme, migrated the content, built the internal tools, and handled the launch.
+  - Inside it, ==a lunch ordering system== for the kitchen and a field trip and event request system, plus the newsletter I send every Monday and a staff login connected through Google.
+  - With the new lunch dashboard, the kitchen can add custom labels to every item. ==The kitchen told me it now takes about half the time==.
 
 layout:
   - inShort
@@ -103,8 +104,6 @@ eras:
       url: lincoln-academy.org
       body: |
         I rebuilt the site as ==a custom PHP WordPress theme using ACF==.
-
-        The layout stays controlled in code, but the content that staff actually needs to change lives in clear fields.
       shots:
         - src: lincoln-academy/site/home.webp
           alt: The new home page — the most-used links along the top, search and Donate Now in the header, and the "Apply to be an Eagle Here" slider.
@@ -163,7 +162,7 @@ viewers:
 
       ==That does not mean it can run a lunch program.==
 
-      The lunch team needed something built around the way they actually work each morning.
+      The lunch team needed something built around the way they work each morning.
     lead:
       src: lincoln-academy/mockups/lunch-dashboard-laptop.webp
       alt: A MacBook on a wooden desk showing the new kitchen dashboard — meal totals across the top and each class's order in the table below, names blurred.
@@ -241,7 +240,7 @@ viewers:
 
           Now the website prepares much of it automatically.
 
-          They can add custom labels to every item, ==so they cut their time in half==.
+          They can add custom labels to every item, and the kitchen told me it now takes ==about half the time==.
       - tab: The numbers
         group: Now
         title: Day, week or month
@@ -255,7 +254,7 @@ viewers:
           - Printable information
           - Downloadable CSV data
 
-          That gives the lunch staff more time to focus on actually preparing and serving lunch instead of spending the morning organizing data.
+          That gives the lunch staff more time to focus on preparing and serving lunch instead of spending the morning organizing data.
 
   - id: field-trips
     heading: Field trip and event requests
@@ -505,14 +504,12 @@ myRole: |
 
   I also continued working on forms, automations, newsletters, announcements, and the other web systems the school already relied on.
 
-  This was not just a website redesign.
-
   I was rebuilding the public site while also improving several of the workflows running through it.
 
 atAGlance:
   - value: Half the time
-    label: For the kitchen, with custom labels on every lunch item
-    note: From the new lunch dashboard.
+    label: Kitchen time, by their account
+    note: With custom labels on every lunch item in the new lunch dashboard.
   - value: About 200 pages
     label: Rebuilt, migrated, or reorganized
     note: The project included public pages, program information, documents, staff resources, and school content.
@@ -560,13 +557,11 @@ keyDecisions:
 
       I rebuilt the site as a custom PHP WordPress theme using ACF.
 
-      The layout stays controlled in code, but the content that staff actually needs to change lives in clear fields.
+      The layout stays controlled in code, but the content that staff need to change lives in clear fields.
 
       That means somebody can update text, links, images, documents, or other school information without understanding how a page builder was assembled.
 
-      The goal was not just to make the new website easier for me to develop.
-
-      It needed to be ==easier for Lincoln to run after I finished building it==.
+      It also had to be ==easier for Lincoln to run after I finished building it==, not only easier for me to develop.
   - heading: Build one staff directory that works differently for public and internal users
     body: |
       The staff directory was one of the areas administration really wanted improved.
@@ -696,7 +691,7 @@ story:
 
       Now the website prepares much of it automatically.
 
-      That gives the lunch staff more time to focus on actually preparing and serving lunch instead of spending the morning organizing data.
+      That gives the lunch staff more time to focus on preparing and serving lunch instead of spending the morning organizing data.
   - heading: Improving communication with families
     body: |
       My role at Lincoln also includes helping communicate what is happening around the school.
@@ -795,6 +790,11 @@ hardProblem:
     Every attempt after that skipped the teachers who had already been contacted and ==sent zero duplicate emails==.
 
     Then I tested with a teacher who had not been reminded yet and confirmed that person still received exactly one.
+  code:
+    - snippet: lunchReminder
+      caption: Each teacher is reminded once a day. The record is checked before sending and updated only after the email goes out.
+    - snippet: reminderAudit
+      caption: Each day's record can be read straight from the database.
 
 result: |
   The biggest change is that Lincoln's website now feels much more like ==a tool for the people who are already part of the school==.
@@ -805,7 +805,7 @@ result: |
 
   The old website had become a collection of pages and plugins.
 
-  The new one is built much more closely around how the school actually works.
+  The new one is built much more closely around how the school works.
 
 differently: |
   The first thing I would change is the staging and launch process.
@@ -846,58 +846,33 @@ next:
 # backed by a line above.
 overview:
   glance: true
+  hook: I rebuilt a K–9 school's website on my own, with **the internal tools the staff use every day** built into it.
   sections:
-    - heading: Overview
+    - heading: What I built
       body: |
-        Lincoln Academy is a K–9 charter school in Utah. I was the solo developer and designer on its website rebuild. I planned the structure, designed it, built the custom WordPress theme, migrated the content, built the internal tools and handled the launch.
+        It's **a custom WordPress theme with three custom plugins**, including lunch ordering, and a private staff portal behind Google sign-in. About 200 pages were rebuilt, migrated or reorganized.
 
-        I was already on the school's operations team, so I was building for people I worked with every day.
-      labels: ["WordPress", "PHP", "ACF Pro"]
+        With the new lunch dashboard, **the kitchen told me it now takes about half the time**.
+      labels: ['WordPress', 'PHP', 'ACF Pro']
+      show: ['viewer:lunch']
     - heading: The Challenge
       body: |
-        The old site was Divi pages, plugins, forms, documents and staff content added over time, and every change inside Divi was getting harder.
-
-        Lunch ordering was breaking down too. After the school moved to Infinite Campus, the old roster process stopped staying current.
-
-        In an anonymous survey, parents and staff said the mobile site felt like a shrunken desktop site, the navigation was confusing, and basic information took several clicks to find.
-      labels: ["Divi", "Infinite Campus"]
+        The old Divi site was getting harder to change, and lunch ordering broke down after the school moved to Infinite Campus. In a survey, parents and staff pointed to the mobile site and the navigation.
+      labels: ['Divi', 'Infinite Campus']
       image: { src: lincoln-academy/webflow-2025/old-home-attendance-banner.webp, alt: "The old Divi home page in 2025, with an \"Attendance Concerns?\" slide and a bar of links under a two-sided menu." }
-    - heading: The Solution
+    - heading: Systems around the site
       body: |
-        I rebuilt the site as a custom PHP theme with ACF, with the layout in code and content in clear fields. Around it I built three custom plugins, for staff forms, lunch ordering and internal ticketing.
-
-        Staff sign in through Google to a private staff portal.
-
-        Formidable forms already fed Zapier by field ID, so I kept them and built around them.
-
-        A field trip request gets an ID like FT-123456, goes to two approvers, then only to the people who need it. A rejected one comes back with a link to pick a new date.
-      labels: ["ACF Pro", "Custom plugins", "Google SSO", "Formidable", "Zapier"]
-      show: ["viewer:lunch", "viewer:field-trips", "feature:staff-login"]
+        Formidable forms already fed Zapier by field ID, so I kept them and built around them. A field trip request gets its own ID, goes to two approvers, then only to the people who need it.
+      labels: ['Formidable', 'Zapier', 'Google SSO']
+      show: ['viewer:field-trips', 'feature:staff-login']
     - heading: Engineering Deep Dive
       body: |
-        Teachers who missed the lunch cutoff were supposed to get one reminder. Some got the same one several times.
+        Teachers who missed the lunch cutoff were getting the same reminder several times. The reminder ran from a protected link whose token stayed valid, so a refresh re-sent it: **the system knew who hadn't ordered, not who had been reminded**.
 
-        My first guess was someone clicking the button more than once, or a scheduled job running twice.
-
-        It wasn't scheduled at all. The reminder ran from a protected URL in the kitchen dashboard, and the security token stayed valid long enough that a refresh, or another admin opening the page, ran it again. The system knew who hadn't ordered. It didn't know who had already been reminded.
-
-        I made it keep a record of who's been contacted each day. It checks the record before sending and adds a teacher only once the email goes out. Replies now go to the kitchen.
-
-        Then I triggered it several times on purpose. It sent zero duplicate emails, and a teacher who hadn't been reminded yet still got exactly one.
-      labels: ["PHP", "WordPress", "Email"]
-      image: { src: lincoln-academy/lunch/dashboard.webp, alt: "The kitchen dashboard, with the Remind missing and Email summary buttons, the day's meal totals and each class's order, names blurred." }
-    - heading: Results
-      body: |
-        **The kitchen cut its time in half** with custom labels on every lunch item in the new dashboard.
-
-        About 200 pages were rebuilt, migrated or reorganized, and the three custom plugins are built around how the school actually works.
-
-        I don't have a conversion number for a school website, and that wouldn't be the right way to judge it anyway.
-      labels: ["Lunch dashboard", "Migration"]
-      image: { src: lincoln-academy/lunch/labels.webp, alt: "The Lunch Labels page, with special student meals and staff meals filled in and names blurred." }
+        I made it keep a daily record and check it before sending. Then I triggered it several times on purpose and got zero duplicates.
+      labels: ['PHP', 'WordPress', 'Email']
+      show: ['hardProblem']
     - heading: Reflection
       body: |
-        I'd want a staging environment that mirrors production, and a narrower deployment that doesn't move more of the database than it needs to.
-
-        I'd also write a content-parity checklist before migrating a site this size, and run broken-link and accessibility checks before a deploy instead of waiting for a parent to find the problem.
-      labels: ["Staging", "QA"]
+        I'd want a staging environment that mirrors production, and broken-link and accessibility checks before every deploy.
+      labels: ['Staging', 'QA']

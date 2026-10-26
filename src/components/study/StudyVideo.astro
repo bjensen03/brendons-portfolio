@@ -17,6 +17,14 @@ import { showPlaceholders } from '../../lib/placeholders';
   preload is "none" everywhere except the hero, which asks for metadata so
   its first frame is ready by the time the mask opens.
 
+  Phone rendition: if a `<name>-720.mp4` sits next to the clip, phones
+  (under 48rem) get it through a <source media> first, so a 350px-wide hero
+  doesn't pull the 1600px file. If a `<name>-720.webp` poster sits there
+  too, the poster is a <picture> over the video instead of the poster
+  attribute (which can't vary by screen or take fetchpriority). The picture
+  hides once the clip has started playing; until then, and under reduced
+  motion, it's what shows.
+
   A missing file renders as an obvious [NEED …] panel, not a broken player.
 */
 
@@ -38,6 +46,14 @@ interface Props {
 const { video, hero = false, class: cls } = Astro.props;
 const exists = publicFileExists(video.src);
 const poster = video.poster && publicFileExists(video.poster) ? video.poster : undefined;
+const PHONE = '(max-width: 47.999rem)';
+const phoneOf = (url: string | undefined, ext: string) => {
+  if (!url) return undefined;
+  const alt = url.replace(/\.[a-z0-9]+$/i, `-720.${ext}`);
+  return alt !== url && publicFileExists(alt) ? alt : undefined;
+};
+const phoneSrc = phoneOf(video.src, 'mp4');
+const phonePoster = poster ? phoneOf(poster, 'webp') : undefined;
 const style = [cropStyle(video.crop, video.width ?? 1600, video.height ?? 900), video.matte && `--matte: ${video.matte}`]
   .filter(Boolean)
   .join('; ');
@@ -46,7 +62,15 @@ const style = [cropStyle(video.crop, video.width ?? 1600, video.height ?? 900), 
 {
   /* The hero clip's poster is the page's LCP. A poster attribute can't
      take fetchpriority, so it's preloaded at high priority instead. */
-  hero && exists && poster && <link rel="preload" as="image" href={poster} fetchpriority="high" />
+  hero && exists && poster && !phonePoster && <link rel="preload" as="image" href={poster} fetchpriority="high" />
+}
+{
+  hero && exists && poster && phonePoster && (
+    <>
+      <link rel="preload" as="image" href={phonePoster} media={PHONE} fetchpriority="high" />
+      <link rel="preload" as="image" href={poster} media="(min-width: 48rem)" fetchpriority="high" />
+    </>
+  )
 }
 {
   exists ? (
@@ -58,12 +82,30 @@ const style = [cropStyle(video.crop, video.width ?? 1600, video.height ?? 900), 
           loop={!video.once}
           playsinline
           preload={hero ? 'metadata' : 'none'}
-          poster={poster}
+          poster={phonePoster ? undefined : poster}
           aria-label={video.label}
           data-study-video-el
         >
+          {phoneSrc && <source src={phoneSrc} type="video/mp4" media={PHONE} />}
           <source src={video.src} type="video/mp4" />
         </video>
+        {
+          phonePoster && poster && (
+            <picture class="cs-video__poster" aria-hidden="true">
+              <source srcset={phonePoster} media={PHONE} type="image/webp" />
+              <img
+                src={poster}
+                alt=""
+                class="cs-crop__media"
+                width={video.width ?? 1600}
+                height={video.height ?? 900}
+                loading={hero ? 'eager' : 'lazy'}
+                fetchpriority={hero ? 'high' : undefined}
+                decoding="async"
+              />
+            </picture>
+          )
+        }
       </div>
       <button type="button" class="cs-video__toggle" aria-pressed="false" data-study-video-toggle>
         <span class="cs-video__icon" aria-hidden="true"></span>
@@ -78,3 +120,23 @@ const style = [cropStyle(video.crop, video.width ?? 1600, video.height ?? 900), 
     )
   )
 }
+
+<script>
+  /* Hide the picture poster once the clip has really started; it stays for
+     a paused-before-start clip and under reduced motion. */
+  document.querySelectorAll<HTMLElement>('[data-study-video]').forEach((fig) => {
+    const v = fig.querySelector<HTMLVideoElement>('[data-study-video-el]');
+    if (!v || !fig.querySelector('.cs-video__poster')) return;
+    v.addEventListener('playing', () => fig.setAttribute('data-started', ''), { once: true });
+  });
+</script>
+
+<style>
+  .cs-video__poster img {
+    z-index: 1;
+    pointer-events: none;
+  }
+  [data-started] .cs-video__poster {
+    display: none;
+  }
+</style>

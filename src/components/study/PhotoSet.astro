@@ -130,7 +130,7 @@ const tabbed = tabs && cats.length > 1;
             data-active={tabbed && i === 0 ? '' : undefined}
             data-reveal={tabbed ? undefined : ''}
           >
-            <h3 id={`${c.key}-label`} class:list={['ps-label text-lead text-fg', tabbed && 'ps-label--tabbed']}>
+            <h3 id={`${c.key}-label`} class:list={['ps-label text-sub text-fg', tabbed && 'ps-label--tabbed']}>
               {c.label}
             </h3>
 
@@ -265,6 +265,8 @@ const tabbed = tabs && cats.length > 1;
   .ps-tab {
     position: relative;
     min-height: 2.75rem;
+    /* "Water" was 42px wide. */
+    min-width: 2.75rem;
     padding: 0.4rem 0;
     font-weight: 500;
     color: var(--color-fg-muted);
@@ -328,7 +330,6 @@ const tabbed = tabs && cats.length > 1;
 
   .ps-label {
     margin-bottom: 1.25rem;
-    font-weight: 600;
   }
 
   .ps-big,

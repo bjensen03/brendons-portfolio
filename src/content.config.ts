@@ -233,6 +233,9 @@ const studies = defineCollection({
     /* 1 · Hero */
     name: z.string(),
     label: z.string(),
+    /* The page's meta description, when it should say more than `label`:
+       what was built and one verified result. Pages fall back to `label`. */
+    description: z.string().optional(),
     role: z.string(),
     company: z.string(),
     timeline: z.string(),
@@ -635,6 +638,9 @@ const studies = defineCollection({
       .object({
         /* The At a glance figures as a band above the sections. */
         glance: z.boolean().default(true),
+        /* One line under the results band: the payoff in a sentence.
+           Inline markdown (bold) is allowed. */
+        hook: z.string().optional(),
         sections: z
           .array(
             z.object({

@@ -43,6 +43,7 @@ import { RESUME } from '../footer/links';
         <span class="block">Brendon.</span>
       </h1>
       <p class="hero-role text-title text-fg">Full-stack developer</p>
+      <p class="hero-stack text-small text-fg-muted">WordPress &amp; custom PHP · JavaScript/TypeScript · React, Svelte, Next.js · SQL</p>
 
       {/* Scroll cue. A real link, so it works with no JS at all; with motion
           on, home-motion.ts smooth-scrolls it, plays the idle loop and fades
@@ -78,8 +79,12 @@ import { RESUME } from '../footer/links';
       </p>
       <div class="mt-8 flex flex-wrap items-center gap-7" data-reveal="manual" data-hero-actions>
         <a href="/work/" class={primaryButton} data-magnetic="0.25">Projects</a>
-        {RESUME && <ExternalLink href={RESUME} newTab class={textLink}>Résumé</ExternalLink>}
-        {CONTACT.github && <ExternalLink href={CONTACT.github} rel="me" class={textLink}>GitHub</ExternalLink>}
+        {RESUME && <ExternalLink href={RESUME} newTab class={`${textLink} hero-link`} data-astro-prefetch="false">Résumé</ExternalLink>}
+        {/* Phones: Contact takes GitHub's place (GitHub stays in the menu
+            and the footer); from tablet up GitHub shows and Contact is in
+            the nav. */}
+        <a href="/contact/" class={`${textLink} hero-link hero-link--phone`}>Contact</a>
+        {CONTACT.github && <ExternalLink href={CONTACT.github} rel="me" class={`${textLink} hero-link hero-link--wide`}>GitHub</ExternalLink>}
       </div>
     </div>
   </div>
@@ -105,9 +110,41 @@ import { RESUME } from '../footer/links';
     margin-top: 0.07em;
   }
 
-  /* The role, straight under the name. */
+  /* The role, straight under the name, and the stack under that: small
+     and muted, a footnote to the role. */
   .hero-role {
     margin-top: 0.75rem;
+  }
+  .hero-stack {
+    margin-top: 0.375rem;
+    max-width: 34rem;
+  }
+
+  /* Text links in the actions row: a 44px tap target without moving the
+     type. The padding grows the hit area; the matching negative margin
+     takes the space back, so the row looks exactly as before. */
+  .hero-link {
+    --hit: max(0px, calc((2.75rem - 1lh) / 2));
+    display: inline-block;
+    padding-block: var(--hit);
+    margin-block: calc(-1 * var(--hit));
+  }
+  .hero-link--phone {
+    display: none;
+  }
+  @media (max-width: 47.999rem) {
+    /* Two lines, not three, so the actions stay on the first screen at
+       375×667. */
+    .hero-stack {
+      font-size: var(--text-label);
+      line-height: 1.45;
+    }
+    .hero-link--phone {
+      display: inline-block;
+    }
+    .hero-link--wide {
+      display: none;
+    }
   }
 
   /* ── Scroll cue ─────────────────────────────────────────────────────────
@@ -421,9 +458,12 @@ import { RESUME } from '../footer/links';
       right: var(--grid-margin);
       bottom: calc(var(--spacing-block) + 0.125rem);
     }
+    /* Projects, Résumé and Contact on one row beside the cue from 360 up
+       (a tighter gap than desktop's); narrower phones wrap. */
     .hero-foot [data-hero-actions] {
       margin-top: 1.5rem;
-      padding-right: calc(var(--cue-size) + 0.75rem);
+      column-gap: 0.875rem;
+      padding-right: calc(var(--cue-size) + 0.25rem);
     }
   }
 </style>

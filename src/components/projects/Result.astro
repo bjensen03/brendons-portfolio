@@ -1,0 +1,18 @@
+---
+/*
+  A card's result line. When it has more than one " · " part, each part
+  holds together, so a narrow phone breaks the line between parts, never
+  inside "3.5 MB → 1.8 MB". A single part wraps normally.
+*/
+interface Props {
+  text: string;
+}
+const parts = Astro.props.text.split(' · ');
+---
+
+{parts.map((part, i) => (
+  <>
+    {i > 0 && " · "}
+    <span class:list={[parts.length > 1 && 'whitespace-nowrap']}>{part}</span>
+  </>
+))}

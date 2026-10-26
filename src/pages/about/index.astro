@@ -40,17 +40,8 @@ const ROLE_LINKS: Record<string, { href: string; label: string }> = {
   'Lincoln Academy': { href: '/work/lincoln-academy/', label: 'Lincoln Academy case study' },
   Freelance: { href: '/work/', label: 'All projects' },
 };
-/* Titles as his résumé gives them (2026-10-25), for About only;
-   the case studies keep their own `role` wording. */
-const RESUME_TITLES: Record<string, string> = {
-  'Rally Trailer Manufacturing': 'Full-Stack Web Developer & Marketing Specialist',
-  'PROLOOK Sports': 'Frontend Web Developer',
-  'Lincoln Academy': 'Communications & Website Specialist',
-  Freelance: 'Web Designer & Developer',
-};
 const EXPERIENCE = roles.map((r) => ({
   ...r,
-  title: RESUME_TITLES[r.company] ?? r.title,
   line: r.company === 'PROLOOK Sports' && prolook ? prolook.data.label : r.line,
   link: ROLE_LINKS[r.company] ?? (r.href ? { href: r.href, label: 'Case study' } : undefined),
 }));
@@ -148,8 +139,8 @@ const OUTDOOR = [
         <Image
           src={portrait}
           alt="Brendon Jensen standing in a field below Mt. Timpanogos in the fall."
-          widths={[400, 640, 900, 1128]}
-          sizes="(min-width: 64rem) 30vw, (min-width: 48rem) 36vw, 90vw"
+          widths={[400, 640, 720, 900, 1128]}
+          sizes="(min-width: 64rem) 30vw, (min-width: 48rem) 36vw, min(90vw, 24rem)"
           loading="eager"
         />
       </div>
@@ -167,12 +158,12 @@ const OUTDOOR = [
                 {r.dates ? r.dates : showPlaceholders && <span class="text-fg">[DATE?]</span>}
               </p>
               <div class="ab-exp__main">
-                <h3 class="text-lead font-semibold text-fg">{r.company}</h3>
+                <h3 class="text-sub text-fg">{r.company}</h3>
                 <p class="mt-1 text-body text-fg-muted">{r.title}</p>
                 <p class="ab-p mt-2 text-body text-fg">{r.line}</p>
                 {r.link && (
                   <p class="mt-3 text-body">
-                    <a href={r.link.href} class={textLink}>
+                    <a href={r.link.href} class={`${textLink} hit-44`}>
                       {r.link.label}
                     </a>
                   </p>
@@ -192,12 +183,12 @@ const OUTDOOR = [
         {
           WORK.map((w) => (
             <li class="ab-work__row">
-              <h3 class="ab-work__name text-title text-fg">{w.name}</h3>
+              <h3 class="ab-work__name text-list text-fg">{w.name}</h3>
               <div class="ab-work__text">
                 <p class="ab-p text-body text-fg">{w.body}</p>
                 <p class="ab-work__links mt-3 text-body">
                   {w.links.map((l) => (
-                    <a href={l.href} class={textLink}>
+                    <a href={l.href} class={`${textLink} hit-44`}>
                       {l.label}
                     </a>
                   ))}
@@ -216,7 +207,7 @@ const OUTDOOR = [
         <Image
           src={trekkers}
           alt="Brendon and Kaylee standing together in a glowing orange slot canyon."
-          widths={[480, 720, 960, 1200]}
+          widths={[480, 660, 720, 960, 1200]}
           sizes="(min-width: 64rem) 34vw, (min-width: 48rem) 40vw, 90vw"
         />
       </div>
@@ -237,7 +228,7 @@ const OUTDOOR = [
         </p>
 
         <div class="mt-block">
-          <h3 class="eyebrow">Canyoneering training</h3>
+          <h3 class="mb-3 text-sub text-fg">Canyoneering training</h3>
           <ul class="ab-cred mt-3" role="list">
             {
               OUTDOOR.map((c) => (
@@ -257,12 +248,12 @@ const OUTDOOR = [
     <div class="container-bleed">
       <h2 id="cred-title" class="ab-h text-section type-display-sentence text-fg" data-split>Education and certifications</h2>
       <p class="mt-stack text-body">
-        <ExternalLink href={RESUME} newTab class={textLink}>Résumé (PDF)</ExternalLink>
+        <ExternalLink href={RESUME} newTab class={textLink} data-astro-prefetch="false">Résumé (PDF)</ExternalLink>
       </p>
 
       <div class="ab-creds mt-block">
         <div>
-          <h3 class="eyebrow">Education</h3>
+          <h3 class="mb-3 text-sub text-fg">Education</h3>
           <ul class="ab-cred mt-3" role="list">
             <li>
               <div>
@@ -275,7 +266,7 @@ const OUTDOOR = [
         </div>
 
         <div>
-          <h3 class="eyebrow">Professional certifications</h3>
+          <h3 class="mb-3 text-sub text-fg">Professional certifications</h3>
           <ul class="ab-cred mt-3" role="list">
             {
               CERTS.map((c) => (
@@ -294,7 +285,7 @@ const OUTDOOR = [
         </div>
 
         <div>
-          <h3 class="eyebrow">Recognition</h3>
+          <h3 class="mb-3 text-sub text-fg">Recognition</h3>
           <ul class="ab-cred mt-3" role="list">
             {
               RECOGNITION.map((r) => (

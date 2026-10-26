@@ -360,3 +360,26 @@ html {
     text-wrap: balance;
   }
 }
+
+/* ── 44px tap targets on small text links, at every width ──────────────── */
+
+/* The overview's "Read the full case study" (CaseStudy.astro), the
+   testimonials' "Read on LinkedIn", and any text link given .hit-44 (the
+   About experience links, the Twilight site links) were 27–41px tall. Padding grows the
+   hit area; the matching negative margin takes the space back, so nothing
+   moves and the underline stays under the words. */
+.ov-more,
+.tm-link,
+.hit-44 {
+  --hit: max(0px, calc((2.75rem - 1lh) / 2));
+  padding-block: var(--hit);
+  margin-block: calc(-1 * var(--hit));
+}
+.ov-more,
+.hit-44 {
+  display: inline-block;
+}
+/* It sits 0.75rem under the name (mt-3); keep that gap. */
+.tm-link {
+  margin-top: calc(0.75rem - var(--hit));
+}

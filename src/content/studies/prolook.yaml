@@ -6,7 +6,8 @@ approved: true
 kind: Custom Sage theme · marketing development
 name: PROLOOK Sports
 label: Building fast-moving marketing projects without waiting weeks for development
-role: Web Developer / Marketing Web Development
+description: 'Marketing development inside PROLOOK''s Sage 9 WordPress theme: landing pages, ACF controls and GSAP animation, including PRO-AI, built in about a week, with about 5,000 submissions from July to September.'
+role: Frontend Web Developer
 company: PROLOOK Sports
 timeline: 2026 to Present
 team: Marketing, Sales, Creative, and Development
@@ -432,51 +433,30 @@ next:
 # backed by a line above.
 overview:
   glance: true
+  hook: Marketing brings me the work that can't wait weeks for the normal development queue, and I get it live, sometimes **by the next morning**.
   sections:
-    - heading: Overview
+    - heading: What I built
       body: |
-        I work between PROLOOK's marketing team and its existing development environment. When marketing needs a landing page, a partner page, a form, an animation or something fixed quickly, I take it and get it live. I wasn't brought in to rebuild the platform or replace the other development team.
+        I built the PRO-AI landing page **in about a week from design to live**, and it took **about 5,000 submissions from July to September**.
+
+        The overnight one was the Denver Athletic partner page: five sections, live in time for a client demo.
+      labels: ['WordPress', 'Sage 9', 'Blade', 'ACF']
+      show: ['scroller']
+    - heading: How I work in their theme
+      body: |
+        I'd never worked in Sage 9 or Blade, so I learned the existing theme instead of replacing it. Marketing controls the parts of a page they change through ACF, the layout stays in code, and I build what the theme doesn't have, like GSAP animation and video sections.
 
         I also work on ALL IN Tournament, which has its own study.
-      labels: ["WordPress", "Sage 9", "Blade", "ACF"]
-    - heading: The Challenge
-      body: |
-        Campaigns, landing pages and partner pages sometimes had to go live within a day or the same week. Through the normal development process, they could take a couple of weeks or longer.
-
-        I had never worked in a Sage 9 or Blade codebase before. I had to learn how the theme was built, how it deployed and which parts belonged to another team, while shipping real production work.
-      labels: ["Sage 9", "Blade"]
-    - heading: The Solution
-      body: |
-        I give marketing control of the right parts of a page through ACF and keep the layout and functionality in code. Not everything is editable, just the things marketing actually changes.
-
-        I learned the existing theme and make smaller changes where they make sense, instead of rebuilding it.
-
-        When a design asks for something the theme doesn't have, I build it, from GSAP animations and scroll effects to video sections, rotating partner logos and forms.
-      labels: ["ACF", "GSAP", "JavaScript", "SCSS"]
-      show: ["viewer:homepage-hero"]
+      labels: ['ACF', 'GSAP', 'SCSS']
+      show: ['viewer:homepage-hero']
     - heading: Engineering Deep Dive
       body: |
-        A product section used a pipe character to mark a line break, and customers were seeing the pipe itself. I updated the Blade template to split the text there. It worked locally, but after the deploy production still showed the pipe.
+        A fix worked locally, but production kept showing the old label. The deployed template matched mine **byte for byte**: production was running an old compiled Blade file that no cache tool could clear, and I had no shell access.
 
-        My first thought was cache. I cleared Autoptimize and the hosting cache and hard-refreshed. Nothing changed.
-
-        I downloaded the production template over SFTP and compared it with mine. They were identical byte for byte. Sage 9 compiles Blade into PHP, and production was still running an old compiled file that my cache tools couldn't clear. I had no shell access.
-
-        So I moved the section into a new partial. Blade had never seen that path, so it compiled it fresh, and the correct label appeared as soon as I deployed it.
-      labels: ["Blade", "SFTP", "Autoptimize"]
-      show: ["hardProblem"]
-    - heading: Results
-      body: |
-        **PRO-AI: about a week from design to live, and about 5,000 submissions from July to September.** I built it while working with the heads of marketing and sales, handled the development, testing and publishing, and it went live on schedule.
-
-        The Denver Athletic partner page went from a morning discussion to a complete five-section live page for a client demo the next morning.
-
-        I don't own PROLOOK's analytics, so I'm not attaching conversion numbers to any of it.
-      labels: ["Landing pages", "Forms"]
-      show: ["scroller"]
+        I moved the section into a new partial. Blade compiled it fresh, and the right label appeared on the next deploy.
+      labels: ['Blade', 'SFTP']
+      show: ['hardProblem']
     - heading: Reflection
       body: |
-        I'd want a staging environment that mirrors production more closely, so a problem like the Blade compile cache shows up somewhere safe first.
-
-        I'd also move deployments toward Git instead of archive-based theme imports, and make marketing a simple guide to which ACF fields control which parts of the site.
-      labels: ["Staging", "Git"]
+        I'd want a staging environment that mirrors production, so a problem like the Blade compile cache shows up somewhere safe first.
+      labels: ['Staging', 'Git']

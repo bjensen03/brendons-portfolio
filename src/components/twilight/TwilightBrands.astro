@@ -25,9 +25,9 @@ import { BRAND_GROUPS, BRANDS } from './data';
     {
       BRAND_GROUPS.map((g) => (
         <div class="tb-group" data-reveal>
-          <h3 class="text-small text-fg-muted">
+          <p class="text-small text-fg-muted">
             {g.label} <span class="tabular-nums">· {g.items.length}</span>
-          </h3>
+          </p>
           <ul role="list" class="tb-grid mt-3">
             {g.items.map((b) => (
               <li class="tb-cell text-lead text-fg">{b.name}</li>
