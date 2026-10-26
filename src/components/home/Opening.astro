@@ -1,0 +1,107 @@
+---
+import markRaw from '../../assets/logo/mark.svg?raw';
+
+/*
+  The opening: the portfolio opens through my mark.
+
+  A cover in the ground colour, the mark drawing itself in the middle, then
+  the mark turns into a hole in the cover and rushes past the camera, and the
+  hero is underneath it. The choreography is `opening` in home-motion.ts.
+
+  It must never be able to trap the page, so it only renders when all of
+  these hold: html.motion-ok is set (JS running, motion allowed — and the
+  head script's failsafe removes that class if the motion module never
+  boots), the inline script below said this is the first page of the session
+  and a real page load rather than a view transition, and less than 3.5s
+  have passed (the CSS bail-out at the bottom). It is aria-hidden and takes
+  no focus. Any click, key, wheel or touch finishes it at once.
+*/
+
+const d = markRaw.match(/\sd="([^"]+)"/)?.[1];
+if (!d) throw new Error('Opening needs the path in src/assets/logo/mark.svg.');
+---
+
+<div class="opening" aria-hidden="true" data-opening>
+  <svg class="opening__svg" xmlns="http://www.w3.org/2000/svg" focusable="false">
+    <defs>
+      <mask id="opening-hole" maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%">
+        <rect width="100%" height="100%" fill="white"></rect>
+        <path d={d} fill="black" fill-rule="evenodd" visibility="hidden" data-opening-hole></path>
+      </mask>
+    </defs>
+    <rect class="opening__cover" width="100%" height="100%" mask="url(#opening-hole)"></rect>
+    <path d={d} class="opening__fill" fill-rule="evenodd" data-opening-fill></path>
+    <path d={d} class="opening__stroke" data-opening-stroke></path>
+  </svg>
+</div>
+
+<script is:inline>
+  /* Decide before anything below paints. Once per session, first real load
+     only — a view transition re-runs this with readyState already past
+     'loading', and that is in-site navigation. */
+  (function () {
+    var root = document.documentElement;
+    var play = false;
+    try {
+      play =
+        document.readyState === 'loading' &&
+        root.classList.contains('motion-ok') &&
+        !sessionStorage.getItem('bj-opened');
+      sessionStorage.setItem('bj-opened', '1');
+    } catch (e) {
+      play = false;
+    }
+    if (play) root.setAttribute('data-opening', 'play');
+  })();
+</script>
+
+<style>
+  .opening {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    color: var(--color-fg);
+    /* Last resort: whatever happens, the cover is gone by 3.5s. */
+    animation: opening-bail 1ms linear 3.5s forwards;
+  }
+
+  :global(html.motion-ok[data-opening='play']) .opening {
+    display: block;
+  }
+
+  .opening__svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .opening__cover {
+    fill: var(--color-surface);
+  }
+
+  .opening__fill {
+    fill: currentColor;
+    opacity: 0;
+  }
+
+  .opening__stroke {
+    fill: none;
+    stroke: currentColor;
+    opacity: 0;
+  }
+
+  @keyframes opening-bail {
+    to {
+      visibility: hidden;
+      pointer-events: none;
+    }
+  }
+</style>
+
+<script>
+  import { registerMotion } from '../../scripts/motion';
+  import { opening } from '../../scripts/home-motion';
+
+  registerMotion(opening);
+</script>

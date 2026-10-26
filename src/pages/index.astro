@@ -1,27 +1,34 @@
 ---
 import Base from '../layouts/Base.astro';
-import Hero from '../components/Hero.astro';
-import Positioning from '../components/Positioning.astro';
-import SelectedWork from '../components/SelectedWork.astro';
-import Lenses from '../components/Lenses.astro';
-import Proof from '../components/Proof.astro';
-import ContactCta from '../components/ContactCta.astro';
+import Opening from '../components/home/Opening.astro';
+import Hero from '../components/home/Hero.astro';
+import WhatIBuild from '../components/home/WhatIBuild.astro';
+import SelectedWork from '../components/home/SelectedWork.astro';
+import Expertise from '../components/home/Expertise.astro';
+import Experience from '../components/home/Experience.astro';
+import Testimonials from '../components/home/Testimonials.astro';
+import TwilightSection from '../components/home/TwilightSection.astro';
 
 /*
   Home page.
 
-  Structure is Phase 2 complete. Two sections render marked placeholders until
-  Phase 0 content exists: selected work fills itself from the projects
-  collection, and the proof strip fills from PROOF in config.ts. Neither
-  invents anything.
+  Opening (first visit of a session) → full-screen hero over the code field →
+  What I build → Selected Work → Expertise → Experience → What people say → The Twilight
+  Trekkers. The closing contact section (#contact) is the site footer, from
+  Base. Motion lives in src/scripts/home-motion.ts (the Twilight section's
+  in src/scripts/twilight-motion.ts), registered from each section;
+  motion.css (loaded site-wide from Base) is its CSS half. Everything is
+  fully visible without JS or with reduced motion.
 */
 ---
 
-<Base>
+<Base preloadMono>
+  <Opening />
   <Hero />
-  <Positioning />
+  <WhatIBuild />
   <SelectedWork />
-  <Lenses />
-  <Proof />
-  <ContactCta />
+  <Expertise />
+  <Experience />
+  <Testimonials />
+  <TwilightSection />
 </Base>

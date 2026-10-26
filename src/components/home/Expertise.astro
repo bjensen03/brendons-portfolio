@@ -1,0 +1,217 @@
+---
+import { expertiseAreas, pad, textLink } from './data';
+import { showPlaceholders } from '../../lib/placeholders';
+
+/*
+  Expertise. A WAI-ARIA tabs pattern with a no-JS fallback: without script the
+  tab list is hidden and all the panels render stacked, so nothing is lost.
+  With script (html.js, set in Base before first paint) the panels share one
+  grid cell, so the box is always as tall as the tallest panel and switching
+  never moves the page below.
+
+  Tools are pulled from the case studies' full-stack lists, not typed here —
+  a list that isn't confirmed yet carries a marker. The tab column is
+  sticky at 1024+, so it stays beside the panel instead of ending in a void.
+*/
+
+const areas = await expertiseAreas();
+---
+
+<section id="expertise" class="bg-white py-section" aria-labelledby="expertise-title">
+  <div class="container-bleed">
+    <div class="grid grid-cols-4 gap-x-(--grid-gutter) md:grid-cols-6 lg:grid-cols-12">
+      <div class="col-span-full lg:col-span-6">
+        <h2 id="expertise-title" class="text-heading text-fg" data-split>Expertise</h2>
+      </div>
+    </div>
+
+    <div class="mt-block grid grid-cols-4 gap-x-(--grid-gutter) md:grid-cols-6 lg:grid-cols-12" data-tabs>
+      <div
+        role="tablist"
+        aria-label="Expertise areas"
+        aria-orientation="vertical"
+        class="col-span-full grid grid-cols-2 gap-1 self-start rounded-control bg-soft p-1 md:grid-cols-5 lg:sticky lg:top-[calc(var(--spacing-nav)+var(--spacing-block))] lg:col-span-4 lg:block lg:rounded-none lg:bg-transparent lg:p-0"
+        data-tablist
+      >
+        {
+          areas.map((area, i) => (
+            <button
+              type="button"
+              role="tab"
+              id={`tab-${area.id}`}
+              aria-controls={`panel-${area.id}`}
+              aria-selected={i === 0 ? 'true' : 'false'}
+              tabindex={i === 0 ? 0 : -1}
+              class="relative flex min-h-12 w-full items-center justify-center rounded-control max-md:last:odd:col-span-2 border border-transparent px-3 text-center text-small font-medium text-fg-muted transition-soft hover:text-fg aria-selected:border-edge aria-selected:bg-white aria-selected:text-fg lg:items-baseline lg:justify-start lg:gap-4 lg:rounded-none lg:border-x-0 lg:border-t-edge lg:border-b-0 lg:py-5 lg:pr-0 lg:pl-5 lg:text-left lg:text-lead lg:font-medium lg:last:border-b lg:last:border-b-edge lg:aria-selected:bg-transparent lg:aria-selected:before:absolute lg:aria-selected:before:inset-y-0 lg:aria-selected:before:left-0 lg:aria-selected:before:w-0.5 lg:aria-selected:before:bg-fg"
+            >
+              <span class="hidden text-small text-fg-muted tabular-nums lg:inline" aria-hidden="true">
+                {pad(i + 1)}
+              </span>
+              <span>{area.name}</span>
+            </button>
+          ))
+        }
+      </div>
+
+      <div
+        class="col-span-full mt-10 md:mt-block lg:col-span-7 lg:col-start-6 lg:mt-0"
+        data-panels
+      >
+        {
+          areas.map((area, i) => (
+            <div
+              role="tabpanel"
+              id={`panel-${area.id}`}
+              aria-labelledby={`tab-${area.id}`}
+              data-inactive={i !== 0 ? '' : undefined}
+              class="panel"
+            >
+              <h3 class="text-title text-fg">{area.heading}</h3>
+              {area.body.split('\n\n').map((para, j) => (
+                <p class:list={[j === 0 ? 'mt-stack' : 'mt-[1em]', 'max-w-measure text-lead text-fg-muted']}>{para}</p>
+              ))}
+
+              {(area.tools.length > 0 || showPlaceholders) && (
+                <div class="mt-block">
+                  <h4 class="text-small font-medium text-fg-muted">Tools</h4>
+                  <ul class="mt-3 grid md:grid-cols-2 md:gap-x-(--grid-gutter)">
+                    {area.tools.length > 0 ? (
+                      area.tools.map((tool) => (
+                        <li class="border-b border-edge py-2.5 text-body text-fg">{tool}</li>
+                      ))
+                    ) : (
+                      <li class="border-b border-edge py-2.5 text-body text-fg">
+                        [PLACEHOLDER — confirmed tools]
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              )}
+
+              {area.studies.length > 0 && (
+                <div class="mt-10">
+                  <h4 class="text-small font-medium text-fg-muted">Used in</h4>
+                  <ul class="mt-3 flex flex-wrap gap-x-6 gap-y-3">
+                    {area.studies.map((s) => (
+                      <li>
+                        <a href={s.href} class={textLink}>
+                          {s.name}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* No script: hide the (useless) tab buttons and show every panel. */
+  :global(html:not(.js)) [data-tablist] {
+    display: none;
+  }
+  :global(html:not(.js)) .panel + .panel {
+    margin-top: var(--spacing-section-sm);
+  }
+
+  /* Script: every panel in one cell; inactive ones keep their space but are
+     invisible (and out of the accessibility tree and tab order). Not the
+     `hidden` attribute: Tailwind's preflight forces [hidden] to display:none
+     with a layered !important that nothing here can override, and that would
+     collapse the box to the current panel's height. */
+  :global(html.js) [data-panels] {
+    display: grid;
+  }
+  :global(html.js) .panel {
+    grid-area: 1 / 1;
+  }
+  :global(html.js) .panel[data-inactive] {
+    visibility: hidden;
+  }
+</style>
+
+<script>
+  /* Tabs: roving tabindex, arrows move and select, Home/End jump. */
+  const setupTabs = () => {
+    document.querySelectorAll<HTMLElement>('[data-tabs]').forEach((root) => {
+      if (root.dataset.tabsReady === 'true') return;
+      root.dataset.tabsReady = 'true';
+
+      const list = root.querySelector<HTMLElement>('[role="tablist"]');
+      const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+      if (!list || tabs.length === 0) return;
+
+      let current = -1;
+      const select = (index: number, focus = true) => {
+        const from = current >= 0 ? document.getElementById(tabs[current].getAttribute('aria-controls') ?? '') : null;
+        tabs.forEach((tab, i) => {
+          const on = i === index;
+          tab.setAttribute('aria-selected', String(on));
+          tab.tabIndex = on ? 0 : -1;
+          const panel = document.getElementById(tab.getAttribute('aria-controls') ?? '');
+          if (panel) {
+            panel.toggleAttribute('data-inactive', !on);
+            panel.inert = !on;
+          }
+        });
+        if (focus) tabs[index].focus();
+        /* Tell the motion layer (home-motion.ts) so it can crossfade. */
+        const to = document.getElementById(tabs[index].getAttribute('aria-controls') ?? '');
+        if (current >= 0 && index !== current && to) {
+          root.dispatchEvent(new CustomEvent('tabs:change', { detail: { from, to } }));
+        }
+        current = index;
+      };
+
+      tabs.forEach((tab, i) => tab.addEventListener('click', () => select(i, false)));
+      select(Math.max(0, tabs.findIndex((t) => t.getAttribute('aria-selected') === 'true')), false);
+
+      list.addEventListener('keydown', (event) => {
+        const current = tabs.indexOf(document.activeElement as HTMLButtonElement);
+        if (current < 0) return;
+        const last = tabs.length - 1;
+        let next: number | undefined;
+        switch (event.key) {
+          case 'ArrowRight':
+          case 'ArrowDown':
+            next = current === last ? 0 : current + 1;
+            break;
+          case 'ArrowLeft':
+          case 'ArrowUp':
+            next = current === 0 ? last : current - 1;
+            break;
+          case 'Home':
+            next = 0;
+            break;
+          case 'End':
+            next = last;
+            break;
+        }
+        if (next === undefined) return;
+        event.preventDefault();
+        select(next);
+      });
+
+      /* Vertical list at ≥1024; a row of five at 768, two columns below. */
+      const mq = window.matchMedia('(min-width: 64rem)');
+      const orient = () => list.setAttribute('aria-orientation', mq.matches ? 'vertical' : 'horizontal');
+      orient();
+      mq.addEventListener('change', orient);
+    });
+  };
+
+  setupTabs();
+  document.addEventListener('astro:page-load', setupTabs);
+</script>
+
+<script>
+  import { registerMotion } from '../../scripts/motion';
+  import { expertisePanels } from '../../scripts/home-motion';
+
+  registerMotion(expertisePanels);
+</script>

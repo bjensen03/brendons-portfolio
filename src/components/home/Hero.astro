@@ -1,0 +1,426 @@
+---
+import CodeField from './CodeField.astro';
+import { primaryButton, textLink } from './data';
+
+/*
+  Hero. Full screen, and the type is the hero: "Hi, I'm Brendon." at the mega
+  step over a faint field of code from the case studies. One plain sentence
+  and the two actions sit bottom-left.
+
+  The height is the small viewport minus the sticky nav (padding included,
+  border-box), so the fold lands
+  exactly at the bottom of the screen and mobile browser chrome can't make it
+  jump. Everything inside is either in flow or absolutely positioned within
+  that box, so nothing the motion does can move the page.
+*/
+---
+
+<section
+  class="relative isolate overflow-hidden"
+  aria-labelledby="hero-title"
+  data-hero
+>
+  <CodeField />
+
+  <div
+    class="hero-body container-bleed relative flex min-h-[calc(100svh-var(--spacing-nav))] flex-col justify-between gap-block py-block"
+  >
+    {/* Shrinks to the headline's width, so the scroll cue can hang off the
+        full stop of "BRENDON." at every size. */}
+    <div class="hero-head relative w-fit max-w-full">
+      <h1
+        id="hero-title"
+        class="hero-title text-mega text-fg"
+        data-reveal="manual"
+        data-hero-title
+      >
+        {/* The space keeps "I'm Brendon" two words for anything reading textContent. */}
+        <span class="block">Hi, I’m</span>{' '}
+        <span class="block">Brendon.</span>
+      </h1>
+
+      {/* Scroll cue. A real link, so it works with no JS at all; with motion
+          on, home-motion.ts smooth-scrolls it, plays the idle loop and fades
+          it out as the page starts to move. Absolutely placed, so it can't
+          shift the layout. */}
+      <div class="hero-cue" data-reveal="manual" data-hero-cue>
+        <a
+          href="#what-i-build"
+          class="hero-cue__button"
+          aria-label="Scroll to what I build"
+          data-magnetic="0.3"
+          data-hero-cue-link
+        >
+          <svg class="hero-cue__ring" viewBox="0 0 64 64" aria-hidden="true">
+            <circle class="hero-cue__track" cx="32" cy="32" r="31.5" />
+            <circle class="hero-cue__trace" cx="32" cy="32" r="31.5" pathLength="100" />
+          </svg>
+          <span class="hero-cue__window" aria-hidden="true">
+            {[0, 1].map((i) => (
+              <svg class={`hero-cue__arrow hero-cue__arrow--${i ? 'in' : 'out'}`} viewBox="-12 -12 48 48">
+                <path d="M12 4v15.5M5.5 13 12 19.5 18.5 13" />
+              </svg>
+            ))}
+          </span>
+        </a>
+        <span class="hero-cue__line" aria-hidden="true"><span class="hero-cue__pulse"></span></span>
+      </div>
+    </div>
+
+    <div class="hero-foot max-w-[34rem]">
+      <p class="text-lead text-fg" data-settle data-hero-line>
+        I'm a full-stack developer with over 5 years of experience. I enjoy building websites and web apps, especially when I get to work on something custom. My background in design and marketing has also helped me understand what businesses actually need from their websites.
+      </p>
+      <div class="mt-8 flex flex-wrap items-center gap-7" data-reveal="manual" data-hero-actions>
+        <a href="#work" class={primaryButton} data-magnetic="0.25">See the work</a>
+        <a href="/about/" class={textLink}>About me</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Full width: "BRENDON." — the longest line, about 6.4em in Archivo at
+     this width — is sized to the whole content width (viewport minus both
+     margins), so it runs margin to margin at every size. Two caps keep it
+     sane: 30svh so both lines plus the sentence and actions still fit the
+     fold on a short, wide screen, and 24rem (384px) as an absolute ceiling
+     for very large monitors. 53px at 390, 203 at 1440, 271 at 1920, 363
+     at 2560. */
+  .hero-title {
+    font-size: min(calc((100vw - 2 * var(--grid-margin)) / 6.6), 30svh, 24rem);
+    transform-origin: 0% 100%;
+  }
+
+  /* At the mega step's tight leading the comma in "HI, I'M" drops into the
+     cap height of "BRENDON." — a small gap between the two lines, here
+     rather than in the global token. */
+  .hero-title > span + span {
+    margin-top: 0.07em;
+  }
+
+  /* ── Scroll cue ─────────────────────────────────────────────────────────
+     Hangs under the full stop of "BRENDON.", right-aligned to the
+     headline, where the hero is empty at every width (the sentence and the
+     buttons are bottom-left). The hairline under it runs to the hero's
+     bottom edge and is cut off there by the section's overflow, so it reads
+     as carrying on into the next section.
+
+     Contrast (non-text, 3:1): the ring is --color-fg-muted and the arrow
+     --color-fg on the scope surface (5.5+ and 9.5+ at every brightness);
+     hovered, --color-on-accent on the accent fill (5.4+), edged in
+     --color-focus (4.1+). The trace and pulse are decoration on top. */
+  .hero-cue {
+    --cue-size: 3.25rem;
+    position: absolute;
+    top: calc(100% + clamp(1.25rem, 2.2vw, 2.25rem));
+    right: 0;
+    width: var(--cue-size);
+  }
+
+  @media (min-width: 48rem) {
+    .hero-cue {
+      --cue-size: 4rem;
+    }
+  }
+
+  .hero-cue__button {
+    position: relative;
+    display: block;
+    width: var(--cue-size);
+    height: var(--cue-size);
+    border-radius: 50%;
+    background-color: var(--color-surface);
+    color: var(--color-fg);
+    transition: color var(--duration-base) var(--ease-out-soft);
+  }
+
+  /* The hover fill grows out from the centre rather than snapping on. */
+  .hero-cue__button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background-color: var(--color-accent-fill);
+    scale: 0;
+    transition: scale var(--duration-base) var(--ease-out-strata);
+  }
+
+  .hero-cue__button:hover,
+  .hero-cue__button:focus-visible {
+    color: var(--color-on-accent);
+  }
+
+  .hero-cue__button:hover::before,
+  .hero-cue__button:focus-visible::before {
+    scale: 1;
+  }
+
+  .hero-cue__button:focus-visible {
+    border-radius: 50%;
+  }
+
+  .hero-cue__ring {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    /* Start the trace at twelve o'clock. */
+    rotate: -90deg;
+    fill: none;
+  }
+
+  .hero-cue__track {
+    stroke: var(--color-fg-muted);
+    stroke-width: 1px;
+    vector-effect: non-scaling-stroke;
+    transition: stroke var(--duration-base) var(--ease-out-soft);
+  }
+
+  .hero-cue__button:hover .hero-cue__track,
+  .hero-cue__button:focus-visible .hero-cue__track {
+    /* The fill alone is ~2.1:1 against the light grounds; the focus tan
+       edges it at 3:1 or better at every brightness. */
+    stroke: var(--color-focus);
+  }
+
+  .hero-cue__trace {
+    stroke: var(--color-focus);
+    stroke-width: 1.5px;
+    stroke-linecap: butt;
+    /* No vector-effect here, so the dashes stay in pathLength units. */
+    stroke-dasharray: 0 100;
+    opacity: 0;
+  }
+
+  /* The arrows slide inside the circle and are clipped by it. */
+  .hero-cue__window {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  .hero-cue__arrow {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .hero-cue__arrow path {
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* The fresh arrow waits above the circle until the loop drops it in. */
+  .hero-cue__arrow--in {
+    translate: 0 -100%;
+  }
+
+  /* Desktop: the hairline from the cue to the hero's bottom edge. Its
+     height overshoots on purpose; the hero clips it. */
+  .hero-cue__line {
+    display: none;
+  }
+
+  @media (min-width: 64rem) {
+    .hero-cue__line {
+      display: block;
+      position: absolute;
+      top: calc(100% + 0.75rem);
+      left: calc(50% - 0.5px);
+      width: 1px;
+      height: 100svh;
+      overflow: hidden;
+      background-color: var(--color-edge);
+    }
+  }
+
+  .hero-cue__pulse {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1px;
+    height: 3.5rem;
+    background-image: linear-gradient(transparent, var(--color-focus) 70%, transparent);
+    translate: 0 -100%;
+    opacity: 0;
+  }
+
+  /*
+    The idle loop. Runs only while home-motion.ts says so: after the
+    entrance (data-entered) and while the hero is on screen and the tab is
+    visible (is-looping). Never under reduced motion, because that setup
+    doesn't run then.
+
+    One cycle: the arrow drops out of the bottom of the circle, a fresh one
+    falls in from the top, a short tan stroke runs once round the ring, and
+    a tan pulse carries on down the hairline. Then it rests. The arrow that
+    ends the cycle in the centre is drawn exactly like the one that starts
+    it, so the loop point is invisible.
+
+    The easing is set on the element, not inside the keyframes: it then
+    applies to each keyframe segment, and the token resolves (var() inside a
+    keyframe's timing function doesn't take).
+  */
+  .hero-cue.is-looping[data-entered] .hero-cue__arrow--out {
+    animation: cue-out var(--duration-cue) var(--ease-in-out-soft) infinite;
+  }
+
+  .hero-cue.is-looping[data-entered] .hero-cue__arrow--in {
+    animation: cue-in var(--duration-cue) var(--ease-out-strata) infinite;
+  }
+
+  .hero-cue.is-looping[data-entered] .hero-cue__trace {
+    animation: cue-trace var(--duration-cue) var(--ease-in-out-soft) infinite;
+  }
+
+  .hero-cue.is-looping[data-entered] .hero-cue__pulse {
+    animation: cue-pulse var(--duration-cue) var(--ease-in-out-soft) infinite;
+  }
+
+  @keyframes cue-out {
+    0% {
+      translate: 0 0;
+    }
+    28%,
+    100% {
+      translate: 0 100%;
+    }
+  }
+
+  @keyframes cue-in {
+    0%,
+    9% {
+      translate: 0 -100%;
+    }
+    48%,
+    100% {
+      translate: 0 0;
+    }
+  }
+
+  @keyframes cue-trace {
+    0%,
+    12% {
+      stroke-dasharray: 0 100;
+      stroke-dashoffset: 0;
+      opacity: 0;
+    }
+    13% {
+      opacity: 1;
+    }
+    36% {
+      stroke-dasharray: 30 70;
+    }
+    58% {
+      opacity: 1;
+    }
+    60%,
+    100% {
+      stroke-dasharray: 0 100;
+      stroke-dashoffset: -100;
+      opacity: 0;
+    }
+  }
+
+  @keyframes cue-pulse {
+    0%,
+    20% {
+      translate: 0 -100%;
+      opacity: 0;
+    }
+    24% {
+      opacity: 1;
+    }
+    78% {
+      opacity: 0;
+    }
+    82%,
+    100% {
+      translate: 0 40svh;
+      opacity: 0;
+    }
+  }
+
+  /* ── Desktop: the intro and the actions share a row ──────────────────
+     The intro is three sentences (~55 words). Stacked under it at a
+     34rem measure the buttons fell below the fold at 1440×900. Here the
+     intro takes a wider measure at a step under the lead size, wraps
+     "pretty" (no orphaned last word, no balanced ragged block), and the
+     actions sit beside its last lines, so the whole hero fits the first
+     screen down to 1280×720 without the name getting any smaller. */
+  @media (min-width: 64rem) {
+    .hero-foot {
+      display: flex;
+      align-items: flex-end;
+      gap: clamp(2rem, 4vw, 4rem);
+      max-width: none;
+      /* Clear of the scroll cue (4rem) and its hairline at the right edge. */
+      padding-right: 6rem;
+    }
+    .hero-foot [data-hero-line] {
+      flex: 0 1 44rem;
+      min-width: 0;
+      font-size: min(var(--text-lead), 1.4375rem);
+      line-height: 1.45;
+      text-wrap: pretty;
+    }
+    .hero-foot [data-hero-actions] {
+      flex: none;
+      margin-top: 0;
+      flex-wrap: nowrap;
+      padding-bottom: 0.2rem;
+    }
+  }
+
+  /* ── Phones and portrait tablets ─────────────────────────────────────
+     A poster, sized by its content: the name starts just under the bar,
+     the sentence and the actions follow it, and the hero ends where they
+     do — no screen-tall frame with the type pushed to one end and empty
+     ground at the other. The code field is a texture
+     behind the name (CodeField.astro). The scroll cue sits at the end of
+     the actions row. */
+  @media (max-width: 63.999rem) and (orientation: portrait) {
+    .hero-body {
+      min-height: 0;
+      justify-content: flex-start;
+      gap: 0;
+      padding-block: clamp(2.25rem, 6svh, 3.5rem) var(--spacing-block);
+    }
+    .hero-head {
+      position: static;
+    }
+    .hero-foot {
+      margin-top: var(--spacing-stack);
+    }
+    .hero-cue {
+      top: auto;
+      right: var(--grid-margin);
+      bottom: calc(var(--spacing-block) + 0.125rem);
+    }
+    .hero-foot [data-hero-actions] {
+      margin-top: 1.5rem;
+      padding-right: calc(var(--cue-size) + 0.75rem);
+    }
+  }
+</style>
+
+<script>
+  import { registerMotion } from '../../scripts/motion';
+  import { heroEntrance, heroScroll, heroCue, codeField } from '../../scripts/home-motion';
+  import { heroTouch } from '../../scripts/mobile-motion';
+
+  registerMotion(heroEntrance);
+  registerMotion(heroScroll);
+  registerMotion(heroCue);
+  registerMotion(codeField);
+  registerMotion(heroTouch);
+</script>

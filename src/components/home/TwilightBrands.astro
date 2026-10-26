@@ -1,0 +1,52 @@
+---
+import { textLink } from './data';
+import { BRANDS_FEATURED, BRANDS_MORE, BRANDS_HREF } from './twilight-data';
+
+/*
+  "Brands we've worked with": a short run of names (BRANDS_FEATURED in
+  twilight-data.ts), then a link to the full list on /twilight-trekkers/
+  ("and 25 more"). All 34 was a wall of text for a teaser. Text only (no
+  logos in the repo); the names wrap as one line of type with a muted
+  middle dot between them.
+  `size` picks the type step for the names.
+*/
+
+interface Props {
+  size?: 'lead' | 'title';
+  class?: string;
+}
+
+const { size = 'lead', class: cls } = Astro.props;
+---
+
+<div class:list={['brands', cls]}>
+  <p class="text-body text-fg-muted">Brands we’ve worked with</p>
+  <ul class:list={['brands__list mt-3 text-fg', size === 'title' ? 'text-title' : 'text-lead']}>
+    {BRANDS_FEATURED.map((b) => <li>{b}</li>)}
+  </ul>
+  {
+    BRANDS_MORE > 0 && (
+      <p class="mt-4 text-body">
+        <a href={BRANDS_HREF} class:list={[textLink, 'group']}>
+          And {BRANDS_MORE} more<span class="link-arrow ml-1" aria-hidden="true">→</span>
+        </a>
+      </p>
+    )
+  }
+</div>
+
+<style>
+  .brands__list {
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: 0.15em;
+  }
+  .brands__list li {
+    white-space: nowrap;
+  }
+  .brands__list li:not(:last-child)::after {
+    content: '·';
+    margin-inline: 0.45em;
+    color: var(--color-fg-muted);
+  }
+</style>

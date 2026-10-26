@@ -1,0 +1,652 @@
+---
+import { Picture } from 'astro:assets';
+import { featuredProjects } from './data';
+import { longestWordEm } from '../../lib/display-fit';
+
+/*
+  Selected Work — index and stage.
+
+  At 1024+ the section holds one sticky frame, gutter to gutter at any width:
+  the project names down the left (5 columns), the active project's screenshot
+  large on the right (7 columns) with its number, line, role · stack and link underneath. Scrolling
+  through the section walks the active project down the list; hovering or
+  focusing a name jumps straight to it. The run is one screen plus 55vh per
+  project, so it scales with however many studies are published.
+
+  The stage is turned on by workStage (home-motion.ts) setting data-ready on
+  the section. Until then — phones, tablets, no JS — it renders as stacked
+  rows: image, then text, one project after another. Under reduced motion the
+  stage still runs at 1024+, but every change is an instant swap.
+
+  Names are h3s under the section's h2; only one of the two layouts is ever
+  displayed, so they're never announced twice.
+*/
+
+const projects = await featuredProjects();
+
+/* Widths never exceed the source, so a capture is never upscaled. */
+const widthsFor = (w: number) => [640, 960, 1280, 1800, 2560].filter((x) => x <= w);
+/* Phones crop the 16:10 shot by height in the carousel's tall frame, so it
+   renders about 1.3 × the screen wide; tablets show a 30rem card. */
+
+/* The one normal-case line under a name: role, then the first three tools.
+   Each tool name keeps its own words together ("Sage 9", not "Sage / 9"), so
+   the line wraps between tools rather than inside one. */
+const keep = (t: string) => t.replace(/ /g, '\u00a0');
+const roleLine = (role: string, stack: string[]) => `${role} · ${stack.slice(0, 3).map(keep).join(', ')}`;
+---
+
+
+<section
+  data-tone="dark"
+  id="work"
+  class="work pt-section pb-section-sm"
+  aria-labelledby="work-title"
+  data-work
+  style={`--n: ${projects.length}`}
+>
+  <div class="container-bleed">
+    <h2 id="work-title" class="text-heading text-fg" data-split>Selected work</h2>
+  </div>
+
+  {/* Stage (desktop, scripted) */}
+  <div class="work-desk" data-work-desk>
+    <div class="work-pin">
+      <div class="work-pin__grid container-bleed grid h-full grid-cols-12 items-center gap-x-(--grid-gutter)">
+        <div class="relative col-span-5 min-w-0 self-center" data-work-list>
+          <span class="work-marker" aria-hidden="true" data-work-marker></span>
+          <ol>
+          {
+            projects.map((p, i) => (
+              <li>
+                <a href={p.href} class="work-item group" data-work-item={i}>
+                  <span class="work-item__num text-small tabular-nums" aria-hidden="true">{p.number}</span>
+                  <h3 class="work-item__name text-heading">{p.name}</h3>
+                  {p.opens && <span class="work-item__opens text-body">{p.opens}</span>}
+                </a>
+              </li>
+            ))
+          }
+          </ol>
+        </div>
+
+        <div class="col-span-7 min-w-0 self-center">
+          <a href={projects[0]?.href} class="work-stage block" tabindex="-1" aria-hidden="true" data-work-stage>
+            {
+              projects.map((p, i) => (
+                <div class="work-slide" data-work-slide={i}>
+                  {!p.shot && p.shotNeeded && (
+                    <div class="shot-needed" data-work-media>
+                      <span class="font-mono text-label text-fg-muted uppercase">{p.shotNeeded}</span>
+                    </div>
+                  )}
+                  {p.shot && (
+                    <Picture
+                      src={p.shot.src}
+                      alt=""
+                      formats={['avif', 'webp']}
+                      widths={widthsFor(p.shot.src.width)}
+                      sizes="55vw"
+                      loading={i === 0 ? 'eager' : 'lazy'}
+                      pictureAttributes={{ class: 'block h-full w-full' }}
+                      class="work-slide__img h-full w-full object-cover object-top"
+                    />
+                  )}
+                </div>
+              ))
+            }
+          </a>
+
+          <div class="work-meta mt-8" data-work-meta-wrap>
+            {
+              projects.map((p, i) => (
+                <div class="work-meta__group grid grid-cols-7 gap-x-(--grid-gutter)" data-work-meta={i}>
+                  <p class="col-span-2 min-w-0 text-display leading-[0.8] text-fg tabular-nums" aria-hidden="true">
+                    <span class="work-mask"><span class="block" data-work-line>{p.number}</span></span>
+                  </p>
+                  <div class="work-meta__text col-span-5 min-w-0">
+                    <p class="text-body text-fg">
+                      <span class="work-mask"><span class="block" data-work-line>{p.line}</span></span>
+                    </p>
+                    <p class="mt-2 text-small text-fg-muted">
+                      <span class="work-mask"><span class="block" data-work-line>{roleLine(p.role, p.stack)}</span></span>
+                    </p>
+                    <p class="mt-4 text-small">
+                      <span class="work-mask">
+                        <span class="block" data-work-line>
+                          <a href={p.href} class="group link-reveal font-medium text-fg">
+                            View case study<span class="sr-only">: {p.opens ?? p.name}</span>
+                            <span class="link-arrow ml-1" aria-hidden="true">→</span>
+                          </a>
+                          {p.more && (
+                            <a href={p.more.href} class="work-more group link-reveal ml-6 text-fg-muted hover:text-fg">
+                              {p.more.label}
+                              <span class="link-arrow ml-1" aria-hidden="true">→</span>
+                            </a>
+                          )}
+                        </span>
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Stacked rows (no JS). Below 1024 with JS it is a swipeable carousel:
+      one project per screen, scroll-snapped, with a counter, dots and
+      previous / next under it (mobile-motion.ts, workCarousel). */}
+  <div
+    class="work-stack container-bleed pt-block"
+    data-lenis-prevent-horizontal
+    role="region"
+    aria-roledescription="carousel"
+    aria-label="Selected work"
+    data-work-track
+  >
+    {
+      projects.map((p, i) => (
+        <article
+          class="work-card border-t border-edge py-block first:border-t-0 first:pt-0"
+          aria-roledescription="slide"
+          aria-label={`${i + 1} of ${projects.length}: ${p.name}`}
+          data-work-card={i}
+        >
+          <a href={p.href} class="group grid grid-cols-1 gap-x-(--grid-gutter) md:grid-cols-6">
+            <div class="work-card__media relative aspect-shot overflow-hidden rounded-media bg-dark-raised md:col-span-6" data-reveal>
+              {!p.shot && p.shotNeeded && (
+                <div class="shot-needed">
+                  <span class="font-mono text-label text-fg-muted uppercase">{p.shotNeeded}</span>
+                </div>
+              )}
+              {p.shot && (
+                <Picture
+                  src={p.shot.src}
+                  alt={p.shot.alt}
+                  formats={['avif', 'webp']}
+                  widths={widthsFor(p.shot.src.width)}
+                  sizes="(max-width: 47.999rem) 132vw, (max-width: 63.999rem) 76vw, 94vw"
+                  loading="lazy"
+                  pictureAttributes={{ class: 'block h-full w-full' }}
+                  class="work-card__img h-full w-full object-cover object-top"
+                />
+              )}
+            </div>
+            <div class="work-card__text mt-6 md:col-span-6 md:grid md:grid-cols-subgrid" data-reveal>
+              <div class="md:col-span-3">
+                <p class="text-title leading-none text-fg-muted tabular-nums" aria-hidden="true">{p.number}</p>
+                <h3 class="work-stack__name mt-3 text-heading text-fg" style={`--fit: ${longestWordEm(p.name)}`}>{p.name}</h3>
+                {p.opens && <p class="mt-2 text-body text-fg-muted">{p.opens}</p>}
+              </div>
+              <div class="work-meta__text mt-4 min-w-0 md:col-span-3 md:mt-0">
+                <p class="text-body text-fg">{p.line}</p>
+                <p class="mt-2 text-small text-fg-muted">{roleLine(p.role, p.stack)}</p>
+                <p class="mt-4 text-small font-medium text-fg">
+                  <span class="link-reveal">View case study</span>
+                  <span class="link-arrow ml-1" aria-hidden="true">→</span>
+                </p>
+              </div>
+            </div>
+          </a>
+          {/* Outside the card's link, which can't hold another one. Same
+              column as the text above it at every width. */}
+          {p.more && (
+            <div class="work-card__more grid grid-cols-1 gap-x-(--grid-gutter) md:grid-cols-6">
+              <p class="mt-3 text-small md:col-span-3 md:col-start-4">
+                <a href={p.more.href} class="work-card__more-link group text-fg-muted hover:text-fg">
+                  <span class="link-reveal">{p.more.label}</span>
+                  <span class="link-arrow ml-1" aria-hidden="true">→</span>
+                </a>
+              </p>
+            </div>
+          )}
+        </article>
+      ))
+    }
+  </div>
+
+  {
+    projects.length > 1 && (
+      <div class="work-controls container-bleed" data-work-controls>
+        <p class="work-controls__count text-small text-fg" aria-live="polite">
+          <span class="sr-only">Project </span>
+          <span class="tabular-nums" data-work-count>1</span>
+          <span class="text-fg-muted"> / {projects.length}</span>
+        </p>
+        {/* Where you are, not controls: the arrows and the swipe move. */}
+        <div class="work-controls__dots" aria-hidden="true">
+          {projects.map((_, i) => (
+            <span class="work-dot" data-current={i === 0 ? 'true' : undefined} data-work-dot={i}>
+              <span></span>
+            </span>
+          ))}
+        </div>
+        <div class="work-controls__arrows">
+          <button type="button" class="work-arrow" aria-label="Previous project" data-work-prev disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+          </button>
+          <button type="button" class="work-arrow" aria-label="Next project" data-work-next>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+          </button>
+        </div>
+      </div>
+    )
+  }
+</section>
+
+<style>
+  .work-desk {
+    display: none;
+  }
+
+  @media (min-width: 64rem) {
+    .work[data-ready] .work-desk {
+      display: block;
+      /* One screen for the sticky frame plus a stretch of scroll per
+         project, so two projects get a shorter run than four rather than
+         the same run split fewer ways. */
+      height: calc(100vh + var(--n) * 55vh);
+    }
+    .work[data-ready] .work-stack {
+      display: none;
+    }
+  }
+
+  /* MANUFACTURING has to fit a phone's column too. */
+  .work-stack__name {
+    font-size: min(var(--text-heading), calc((100vw - 2 * var(--grid-margin)) / 11.6));
+  }
+  @media (min-width: 48rem) {
+    .work-stack__name {
+      font-size: min(var(--text-heading), calc((100vw - 2 * var(--grid-margin)) / 2 / 11.6));
+    }
+  }
+
+  .work-pin {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding-top: var(--spacing-nav);
+  }
+  /* The brightness rail (ThemeSlider) is fixed 0.5rem from the right edge
+     and 2rem wide, so it covers the last 2.5rem of the screen. The stage and
+     meta run to the right edge of the frame, so the frame keeps at least
+     1.5rem of air past the rail on that side. */
+  .work-pin__grid {
+    padding-inline-end: max(var(--grid-margin), 4rem);
+  }
+
+  /* Names. Dim floor is 54% of fg, which keeps heading-size type at 3:1 or
+     better across the whole --lum range (same floor as What I build). The
+     size is capped so MANUFACTURING, the longest word, fits five columns. */
+  .work-item {
+    display: grid;
+    grid-template-columns: 2.75rem 1fr;
+    align-items: baseline;
+    padding-block: 0.9rem;
+    padding-left: 1.75rem;
+    --lit: 0;
+    color: color-mix(in oklch, var(--color-fg) calc(54% + 46% * var(--lit)), transparent);
+    transition: --lit var(--duration-base) var(--ease-out-soft);
+  }
+  .work-item[data-active] {
+    --lit: 1;
+  }
+  .work-item__name {
+    color: inherit;
+    font-size: min(var(--text-heading), calc((100vw - 2 * var(--grid-margin)) * 5 / 12 / 13));
+    transition: translate var(--duration-base) var(--ease-out-soft);
+  }
+  .work-item[data-active] .work-item__name {
+    translate: 0.25rem 0;
+  }
+  /* The numbers are small text, so the 54% floor that's fine for the names
+     isn't enough here. Inactive ones use the muted token (4.5:1 at every
+     --lum), the active one takes the full fg. */
+  .work-item__num {
+    color: var(--color-fg-muted);
+  }
+  .work-item[data-active] .work-item__num {
+    color: var(--color-fg);
+  }
+  /* "ALL IN Tournament" under PROLOOK: the study the entry opens. Body-size
+     text, so it takes the muted token rather than the names' 54% floor. */
+  .work-item__opens {
+    grid-column: 2;
+    margin-top: 0.35rem;
+    color: var(--color-fg-muted);
+    transition: translate var(--duration-base) var(--ease-out-soft);
+  }
+  .work-item[data-active] .work-item__opens {
+    color: var(--color-fg);
+    translate: 0.25rem 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .work-item,
+    .work-item__name,
+    .work-item__opens {
+      transition: none;
+    }
+  }
+
+  @property --lit {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 1;
+  }
+
+  .work-marker {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 0;
+    border-radius: 2px;
+    background: var(--color-accent-fill);
+  }
+
+  /* The frame is one screen tall, so the stage has to fit what's left of it
+     after the nav, the meta block under it and some air — otherwise the
+     meta hangs out of the bottom of the frame and, at the end of the run,
+     out of the section. --work-meta-h is measured by the script below; the
+     16 / 10 matches --aspect-shot. */
+  .work-stage {
+    width: min(100%, calc((100svh - var(--spacing-nav) - var(--work-meta-h, 12rem) - 2rem - 4rem) * 16 / 10));
+    position: relative;
+    aspect-ratio: var(--aspect-shot);
+    overflow: hidden;
+    border-radius: var(--radius-media);
+    background: var(--color-dark-raised);
+  }
+  .work-slide {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    visibility: hidden;
+  }
+  .work-slide:first-child {
+    visibility: visible;
+  }
+  /* Stand-in for a featured study with no screenshot yet: the frame's own
+     solid surface with the label centred, same as the About placeholders. */
+  .shot-needed {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    padding: 1.5rem;
+    text-align: center;
+    background: var(--color-dark-raised);
+    transform-origin: 50% 50%;
+  }
+
+  .work-slide__img {
+    transform-origin: 50% 50%;
+    will-change: transform;
+  }
+
+  /* Meta groups share one grid cell, so the block is as tall as the tallest
+     and switching projects can't move anything below it. */
+  .work-meta {
+    display: grid;
+  }
+  .work-meta__group {
+    grid-area: 1 / 1;
+    visibility: hidden;
+  }
+  .work-meta__group:first-child {
+    visibility: visible;
+  }
+  /* Long role · stack lines wrap inside their column, never run past it. */
+  .work-meta__text {
+    overflow-wrap: anywhere;
+  }
+  .work-mask {
+    display: block;
+    overflow: hidden;
+    /* Room for descenders and the link underline inside the mask. */
+    padding-bottom: 0.15em;
+    margin-bottom: -0.15em;
+  }
+
+  /* ── Phones and tablets: the swipeable carousel ─────────────────────────
+     Below 1024 with JS, the stacked rows become one horizontal, snapping
+     track: a project per card, the next one peeking in from the right so
+     the swipe is obvious. The screenshot gets a tall frame (most of the
+     screen) and drifts sideways as the card slides, where the browser has
+     scroll-driven animations. workCarousel (mobile-motion.ts) runs the
+     counter, the dots, the arrows and a one-time swipe hint. Desktop (1024+)
+     never sees any of this; without JS the rows stay stacked. */
+  .work-controls {
+    display: none;
+  }
+
+  @media (max-width: 63.999rem) {
+    :global(html.js) .work-stack {
+      position: relative;
+      display: flex;
+      gap: var(--grid-gutter);
+      overflow-x: auto;
+      overflow-y: hidden;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--grid-margin);
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x pan-y;
+    }
+    :global(html.js) .work-stack::-webkit-scrollbar {
+      display: none;
+    }
+    /* The trailing margin, so the last card can snap to the start. */
+    /* Room after the last card so it can snap to the same left edge as the
+       others (the track ends with it at the start, not 30px in). */
+    :global(html.js) .work-stack::after {
+      content: '';
+      flex: 0 0 calc(100% - min(86%, 30rem) - var(--grid-gutter));
+    }
+    :global(html.js) .work-card {
+      flex: 0 0 min(86%, 30rem);
+      min-width: 0;
+      /* Everything inside is sized from the card's own width (cqi), so the
+         longest name can't push one card wider than the rest. */
+      container-type: inline-size;
+      padding: 0;
+      border: 0;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+    /* The card's link fills the card; a secondary link (PROLOOK's) sits
+       under it. */
+    :global(html.js) .work-card {
+      display: flex;
+      flex-direction: column;
+    }
+    :global(html.js) .work-card > a {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+    }
+    :global(html.js) .work-card__more {
+      display: block;
+    }
+    /* A 44px tap target on touch. The padding grows the hit area and the
+       matching negative margin takes it back, so nothing around it moves.
+       The underline sits on the inner span, so it stays under the text. */
+    .work-card__more-link {
+      --hit: max(0px, calc((2.75rem - 1lh) / 2));
+      display: inline-block;
+      padding-block: var(--hit);
+      margin-block: calc(-1 * var(--hit));
+    }
+    /* Tall frame: a phone shows the screenshot big, not as a strip. */
+    :global(html.js) .work-card__media {
+      aspect-ratio: auto;
+      height: min(95cqi, 40svh);
+      isolation: isolate;
+    }
+    :global(html.js) .work-card__img {
+      object-position: 0% 0%;
+    }
+    /* A phone on its side: 40% of a short screen is a letterbox. */
+    @media (orientation: landscape) and (max-height: 32rem) {
+      :global(html.js) .work-card {
+        flex-basis: min(60%, 30rem);
+      }
+      :global(html.js) .work-card__media {
+        height: 64svh;
+      }
+    }
+    :global(html.js) .work-card__text {
+      display: block;
+      margin-top: 1.25rem;
+    }
+    /* Each name as big as its own longest word allows in the card. */
+    :global(html.js) .work-card__text .work-stack__name {
+      font-size: min(2.75rem, calc(100cqi / (var(--fit, 11.6) * 1.04)));
+    }
+
+    /* Pressed feedback on the whole card. */
+    :global(html.js) .work-card > a {
+      transition: scale var(--duration-fast) var(--ease-out-soft);
+    }
+    :global(html.js) .work-card > a:active {
+      scale: 0.985;
+    }
+
+    /* The screenshot drifts across its frame as the card crosses the track,
+       so a swipe has depth. Pure CSS, compositor-driven; skipped where
+       scroll-driven animations aren't supported and under reduced motion. */
+    @supports (animation-timeline: view()) {
+      @media (prefers-reduced-motion: no-preference) {
+        :global(html.js) .work-card__img {
+          animation: work-drift linear both;
+          animation-timeline: view(inline);
+        }
+      }
+    }
+
+    :global(html.js) .work-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+  }
+
+  @keyframes work-drift {
+    from {
+      object-position: 0% 0%;
+    }
+    to {
+      object-position: 100% 0%;
+    }
+  }
+
+  .work-controls__count {
+    min-width: 3.5rem;
+    font-size: var(--text-body);
+  }
+  .work-controls__dots {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+  }
+  /* A short bar each; the current one is long and tan. */
+  .work-dot {
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 2.75rem;
+  }
+  .work-dot span {
+    display: block;
+    width: 0.5rem;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--color-fg-muted);
+    transition:
+      width var(--duration-base) var(--ease-out-soft),
+      background-color var(--duration-base) var(--ease-out-soft);
+  }
+  .work-dot[data-current='true'] span {
+    width: 1.5rem;
+    background: var(--color-accent-fill);
+  }
+  .work-controls__arrows {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .work-arrow {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--color-edge-strong);
+    border-radius: 50%;
+    color: var(--color-fg);
+    cursor: pointer;
+    transition:
+      opacity var(--duration-fast) var(--ease-out-soft),
+      scale var(--duration-fast) var(--ease-out-soft);
+  }
+  .work-arrow:active {
+    scale: 0.92;
+  }
+  .work-arrow:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+  .work-arrow svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .work-dot span,
+    .work-arrow {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import { registerMotion } from '../../scripts/motion';
+  import { workStage } from '../../scripts/home-motion';
+  import { workCarousel } from '../../scripts/mobile-motion';
+
+  /* Runs under reduced motion too: the stage itself isn't motion, only its
+     transitions are, and workStage drops those when motion is off. */
+  registerMotion(workStage, { reduced: true });
+  /* The phone carousel's counter and arrows work with motion off too. */
+  registerMotion(workCarousel, { reduced: true });
+
+  /* Feed the meta block's real height to the stage sizing in CSS. A
+     ResizeObserver rather than a one-off read: the meta reflows when fonts
+     land, when the window resizes and when a longer role line wraps. */
+  registerMotion(
+    () => {
+      const section = document.querySelector<HTMLElement>('[data-work]');
+      const meta = section?.querySelector<HTMLElement>('[data-work-meta-wrap]');
+      if (!section || !meta) return;
+      const ro = new ResizeObserver(() => {
+        section.style.setProperty('--work-meta-h', `${Math.ceil(meta.offsetHeight)}px`);
+      });
+      ro.observe(meta);
+      return () => ro.disconnect();
+    },
+    { reduced: true },
+  );
+</script>

@@ -1,0 +1,44 @@
+---
+import { Image } from 'astro:assets';
+
+/*
+  A project's cover image, when it has one.
+
+  Renders nothing when it doesn't. There is no generated stand-in any more —
+  the case studies carry themselves on their writing, and a page with no
+  photograph simply doesn't show one.
+*/
+
+interface Props {
+  image?: ImageMetadata;
+  alt?: string;
+  widths?: number[];
+  sizes?: string;
+  class?: string;
+  /** The page's first visible image: eager and high fetch priority (LCP). */
+  priority?: boolean;
+}
+
+const {
+  image,
+  alt = '',
+  widths = [640, 960, 1440, 1920],
+  sizes = '100vw',
+  class: className = '',
+  priority = false,
+} = Astro.props;
+---
+
+{
+  image && (
+    <Image
+      src={image}
+      alt={alt}
+      widths={widths}
+      sizes={sizes}
+      class={className}
+      loading={priority ? 'eager' : 'lazy'}
+      fetchpriority={priority ? 'high' : undefined}
+    />
+  )
+}

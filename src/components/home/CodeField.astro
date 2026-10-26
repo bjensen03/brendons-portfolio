@@ -1,0 +1,179 @@
+---
+import { fieldColumns } from './snippets';
+
+/*
+  The code behind the hero: excerpts from the case studies' hard problems,
+  in the languages they were solved in (snippets.ts says which study each
+  one comes from). Decoration, so it is aria-hidden — the real explanations
+  live in the case studies.
+
+  Each column holds its snippets twice so the CSS drift (motion.css) can loop
+  by translating exactly half the track. The second column only appears at
+  1024+, which is how tablets and phones get fewer lines.
+
+  Without JS, or under reduced motion, it is simply static, faint code.
+  home-motion.ts adds the spotlight copy and the occasional scramble.
+*/
+
+const columns = fieldColumns.map((col) =>
+  col.flatMap((snippet) => [
+    { text: `// ${snippet.lang}`, comment: true },
+    ...snippet.code.split('\n').map((text) => ({
+      text: text || ' ',
+      comment: /^\s*(\/\/|#|--|\{\{--|\{\{!)/.test(text),
+    })),
+    { text: ' ', comment: false },
+  ]),
+);
+---
+
+<div class="code-field" aria-hidden="true" data-code-field>
+  <div class="code-field__layer" data-cf-layer="base">
+    {
+      columns.map((lines, c) => (
+        <div
+          class:list={['code-field__col', c > 0 && 'code-field__col--wide']}
+          style={[
+            `--cf-speed: ${[170, 210][c]}s`,
+            `--cf-left: ${['-2rem', '53%'][c]}`,
+            `--cf-top: ${['-1rem', '-7rem'][c]}`,
+          ].join('; ')}
+        >
+          <div class="code-field__track">
+            {[0, 1].map(() =>
+              lines.map((line) => (
+                <span class:list={['code-field__line', line.comment && 'is-comment']}>{line.text}</span>
+              )),
+            )}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .code-field {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+    /*
+      Not a wallpaper: dense behind the type, thinning toward every edge (the
+      brightness rail on the right sits in the faded zone), and a soft clear
+      patch bottom-left so the sentence and buttons sit on ground, not code.
+      Two layers intersected — it's a mask, so the colours are alpha only.
+    */
+    mask-image:
+      radial-gradient(ellipse 58% 62% at 36% 36%, black 15%, transparent 100%),
+      radial-gradient(ellipse 50% 46% at 0% 100%, transparent 50%, black 100%);
+    mask-composite: intersect;
+  }
+
+  .code-field__layer {
+    position: absolute;
+    inset: 0;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.75;
+    white-space: pre;
+    color: color-mix(in oklch, var(--color-fg) 6%, transparent);
+  }
+
+  /* Columns of different widths at uneven offsets, overlapping a little.
+     Lines run on past their column and off the screen rather than being
+     cut at a boundary. */
+  .code-field__col {
+    position: absolute;
+    top: var(--cf-top);
+    left: var(--cf-left);
+  }
+  .code-field__col--wide {
+    display: none;
+  }
+
+  @media (min-width: 64rem) {
+    .code-field__col--wide {
+      display: block;
+    }
+  }
+
+  .code-field__line {
+    display: block;
+  }
+  .code-field__line.is-comment {
+    color: color-mix(in oklch, var(--color-fg) 4%, transparent);
+  }
+
+  /* The spotlight: a brighter copy of the field (cloned by home-motion.ts),
+     visible only inside a soft circle that follows the pointer. */
+  .code-field__layer--lit {
+    color: color-mix(in oklch, var(--color-fg) 40%, transparent);
+    opacity: 0;
+    transition: opacity var(--duration-base) var(--ease-out-soft);
+    mask-image: radial-gradient(
+      circle 15rem at var(--cf-x, 50%) var(--cf-y, 50%),
+      black 0%,
+      transparent 100%
+    );
+  }
+  .code-field__layer--lit .code-field__line.is-comment {
+    color: color-mix(in oklch, var(--color-fg) 26%, transparent);
+  }
+  .code-field.is-lit .code-field__layer--lit {
+    opacity: 1;
+  }
+
+  /* Slow upward drift. Only with motion allowed and JS running; paused
+     whenever the hero is off screen (home-motion.ts sets .is-paused). */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html.motion-ok) .code-field__track {
+      animation: code-field-drift var(--cf-speed) linear infinite;
+    }
+  }
+  .code-field.is-paused .code-field__track {
+    animation-play-state: paused;
+  }
+
+  @keyframes code-field-drift {
+    to {
+      transform: translateY(-50%);
+    }
+  }
+
+  /* ── Phones and portrait tablets ─────────────────────────────────────
+     A texture behind the name, not a block of its own: the lines start
+     inside the page gutter (never cut mid-word at the left edge), fade out
+     toward both sides and below the name, and are dimmer than on desktop so
+     they never compete with the type. A soft light drifts through them on
+     its own and comes to a finger (heroTouch, mobile-motion.ts). */
+  @media (max-width: 63.999rem) and (orientation: portrait) {
+    .code-field {
+      mask-image:
+        linear-gradient(to right, transparent, black var(--grid-margin), black 60%, transparent 96%),
+        linear-gradient(to bottom, black 30%, transparent 78%);
+      mask-composite: intersect;
+    }
+    .code-field__col {
+      top: 0.5rem;
+      left: var(--grid-margin);
+    }
+    .code-field__layer {
+      font-size: 0.75rem;
+      color: color-mix(in oklch, var(--color-fg) 7%, transparent);
+    }
+    .code-field__line.is-comment {
+      color: color-mix(in oklch, var(--color-fg) 5%, transparent);
+    }
+    .code-field__layer--lit {
+      color: color-mix(in oklch, var(--color-fg) 55%, transparent);
+      mask-image: radial-gradient(
+        circle 8.5rem at var(--cf-x, 50%) var(--cf-y, 30%),
+        black 0%,
+        transparent 100%
+      );
+    }
+  }
+</style>

@@ -1,0 +1,136 @@
+---
+import ExternalLink from '../ExternalLink.astro';
+import { textLink } from './data';
+import { HOME_TESTIMONIALS, ABOUT_TESTIMONIALS, type Testimonial } from './testimonials';
+
+/*
+  What people say. LinkedIn recommendations, quoted verbatim (the short
+  version; the full one is on LinkedIn). Words in testimonials.ts.
+
+  Two renderings:
+    section (default, homepage): a heading and the quotes, each one big
+             type and plain attribution. The first quote is the lead, set
+             at the title step across most of the row; the next sits a
+             step smaller and further right, so the pair reads like a
+             printed spread rather than a row of cards.
+    single   one quote with no heading, for a page that places it inside
+             its own section (About, next to the Twilight Trekkers part):
+             <Testimonials variant="single" />  (the About-placed ones)
+
+  Homepage: top padding only. The Twilight section that follows is on the
+  same ground and brings its own top padding, so the gap between them is
+  one section's worth, not two.
+
+  No photos, no stars, no carousel, no cards. A tan rule is the only
+  accent (a marker, never text). Name and title are plain sentence case.
+*/
+
+interface Props {
+  /** section: the homepage block. single: the About-placed quote(s), bare. */
+  variant?: 'section' | 'single';
+  class?: string;
+}
+
+const { variant = 'section', class: cls } = Astro.props;
+const items: Testimonial[] = variant === 'section' ? HOME_TESTIMONIALS : ABOUT_TESTIMONIALS;
+---
+
+{
+  variant === 'section' ? (
+    <section class:list={['tm bg-surface pt-section', cls]} aria-labelledby="tm-title">
+      <div class="container-bleed">
+        <h2 id="tm-title" class="text-heading text-fg" data-split>
+          What people say
+        </h2>
+
+        <div class="mt-block grid grid-cols-4 gap-x-(--grid-gutter) gap-y-block md:grid-cols-6 lg:grid-cols-12">
+          {items.map((t, i) => (
+            <figure
+              class:list={[
+                'tm-quote col-span-full',
+                i === 0 ? 'tm-quote--lead lg:col-span-9' : 'tm-quote--next md:col-span-5 md:col-start-2 lg:col-span-7 lg:col-start-6',
+              ]}
+              data-reveal
+            >
+              <span class="tm-rule" aria-hidden="true" />
+              <blockquote class:list={['tm-text text-fg', i === 0 ? 'text-title' : 'text-lead']}>
+                <p>{t.short}</p>
+              </blockquote>
+              <figcaption class="tm-cite">
+                <span class="block text-body font-medium text-fg">{t.name}</span>
+                <span class="block text-body text-fg-muted">{t.title}</span>
+                {t.href && (
+                  <ExternalLink href={t.href} class:list={[textLink, 'group mt-3 inline-flex whitespace-nowrap text-small']}>
+                    Read on LinkedIn
+                  </ExternalLink>
+                )}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </div>
+    </section>
+  ) : (
+    items.map((t) => (
+      <figure class:list={['tm-quote tm-quote--single', cls]} data-reveal>
+        <span class="tm-rule" aria-hidden="true" />
+        <blockquote class="tm-text text-lead text-fg">
+          <p>{t.short}</p>
+        </blockquote>
+        <figcaption class="tm-cite">
+          <span class="block text-body font-medium text-fg">{t.name}</span>
+          <span class="block text-body text-fg-muted">{t.title}</span>
+          {t.href && (
+            <ExternalLink href={t.href} class:list={[textLink, 'group mt-3 inline-flex whitespace-nowrap text-small']}>
+              Read on LinkedIn
+            </ExternalLink>
+          )}
+        </figcaption>
+      </figure>
+    ))
+  )
+}
+
+<style>
+  .tm-quote {
+    margin: 0;
+  }
+  /* A short tan rule over each quote: the one accent, as a marker. */
+  .tm-rule {
+    display: block;
+    width: 3rem;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--color-accent-fill);
+  }
+  .tm-text {
+    margin-top: var(--spacing-stack);
+    max-width: 34ch;
+    text-wrap: pretty;
+  }
+  .tm-quote--lead .tm-text {
+    max-width: 30ch;
+    font-weight: 500;
+  }
+  .tm-quote--next .tm-text,
+  .tm-quote--single .tm-text {
+    max-width: 44ch;
+  }
+  /* Typographic quote marks hang into the margin so the text block's left
+     edge stays on the grid. */
+  .tm-text p::before {
+    content: '\201C';
+    margin-left: -0.45em;
+  }
+  .tm-text p::after {
+    content: '\201D';
+  }
+  .tm-cite {
+    margin-top: var(--spacing-stack);
+  }
+  @media (max-width: 47.999rem) {
+    .tm-text p::before {
+      margin-left: 0;
+    }
+  }
+</style>
