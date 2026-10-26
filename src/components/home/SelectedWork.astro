@@ -34,6 +34,13 @@ const widthsFor = (w: number) => [640, 960, 1280, 1800, 2560].filter((x) => x <=
    the line wraps between tools rather than inside one. */
 const keep = (t: string) => t.replace(/ /g, '\u00a0');
 const roleLine = (role: string, stack: string[]) => `${role} · ${stack.slice(0, 3).map(keep).join(', ')}`;
+
+/* Every project name is set at ONE size per breakpoint, picked so the
+   longest single word across all of them ("MANUFACTURING") fits a card;
+   long names wrap between words, never shrink on their own. */
+const fitAll = Math.max(...projects.map((p) => Number(longestWordEm(p.name)))).toFixed(3);
+/* Each screenshot's own shape, so the phone cards show the whole capture. */
+const ratio = (p: (typeof projects)[number]) => (p.shot ? `${p.shot.src.width} / ${p.shot.src.height}` : '16 / 10');
 ---
 
 
@@ -43,10 +50,10 @@ const roleLine = (role: string, stack: string[]) => `${role} · ${stack.slice(0,
   class="work pt-section pb-section-sm"
   aria-labelledby="work-title"
   data-work
-  style={`--n: ${projects.length}`}
+  style={`--n: ${projects.length}; --fit-all: ${fitAll}`}
 >
   <div class="container-bleed">
-    <h2 id="work-title" class="text-heading text-fg" data-split>Selected work</h2>
+    <h2 id="work-title" class="text-section text-fg" data-split>Selected work</h2>
   </div>
 
   {/* Stage (desktop, scripted) */}
@@ -61,7 +68,7 @@ const roleLine = (role: string, stack: string[]) => `${role} · ${stack.slice(0,
               <li>
                 <a href={p.href} class="work-item group" data-work-item={i}>
                   <span class="work-item__num text-small tabular-nums" aria-hidden="true">{p.number}</span>
-                  <h3 class="work-item__name text-heading">{p.name}</h3>
+                  <h3 class="work-item__name text-list">{p.name}</h3>
                   {p.opens && <span class="work-item__opens text-body">{p.opens}</span>}
                 </a>
               </li>
@@ -157,7 +164,7 @@ const roleLine = (role: string, stack: string[]) => `${role} · ${stack.slice(0,
           data-work-card={i}
         >
           <a href={p.href} class="group grid grid-cols-1 gap-x-(--grid-gutter) md:grid-cols-6">
-            <div class="work-card__media relative aspect-shot overflow-hidden rounded-media bg-dark-raised md:col-span-6" data-reveal>
+            <div class="work-card__media relative overflow-hidden rounded-media bg-dark-raised md:col-span-6" style={`--ar: ${ratio(p)}`} data-reveal>
               {!p.shot && p.shotNeeded && (
                 <div class="shot-needed">
                   <span class="font-mono text-label text-fg-muted uppercase">{p.shotNeeded}</span>
@@ -169,17 +176,17 @@ const roleLine = (role: string, stack: string[]) => `${role} · ${stack.slice(0,
                   alt={p.shot.alt}
                   formats={['avif', 'webp']}
                   widths={widthsFor(p.shot.src.width)}
-                  sizes="(max-width: 47.999rem) 132vw, (max-width: 63.999rem) 76vw, 94vw"
+                  sizes="(max-width: 47.999rem) 86vw, (max-width: 63.999rem) 30rem, 94vw"
                   loading="lazy"
                   pictureAttributes={{ class: 'block h-full w-full' }}
-                  class="work-card__img h-full w-full object-cover object-top"
+                  class="work-card__img h-full w-full object-contain object-top"
                 />
               )}
             </div>
             <div class="work-card__text mt-6 md:col-span-6 md:grid md:grid-cols-subgrid" data-reveal>
               <div class="md:col-span-3">
                 <p class="text-title leading-none text-fg-muted tabular-nums" aria-hidden="true">{p.number}</p>
-                <h3 class="work-stack__name mt-3 text-heading text-fg" style={`--fit: ${longestWordEm(p.name)}`}>{p.name}</h3>
+                <h3 class="work-stack__name mt-3 text-list text-fg">{p.name}</h3>
                 {p.opens && <p class="mt-2 text-body text-fg-muted">{p.opens}</p>}
               </div>
               <div class="work-meta__text mt-4 min-w-0 md:col-span-3 md:mt-0">
@@ -258,12 +265,16 @@ const roleLine = (role: string, stack: string[]) => `${role} · ${stack.slice(0,
 
   /* MANUFACTURING has to fit a phone's column too. */
   .work-stack__name {
-    font-size: min(var(--text-heading), calc((100vw - 2 * var(--grid-margin)) / 11.6));
+    font-size: min(var(--text-list), calc((100vw - 2 * var(--grid-margin)) / (var(--fit-all, 11.6) * 1.04)));
   }
   @media (min-width: 48rem) {
     .work-stack__name {
-      font-size: min(var(--text-heading), calc((100vw - 2 * var(--grid-margin)) / 2 / 11.6));
+      font-size: min(var(--text-list), calc((100vw - 2 * var(--grid-margin)) / 2 / (var(--fit-all, 11.6) * 1.04)));
     }
+  }
+  /* The stacked cards show each screenshot whole, at its own shape. */
+  .work-card__media {
+    aspect-ratio: var(--ar, 16 / 10);
   }
 
   .work-pin {
@@ -298,7 +309,7 @@ const roleLine = (role: string, stack: string[]) => `${role} · ${stack.slice(0,
   }
   .work-item__name {
     color: inherit;
-    font-size: min(var(--text-heading), calc((100vw - 2 * var(--grid-margin)) * 5 / 12 / 13));
+    font-size: min(var(--text-list), calc((100vw - 2 * var(--grid-margin)) * 5 / 12 / 13));
     transition: translate var(--duration-base) var(--ease-out-soft);
   }
   .work-item[data-active] .work-item__name {
@@ -485,31 +496,30 @@ const roleLine = (role: string, stack: string[]) => `${role} · ${stack.slice(0,
       padding-block: var(--hit);
       margin-block: calc(-1 * var(--hit));
     }
-    /* Tall frame: a phone shows the screenshot big, not as a strip. */
+    /* The whole capture at its own shape (the tall crop cut the
+       previews off). */
     :global(html.js) .work-card__media {
-      aspect-ratio: auto;
-      height: min(95cqi, 40svh);
       isolation: isolate;
     }
-    :global(html.js) .work-card__img {
-      object-position: 0% 0%;
-    }
-    /* A phone on its side: 40% of a short screen is a letterbox. */
+    /* A phone on its side: a narrower card keeps the capture on screen. */
     @media (orientation: landscape) and (max-height: 32rem) {
       :global(html.js) .work-card {
         flex-basis: min(60%, 30rem);
-      }
-      :global(html.js) .work-card__media {
-        height: 64svh;
       }
     }
     :global(html.js) .work-card__text {
       display: block;
       margin-top: 1.25rem;
     }
-    /* Each name as big as its own longest word allows in the card. */
+    /* md:mt-0 is for the two-column stacked rows; in a card the line sat
+       flush under the name at 768. */
+    :global(html.js) .work-card__text .work-meta__text {
+      margin-top: 1rem;
+    }
+    /* One size for every name: the longest word across all of them fills
+       the card at most. */
     :global(html.js) .work-card__text .work-stack__name {
-      font-size: min(2.75rem, calc(100cqi / (var(--fit, 11.6) * 1.04)));
+      font-size: min(var(--text-list), calc(100cqi / (var(--fit-all, 11.6) * 1.04)));
     }
 
     /* Pressed feedback on the whole card. */
@@ -520,17 +530,6 @@ const roleLine = (role: string, stack: string[]) => `${role} · ${stack.slice(0,
       scale: 0.985;
     }
 
-    /* The screenshot drifts across its frame as the card crosses the track,
-       so a swipe has depth. Pure CSS, compositor-driven; skipped where
-       scroll-driven animations aren't supported and under reduced motion. */
-    @supports (animation-timeline: view()) {
-      @media (prefers-reduced-motion: no-preference) {
-        :global(html.js) .work-card__img {
-          animation: work-drift linear both;
-          animation-timeline: view(inline);
-        }
-      }
-    }
 
     :global(html.js) .work-controls {
       display: flex;
@@ -541,14 +540,6 @@ const roleLine = (role: string, stack: string[]) => `${role} · ${stack.slice(0,
     }
   }
 
-  @keyframes work-drift {
-    from {
-      object-position: 0% 0%;
-    }
-    to {
-      object-position: 100% 0%;
-    }
-  }
 
   .work-controls__count {
     min-width: 3.5rem;

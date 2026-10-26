@@ -155,17 +155,59 @@
      "EXPERIENCE", which has to fit a 4-of-12 column (293px at 1024, 432 at
      1440), so this step is smaller than it was in Geist and still reads
      larger. */
-  --text-heading: clamp(2.25rem, 4.2vw - 0.4rem, 3.4rem);
-  --text-heading--line-height: 0.9;
-  --text-heading--letter-spacing: -0.015em;
-  --text-heading--font-weight: 800;
+  /* ── Heading scale (approved 2026-10-25) ───────────────────────
+     One size per heading level, the same on every page, so two headings
+     at the same level never differ because one has a shorter name. Short
+     display titles are caps; long ones are sentence case
+     (.type-display-sentence). 390 / 834 / 1440 sizes noted. */
 
-  /* Contact headline. 41 / 72 / 104px. The floor keeps the longest word on
-     one line at 390. */
-  --text-display: clamp(2.5rem, 0.6rem + 7.7vw, 6.5rem);
-  --text-display--line-height: 0.88;
-  --text-display--letter-spacing: -0.02em;
-  --text-display--font-weight: 850;
+  /* H1 page title, short titles in caps (study names, Projects, 404,
+     Twilight). 48 / 72 / 112 */
+  --text-page: clamp(3rem, 1.6rem + 6vw, 7rem);
+  --text-page--line-height: 0.9;
+  --text-page--letter-spacing: -0.02em;
+  --text-page--font-weight: 900;
+
+  /* H1 sentence titles (About, Contact): Archivo 900, sentence case.
+     36 / 52 / 80 */
+  --text-page-long: clamp(2.25rem, 1.2rem + 4.2vw, 5rem);
+  --text-page-long--line-height: 0.95;
+  --text-page-long--letter-spacing: -0.02em;
+  --text-page-long--font-weight: 900;
+
+  /* H2 section: Archivo 800; caps if short, sentence case if long.
+     28 / 38 / 56 */
+  --text-section: clamp(1.75rem, 1.1rem + 2.7vw, 3.5rem);
+  --text-section--line-height: 0.95;
+  --text-section--letter-spacing: -0.015em;
+  --text-section--font-weight: 800;
+
+  /* List display names (/work/ rows, home Selected work, next project).
+     Archivo uppercase. 28 / 36 / 48 — always below the H2 above it. */
+  --text-list: clamp(1.75rem, 1.2rem + 2.2vw, 3rem);
+  --text-list--line-height: 0.95;
+  --text-list--letter-spacing: -0.015em;
+  --text-list--font-weight: 850;
+
+  /* H3 subheading: Geist 600, sentence case. 22 / 26 / 32 */
+  --text-sub: clamp(1.375rem, 1.1rem + 1.1vw, 2rem);
+  --text-sub--line-height: 1.15;
+  --text-sub--letter-spacing: -0.02em;
+  --text-sub--font-weight: 600;
+
+  /* H4 item title stays text-lead + semibold (20 / 23 / 26). */
+
+  /* The older names now point at the scale: text-heading is the section
+     step, text-display the page step. */
+  --text-heading: var(--text-section);
+  --text-heading--line-height: var(--text-section--line-height);
+  --text-heading--letter-spacing: var(--text-section--letter-spacing);
+  --text-heading--font-weight: var(--text-section--font-weight);
+
+  --text-display: var(--text-page);
+  --text-display--line-height: var(--text-page--line-height);
+  --text-display--letter-spacing: var(--text-page--letter-spacing);
+  --text-display--font-weight: var(--text-page--font-weight);
 
   /* The H1 only. 52 / 104 / 100px (68 at 1024). Archivo at 900 / 115% width is far wider than
      Geist was: "BRENDON." is the longest line and it has to fit the hero's
@@ -175,8 +217,9 @@
   --text-hero--letter-spacing: -0.02em;
   --text-hero--font-weight: 900;
 
-  /* Mega: a full-screen hero line for the next phase. Up to 12rem. Not used
-     yet. 72 / 108 / 174px, 192 from ~1600. */
+  /* Mega: only the home hero and the footer wordmark (the heading scale,
+     2026-10-25); every other page title is text-page. 72 / 108 / 174px,
+     192 from ~1600. */
   --text-mega: clamp(4.5rem, 1rem + 11vw, 12rem);
   --text-mega--line-height: 0.9;
   --text-mega--letter-spacing: -0.025em;
@@ -589,10 +632,31 @@
   [class*='text-hero'],
   [class*='text-mega'],
   [class*='text-display'],
-  [class*='text-heading'] {
+  [class*='text-heading'],
+  [class*='text-page'],
+  [class*='text-section'],
+  [class*='text-list'] {
     font-family: var(--font-display);
     font-stretch: var(--display-stretch);
     text-transform: var(--display-case);
+  }
+
+  /* Long display headings (more than ~3 words or 20 characters): the same
+     face and size, in sentence case. !important because the display
+     classes it sits on set their case outside this layer (.cs-h2 in
+     study.css, components' scoped styles), and unlayered rules beat
+     layered ones. A layered !important wins over all of them. */
+  .type-display-sentence {
+    text-transform: none !important;
+  }
+
+  /* The small line above a heading: Geist 500, sentence case, muted. Never
+     mono, never caps. */
+  .eyebrow {
+    font: 500 var(--text-small) / 1.4 var(--font-body);
+    letter-spacing: 0;
+    color: var(--color-fg-muted);
+    margin-bottom: 0.75rem;
   }
 
   /* Hover and focus transitions, tied to the motion tokens so component code

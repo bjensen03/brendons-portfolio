@@ -1,0 +1,93 @@
+---
+import { BRAND_GROUPS, BRANDS } from './data';
+
+/*
+  Every brand, stay and excursion we've worked with, on one screen: a compact
+  grid of names under three small group labels (Brands, Hotels & stays,
+  Excursions). Names only, so every cell carries the same weight and the
+  whole list scans at a glance. The one-line blurbs from the Collaborations
+  page stay in the case study's list; there are no logos in the repo, so
+  none are shown.
+
+  Two columns on a phone, three from 768, four from 1024. Each cell is a
+  ruled box sized by the grid, so long names (Field Station Joshua Tree)
+  wrap inside their own cell instead of pushing the row out.
+*/
+---
+
+<section class="cs-sec" aria-labelledby="tt-brands-title">
+  <div class="container-bleed">
+    <h2 id="tt-brands-title" class="text-section type-display-sentence text-fg" data-split>Brands we’ve worked with</h2>
+    <p class="mt-stack max-w-measure text-body text-fg-muted" data-reveal>
+      Every brand, stay and excursion we’ve worked with: {BRANDS.length} so far.
+    </p>
+
+    {
+      BRAND_GROUPS.map((g) => (
+        <div class="tb-group" data-reveal>
+          <h3 class="text-small text-fg-muted">
+            {g.label} <span class="tabular-nums">· {g.items.length}</span>
+          </h3>
+          <ul role="list" class="tb-grid mt-3">
+            {g.items.map((b) => (
+              <li class="tb-cell text-lead text-fg">{b.name}</li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .tb-group {
+    margin-top: var(--spacing-block);
+  }
+
+  .tb-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    list-style: none;
+    /* Each cell draws its own box and overlaps its neighbour by a pixel, so
+       shared edges stay single and a short last row ends cleanly instead of
+       leaving an empty boxed area. The 1px padding absorbs the overlap. */
+    padding: 0 1px 1px 0;
+  }
+
+  .tb-cell {
+    display: flex;
+    align-items: center;
+    min-height: 4.5rem;
+    min-width: 0;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--color-edge);
+    margin: 0 -1px -1px 0;
+    overflow-wrap: break-word;
+    line-height: 1.25;
+  }
+
+  /* The narrowest phones: a step down so long names (Field Station Joshua
+     Tree) take two lines in a half-width cell, not four. */
+  @media (max-width: 22.49rem) {
+    .tb-cell {
+      font-size: var(--text-body);
+      padding: 0.8rem 0.75rem;
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .tb-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .tb-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .tb-cell {
+      min-height: 5rem;
+      padding: 1rem 1.25rem;
+    }
+  }
+</style>

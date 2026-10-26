@@ -33,6 +33,9 @@ const total = rows.reduce((sum, r) => sum + projectCount(r), 0);
 
 const widthsFor = (w: number) => [480, 720, 960, 1280].filter((x) => x <= w);
 const tagsOf = (r: ProjectRow) => r.tags.join(' ');
+/* One size for every project name at each width: the list step, capped so
+   the longest word of any name on the page fits its column. */
+const listFit = Math.max(...groups.flatMap((g) => g.rows).filter((r) => !r.set).map((r) => parseFloat(longestWordEm(r.name)))).toFixed(3);
 /* A sites row with only two tiles spans the row at 1024+ (see .pset--sites
    below), so its screenshots are drawn about twice as wide and need the
    bigger files. */
@@ -46,9 +49,9 @@ const firstShotId = groups.flatMap((g) => g.rows).find((r) => !r.set && r.shot)?
 const THUMB_SIZES = '(min-width: 64rem) 38vw, (min-width: 48rem) calc(83.33vw - 70px), calc(100vw - 2.5rem)';
 ---
 
-<section class="projects pt-block pb-section" aria-labelledby="projects-title" data-projects>
+<section class="projects pt-block pb-section" aria-labelledby="projects-title" style={`--list-fit: ${listFit}`} data-projects>
   <div class="container-bleed">
-    <h1 id="projects-title" class="projects-title text-mega text-fg" data-split>Projects</h1>
+    <h1 id="projects-title" class="projects-title text-page text-fg" style={`--title-fit: ${longestWordEm('Projects')}`} data-split>Projects</h1>
 
     <div class="mt-stack grid grid-cols-4 gap-x-(--grid-gutter) md:grid-cols-6 lg:grid-cols-12">
       <p class="col-span-full max-w-measure text-lead text-fg-muted lg:col-span-6" data-reveal>
@@ -79,7 +82,7 @@ const THUMB_SIZES = '(min-width: 64rem) 38vw, (min-width: 48rem) calc(83.33vw - 
     {
       groups.map((g) => (
         <section class="pgroup" aria-labelledby={`group-${g.id}`} data-pgroup>
-          <h2 id={`group-${g.id}`} class="pgroup__title text-heading text-fg" style={`--fit: ${longestWordEm(g.title)}`} data-split>
+          <h2 id={`group-${g.id}`} class="pgroup__title text-section text-fg" data-split>
             {g.title}
           </h2>
           <ol class="pgroup__rows" role="list">
@@ -88,7 +91,7 @@ const THUMB_SIZES = '(min-width: 64rem) 38vw, (min-width: 48rem) calc(83.33vw - 
                 {r.set ? (
                   <div class:list={['prow__body', `prow__body--${r.set.kind}`]}>
                     <span class="prow__num text-small tabular-nums">{r.number}</span>
-                    <h3 class="prow__name" style={`--fit: ${longestWordEm(r.name)}`}>{r.name}</h3>
+                    <h3 class="prow__name text-list">{r.name}</h3>
                     <div class="prow__text">
                       <p class="text-body text-fg">{r.line}</p>
                       <p class="mt-2 text-small text-fg-muted">{r.meta}</p>
@@ -154,7 +157,7 @@ const THUMB_SIZES = '(min-width: 64rem) 38vw, (min-width: 48rem) calc(83.33vw - 
                       data-prow={r.id}
                     >
                       <span class="prow__num text-small tabular-nums">{r.number}</span>
-                      <h3 class="prow__name" style={`--fit: ${longestWordEm(r.name)}`}>{r.name}</h3>
+                      <h3 class="prow__name text-list">{r.name}</h3>
                       <div class="prow__text">
                         <p class="text-body text-fg">{r.line}</p>
                         <p class="mt-2 text-small text-fg-muted">{r.meta}</p>
@@ -195,7 +198,7 @@ const THUMB_SIZES = '(min-width: 64rem) 38vw, (min-width: 48rem) calc(83.33vw - 
                       <li class="prow prow--child" data-row data-child data-tags={tagsOf(c)}>
                         <a href={c.href} class="prow__body group" data-prow={c.id}>
                           <span class="prow__num text-small tabular-nums">{c.number}</span>
-                          <h4 class="prow__name" style={`--fit: ${longestWordEm(c.name)}`}>{c.name}</h4>
+                          <h4 class="prow__name text-sub">{c.name}</h4>
                           <div class="prow__text">
                             <p class="text-body text-fg">{c.line}</p>
                             <p class="mt-2 text-small text-fg-muted">{c.meta}</p>
@@ -267,6 +270,10 @@ const THUMB_SIZES = '(min-width: 64rem) 38vw, (min-width: 48rem) calc(83.33vw - 
 </section>
 
 <style>
+  /* The page step, held to the content width on the smallest phones. */
+  .projects-title {
+    font-size: min(var(--text-page), calc((100vw - 2 * var(--grid-margin)) / (var(--title-fit, 8.4) * 1.04)));
+  }
   /* The filter bar only works with JS, so without it the bar isn't shown.
      With JS on it takes its space from the first paint and stays invisible
      until the script marks it ready, so showing it doesn't push the list
@@ -281,13 +288,6 @@ const THUMB_SIZES = '(min-width: 64rem) 38vw, (min-width: 48rem) calc(83.33vw - 
   }
   :global(html.js) .filters[data-ready] {
     visibility: visible;
-  }
-
-  /* "PROJECTS" (about 6.6em in Archivo at this width) runs margin to margin,
-     capped by the screen height and an absolute ceiling, like the home hero. */
-  .projects-title {
-    font-size: min(calc((100vw - 2 * var(--grid-margin)) / 6.65), 32svh, 24rem);
-    line-height: 0.86;
   }
 
   .filter-btn {
@@ -318,25 +318,6 @@ const THUMB_SIZES = '(min-width: 64rem) 38vw, (min-width: 48rem) calc(83.33vw - 
   .pgroup__title {
     margin-bottom: var(--spacing-stack);
   }
-  /* Below 1024, fitHeadings (mobile-motion.ts) sizes section headings so
-     the longest word runs the column, capped by the page title. Doing it
-     only in JS grew "CLIENT WORK" from 36px to 48px after load and pushed
-     the list down (CLS). This is the same sum, done in CSS from the
-     server-side word width (--fit), so the heading paints at its final size
-     and the script finds nothing to change. */
-  @media (max-width: 63.999rem) {
-    .pgroup__title {
-      --avail: calc(100vw - 2 * var(--grid-margin));
-      --title: min(calc(var(--avail) / 6.65), 32svh, 24rem);
-      --cap: max(36px, min(48px, var(--title)));
-      font-size: round(down, min(var(--cap), var(--avail) * 0.995 / var(--fit, 11.8)), 1px);
-    }
-  }
-  @media (min-width: 48rem) and (max-width: 63.999rem) {
-    .pgroup__title {
-      --cap: max(36px, min(72px, var(--title)));
-    }
-  }
 
   /* ── Rows ── */
   .prow__body {
@@ -364,15 +345,10 @@ const THUMB_SIZES = '(min-width: 64rem) 38vw, (min-width: 48rem) calc(83.33vw - 
   .prow__name {
     grid-column: 1 / -1;
     margin: 0;
-    font-family: var(--font-display);
-    font-stretch: var(--display-stretch);
-    text-transform: var(--display-case);
-    font-weight: 850;
-    line-height: 0.92;
-    letter-spacing: -0.02em;
-    /* MANUFACTURING (about 11.6em) is the longest unbreakable word; it has
-       to fit whatever share of the row the name gets. */
-    font-size: min(4.75rem, calc((100vw - 2 * var(--grid-margin)) * var(--span) / 11.8));
+    /* The list step (text-list), the same for every name at a given width:
+       capped so the longest word on the page (--list-fit, MANUFACTURING)
+       fits whatever share of the row the name gets. */
+    font-size: min(var(--text-list), calc((100vw - 2 * var(--grid-margin)) * var(--span) / (var(--list-fit, 12.6) * 1.04)));
     overflow-wrap: normal;
     --lit: 1;
     color: color-mix(in oklch, var(--color-fg) calc(54% + 46% * var(--lit)), transparent);
@@ -399,8 +375,9 @@ const THUMB_SIZES = '(min-width: 64rem) 38vw, (min-width: 48rem) calc(83.33vw - 
   .prow--child .prow__body {
     padding-block: clamp(1.1rem, 0.8rem + 1vw, 1.75rem);
   }
+  /* Sub-sites are a subheading (text-sub, Geist), not a display name. */
   .prow--child .prow__name {
-    font-size: min(2.75rem, calc((100vw - 2 * var(--grid-margin)) * var(--span) / 11.8));
+    font-size: var(--text-sub);
   }
 
   @media (min-width: 48rem) {
@@ -478,20 +455,12 @@ const THUMB_SIZES = '(min-width: 64rem) 38vw, (min-width: 48rem) calc(83.33vw - 
 
   /* ── Phones ──────────────────────────────────────────────────────────────
      Picture first, then the number, the name and the line — each project
-     opens on its screenshot, like the cards on the homepage. Names are
-     sized one by one so the longest word runs the full width (--fit is its
-     width in em, from lib/display-fit), instead of every name being set
-     small enough for MANUFACTURING. A pressed row sinks a touch. */
+     opens on its screenshot, like the cards on the homepage. A pressed row
+     sinks a touch. */
   @media (max-width: 47.999rem) {
     .prow__thumb {
       order: -1;
       margin-bottom: 0.5rem;
-    }
-    .prow__name {
-      font-size: min(2.75rem, calc((100vw - 2 * var(--grid-margin)) / (var(--fit, 11.8) * 1.04)));
-    }
-    .prow--child .prow__name {
-      font-size: min(2.25rem, calc((100vw - 2 * var(--grid-margin)) / (var(--fit, 11.8) * 1.04)));
     }
     a.prow__body {
       transition: scale var(--duration-fast) var(--ease-out-soft);

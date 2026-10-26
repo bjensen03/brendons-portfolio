@@ -52,11 +52,14 @@
   }
 }
 
+/* H2 section step (the heading scale). A long one (more than three words or
+   20 characters) is set in sentence case: Namespaced adds
+   .type-display-sentence at build. */
 .cs-h2 {
-  font-size: var(--text-heading);
-  line-height: var(--text-heading--line-height);
-  letter-spacing: var(--text-heading--letter-spacing);
-  font-weight: var(--text-heading--font-weight);
+  font-size: var(--text-section);
+  line-height: var(--text-section--line-height);
+  letter-spacing: var(--text-section--letter-spacing);
+  font-weight: var(--text-section--font-weight);
   font-family: var(--font-display);
   font-stretch: var(--display-stretch);
   text-transform: var(--display-case);
@@ -297,10 +300,10 @@ html.motion-ok .cs .hl:not(.is-lit) {
 .cs-short__h {
   grid-column: 1 / -1;
   font-family: var(--font-body);
-  font-size: var(--text-title);
-  line-height: var(--text-title--line-height);
-  letter-spacing: var(--text-title--letter-spacing);
-  font-weight: var(--text-title--font-weight);
+  font-size: var(--text-sub);
+  line-height: var(--text-sub--line-height);
+  letter-spacing: var(--text-sub--letter-spacing);
+  font-weight: var(--text-sub--font-weight);
   color: var(--color-fg);
 }
 
@@ -590,11 +593,10 @@ html.motion-ok .cs .hl:not(.is-lit) {
   }
 }
 
-/* Phones: block headings a step down (36px read as shouting at 390, and a
-   long one ran to five lines). Balanced so a wrap doesn't strand a word. */
+/* Phones: balanced so a wrap doesn't strand a word. (The size is the
+   section step, 28px here.) */
 @media (max-width: 47.999rem) {
   .cs-h2 {
-    font-size: min(2.1rem, 8.6vw);
     text-wrap: balance;
   }
 }

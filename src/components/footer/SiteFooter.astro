@@ -19,17 +19,17 @@ import { email, contactLinks, sitePages, year } from './links';
   contact block.
 
   - The code field from the hero drifts behind the closing question.
-  - The question is a lead-in, not the event: two lines from 1024
-    ("Have something that / needs building?"), sized so the first line
-    takes about 70% of the content width; smaller still on phones.
+  - The question is a lead-in, not the event: the section heading step in
+    sentence case, two lines from 1024 ("Have something that / needs
+    building?").
   - The email is ordinary body-scale type with Copy email and the profiles.
   - The last thing on the page is the name, edge to edge. Each line rests at
     55% white and a full-strength copy wipes across it from the left as it
     scrolls up, scrubbed, finishing exactly at the bottom of the page.
     Reduced motion or no JS: solid white.
 
-  The name and the question are fitted from the Archivo advance table
-  (lib/display-fit), so nothing is measured in the browser.
+  The name is fitted from the Archivo advance table (lib/display-fit), so
+  nothing is measured in the browser.
 */
 
 interface Props {
@@ -47,8 +47,6 @@ const nameSets = { phone: [first, last], wide: [SITE.name] } as const;
 
 const Q1 = 'Have something that';
 const Q2 = 'needs building?';
-const lineEm = (s: string) => s.split(' ').reduce((sum, w, i) => sum + wordEm(w) + (i ? SPACE_EM : 0), 0);
-const qEm = Math.max(lineEm(Q1), lineEm(Q2)) * safety;
 ---
 
 <footer data-tone="dark" class:list={['fd', !contact && 'fd--bare']}>
@@ -57,7 +55,7 @@ const qEm = Math.max(lineEm(Q1), lineEm(Q2)) * safety;
   <div class="container-bleed">
     {contact && (
     <section id="contact" aria-labelledby="fd-title">
-    <h2 id="fd-title" class="fd-title type-display text-fg" style={`--fd-q: ${qEm.toFixed(3)}`} data-split>
+    <h2 id="fd-title" class="fd-title text-section type-display-sentence text-fg" data-split>
       <span class="fd-q">{Q1}</span>{' '}
       <span class="fd-q">{Q2}</span>
     </h2>
@@ -203,23 +201,8 @@ const qEm = Math.max(lineEm(Q1), lineEm(Q2)) * safety;
   }
 
   /* ── The question ────────────────────────────────────────────────────── */
-  .fd-title {
-    font-weight: 850;
-    line-height: 0.92;
-    letter-spacing: -0.02em;
-    font-size: 1.75rem;
-  }
-  @media (min-width: 48rem) {
-    .fd-title {
-      font-size: 3rem;
-    }
-  }
-  /* From 1024: exactly two lines, the longer one ~70% of the content width
-     (64px at 1440, 85px at 1920). */
+  /* From 1024: exactly two lines. */
   @media (min-width: 64rem) {
-    .fd-title {
-      font-size: calc((100vw - 2 * var(--grid-margin)) * 0.7 / var(--fd-q));
-    }
     .fd-q {
       display: block;
       white-space: nowrap;
@@ -364,14 +347,8 @@ const qEm = Math.max(lineEm(Q1), lineEm(Q2)) * safety;
     }
   }
 
-  /* Phones: the question at the study heading step with a looser
-     leading (0.92 let the lines touch at 28px), and the three profiles on
-     one line at 375. */
+  /* Phones: the three profiles on one line at 375. */
   @media (max-width: 47.999rem) {
-    .fd-title {
-      font-size: min(2.1rem, 8.6vw);
-      line-height: 0.97;
-    }
     .fd-links {
       gap: 0 1.25rem;
     }

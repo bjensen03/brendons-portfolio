@@ -17,10 +17,6 @@
                       you're in, how far through, and a jump list
     heroTouch         the hero's code field lights up under a finger
 
-  fitHeadings (section headings sized to the screen) lives in
-  fit-headings.ts: Base.astro runs it on every page, and importing it from
-  here made every page download this whole file.
-
   The tracks are native horizontal scrollers with CSS scroll-snap — the
   browser does the physics, momentum and accessibility (they scroll with a
   keyboard and a screen reader like any other overflow). Scripts only read

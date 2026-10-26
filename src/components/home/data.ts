@@ -160,45 +160,34 @@ export const featuredProjects = async (): Promise<FeaturedProject[]> => {
   return out;
 };
 
-/* ── Expertise ─────────────────────────────────────────────────────────── */
+/* ── Technical skills (the tabbed areas) ─────────────────────────────────── */
 
 export const AREAS = [
   {
     id: 'frontend',
     name: 'Frontend',
     heading: 'Frontend: the layouts, components and interactions people use.',
-    body:
-      "Frontend development is what I enjoy most. I like taking a design and figuring out how to bring it to life. I've worked on everything from custom websites to more complex web applications, and I always try to make sure what I build looks good and works well on any screen.",
   },
   {
     id: 'backend',
     name: 'Backend',
     heading: 'Backend: data, logic, forms and the integrations behind them.',
-    body:
-      "I've worked on a lot of projects where the real work happens behind the scenes. Whether it's building custom functionality or connecting different systems together, I enjoy figuring out how everything needs to work. Some of my favorite projects have been the ones where I've had to build something completely custom.",
   },
   {
     id: 'wordpress',
     name: 'WordPress & CMS',
     heading: 'WordPress & CMS: custom themes and the editing experience.',
-    body:
-      "I've worked with WordPress for years, starting with page builders and eventually moving into custom themes and development with PHP and ACF. I like being able to build exactly what a website needs without relying on a bunch of plugins. I've also built custom portals and systems that make things easier for the people using them.",
   },
   {
     id: 'workflow',
     name: 'Design & workflow',
     heading: 'Design & workflow: from layout to a tested release.',
-    body:
-      "I enjoy being involved in a project from the beginning and seeing it all come together. Along with development, I've worked in digital marketing, which has helped me understand the business side of websites. I like figuring out what needs to be improved and building something that actually makes a difference.",
   },
-  /* A blank line in a body starts a new
-     paragraph. `studies` pins the links instead of deriving them. */
+  /* `studies` pins the links instead of deriving them. */
   {
     id: 'marketing',
     name: 'Marketing',
     heading: 'Marketing: content, campaigns and the work behind them.',
-    body:
-      "Marketing has always been part of what I do alongside development. My wife Kaylee and I started The Twilight Trekkers in 2021, and we've grown it to over 26K Instagram followers and worked with 34 brands. I write our blogs, film and edit drone footage, and pay attention to what our followers enjoy most.\n\nAt Rally, I also handled marketing for the Rally Connects tradeshow. We originally planned for around 100 people, but ended up having over 250 attend.",
     studies: ['twilight-trekkers', 'rally-rep', 'rally-trailer'],
     /* Picked from those studies' full-stack lists, so the panel shows tools
        rather than features like "Dealer lead routing". */
@@ -251,7 +240,6 @@ export type AreaData = {
   id: AreaId;
   name: string;
   heading: string;
-  body: string;
   tools: string[];
   studies: Array<{ name: string; href: string }>;
 };

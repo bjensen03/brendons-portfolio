@@ -127,7 +127,7 @@ export const GALLERY_PHOTOS: GalleryPhoto[] = [
   { f: 'mountains/forest-log-bridge-01.webp', w: 1067, h: 1600, alt: 'A woman crossing a log bridge in a sunlit forest.' },
   { f: 'mountains/tunnel-log-01.webp', w: 900, h: 1600, alt: 'A person walking through a tunnel cut in a fallen giant tree.' },
   { f: 'mountains/taft-point-01.webp', w: 1600, h: 1067, alt: 'Light rays over a granite valley, tiny people on a cliff point.' },
-  { f: 'water/havasu-falls-01.webp', w: 2400, h: 1519, best: true, big: true, focus: '52% 62%', alt: 'A tall waterfall over red cliffs into a turquoise pool, two people on the shore.' },
+  { f: 'water/havasu-falls-01.webp', w: 2400, h: 1519, best: true, big: true, focus: '52% 62%', alt: 'Mooney Falls plunging over red cliffs into a turquoise pool, two people on the shore.' },
   { f: 'water/kayak-falls-01.webp', w: 1536, h: 2048, best: true, big: true, focus: '45% 50%', alt: 'A kayaker paddling toward a wide waterfall.' },
   { f: 'water/havasu-cascades-01.webp', w: 1280, h: 1920, best: true, focus: '45% 55%', alt: 'Turquoise travertine pools and cascades, a woman in red on a ledge.' },
   { f: 'water/calf-creek-falls-01.webp', w: 1067, h: 1600, alt: 'Two people wading at the foot of a tall ribbon waterfall on streaked canyon walls.' },

@@ -1,34 +1,44 @@
 ---
 import { expertiseAreas, pad, textLink } from './data';
+import { buildLines, highlight, mealSwap } from './snippets';
 import { showPlaceholders } from '../../lib/placeholders';
 
 /*
-  Expertise. A WAI-ARIA tabs pattern with a no-JS fallback: without script the
-  tab list is hidden and all the panels render stacked, so nothing is lost.
-  With script (html.js, set in Base before first paint) the panels share one
-  grid cell, so the box is always as tall as the tallest panel and switching
-  never moves the page below.
+  Technical skills. What used to be two sections ("What I build" and
+  Expertise) in one: the skills as a single row, then the areas as tabs,
+  each with its tools and the projects that use them. The Frontend tab
+  carries one real code excerpt, the swap button from Meal Planner.
 
-  Tools are pulled from the case studies' full-stack lists, not typed here —
-  a list that isn't confirmed yet carries a marker. The tab column is
-  sticky at 1024+, so it stays beside the panel instead of ending in a void.
+  The tabs are a WAI-ARIA tabs pattern with a no-JS fallback: without
+  script the tab list is hidden and all the panels render stacked, so
+  nothing is lost. With script (html.js, set in Base before first paint)
+  the panels share one grid cell, so the box is always as tall as the
+  tallest panel and switching never moves the page below.
+
+  Tools are pulled from the case studies' full-stack lists, not typed
+  here. The tab column is sticky at 1024+, so it stays beside the panel.
 */
 
 const areas = await expertiseAreas();
+/* The skills from the old "What I build" lines, as one list. */
+const skills = buildLines.map((l) => l.label);
 ---
 
-<section id="expertise" class="bg-white py-section" aria-labelledby="expertise-title">
+<section id="skills" class="bg-white py-section" aria-labelledby="skills-title">
   <div class="container-bleed">
     <div class="grid grid-cols-4 gap-x-(--grid-gutter) md:grid-cols-6 lg:grid-cols-12">
       <div class="col-span-full lg:col-span-6">
-        <h2 id="expertise-title" class="text-heading text-fg" data-split>Expertise</h2>
+        <h2 id="skills-title" class="text-section text-fg" data-split>Technical skills</h2>
       </div>
+      <ul class="skills-row col-span-full mt-stack lg:col-span-9" aria-label="Skills" data-reveal>
+        {skills.map((s) => <li class="text-lead text-fg">{s}</li>)}
+      </ul>
     </div>
 
     <div class="mt-block grid grid-cols-4 gap-x-(--grid-gutter) md:grid-cols-6 lg:grid-cols-12" data-tabs>
       <div
         role="tablist"
-        aria-label="Expertise areas"
+        aria-label="Skill areas"
         aria-orientation="vertical"
         class="col-span-full grid grid-cols-2 gap-1 self-start rounded-control bg-soft p-1 md:grid-cols-5 lg:sticky lg:top-[calc(var(--spacing-nav)+var(--spacing-block))] lg:col-span-4 lg:block lg:rounded-none lg:bg-transparent lg:p-0"
         data-tablist
@@ -67,13 +77,10 @@ const areas = await expertiseAreas();
               class="panel"
             >
               <h3 class="text-title text-fg">{area.heading}</h3>
-              {area.body.split('\n\n').map((para, j) => (
-                <p class:list={[j === 0 ? 'mt-stack' : 'mt-[1em]', 'max-w-measure text-lead text-fg-muted']}>{para}</p>
-              ))}
 
               {(area.tools.length > 0 || showPlaceholders) && (
                 <div class="mt-block">
-                  <h4 class="text-small font-medium text-fg-muted">Tools</h4>
+                  <h4 class="eyebrow">Tools</h4>
                   <ul class="mt-3 grid md:grid-cols-2 md:gap-x-(--grid-gutter)">
                     {area.tools.length > 0 ? (
                       area.tools.map((tool) => (
@@ -88,9 +95,20 @@ const areas = await expertiseAreas();
                 </div>
               )}
 
+              {area.id === 'frontend' && (
+                <figure class="skill-code mt-10">
+                  <figcaption class="text-small text-fg">
+                    Meal Planner, my own app<span class="text-fg-muted"> · {mealSwap.lang}</span>
+                  </figcaption>
+                  <pre class="skill-code__pre" data-lenis-prevent-horizontal><code>{highlight(mealSwap.code).map((t) => (
+                    t.role === 'plain' ? t.text : <span class={`tok-${t.role}`}>{t.text}</span>
+                  ))}</code></pre>
+                </figure>
+              )}
+
               {area.studies.length > 0 && (
                 <div class="mt-10">
-                  <h4 class="text-small font-medium text-fg-muted">Used in</h4>
+                  <h4 class="eyebrow">Used in</h4>
                   <ul class="mt-3 flex flex-wrap gap-x-6 gap-y-3">
                     {area.studies.map((s) => (
                       <li>
@@ -111,6 +129,44 @@ const areas = await expertiseAreas();
 </section>
 
 <style>
+  /* The skills as one run of words with a muted dot between them. */
+  .skills-row {
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: 0.25em;
+  }
+  .skills-row li:not(:last-child)::after {
+    content: '·';
+    margin-inline: 0.5em;
+    color: var(--color-fg-muted);
+  }
+
+  /* The Meal Planner excerpt: the same code treatment the hero field and
+     the case studies use. */
+  .skill-code__pre {
+    margin-top: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--color-edge);
+    border-radius: var(--radius-media);
+    background: var(--color-surface-raised);
+    font-family: var(--font-mono);
+    font-size: clamp(0.8125rem, 0.25rem + 0.55vw, 1rem);
+    line-height: 1.7;
+    color: var(--color-fg);
+    max-inline-size: var(--measure-code);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    tab-size: 2;
+  }
+  .skill-code__pre :global(.tok-comment) {
+    color: var(--color-fg-muted);
+    font-style: italic;
+  }
+  .skill-code__pre :global(.tok-string) {
+    color: var(--color-fg);
+    font-weight: 600;
+  }
+
   /* No script: hide the (useless) tab buttons and show every panel. */
   :global(html:not(.js)) [data-tablist] {
     display: none;

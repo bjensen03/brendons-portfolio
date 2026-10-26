@@ -5,7 +5,6 @@ import { primaryButton, textLink } from '../../components/home/data';
 import CopyEmail from '../../components/footer/CopyEmail.astro';
 import ExternalLink from '../../components/ExternalLink.astro';
 import { RESUME } from '../../components/footer/links';
-import { SPACE_EM, wordEm } from '../../lib/display-fit';
 
 /*
   Contact.
@@ -52,7 +51,6 @@ const PROJECT_TYPES = [
 
 /* Phones: "TELL ME" (the widest pair that should stay together) sets the
    title size, so it breaks as TELL ME / WHAT IT / NEEDS / TO DO. */
-const pairFit = (['Tell', 'me'].reduce((sum, w) => sum + wordEm(w), 0) + SPACE_EM).toFixed(3);
 
 const field =
   'transition-soft min-h-12 w-full rounded-control border border-edge-strong bg-surface px-4 py-3 text-body text-fg placeholder:text-fg-muted focus:border-focus';
@@ -65,7 +63,7 @@ const field =
 >
   <section class="ct-open" aria-labelledby="contact-title">
     <div class="container-bleed">
-      <h1 id="contact-title" class="ct-title text-mega text-fg" data-split="lines" style={`--pair-fit: ${pairFit}`}>
+      <h1 id="contact-title" class="ct-title text-page-long type-display-sentence text-fg" data-split="lines">
         Tell me what it needs to do.
       </h1>
 
@@ -236,18 +234,10 @@ const field =
     overflow-wrap: break-word;
   }
 
-  /* Phones: TELL ME fills the column, up to the case-study title's phone
-     size. From 768 the homepage contact headline's treatment: the display
-     step, growing with the content width from 1024. */
+  /* The page title is the sentence step (text-page-long), in sentence
+     case: it's a sentence, not a short display title. */
   .ct-title {
-    font-size: min(4.5rem, calc((100vw - 2 * var(--grid-margin)) / (var(--pair-fit) * 1.04)));
-    overflow-wrap: normal;
-  }
-
-  @media (min-width: 48rem) {
-    .ct-title {
-      font-size: max(var(--text-display), min(calc((100vw - 2 * var(--grid-margin)) * 0.088), 13rem));
-    }
+    max-width: 18ch;
   }
 
   .ct-grid {

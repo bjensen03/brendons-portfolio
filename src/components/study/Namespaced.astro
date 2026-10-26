@@ -20,11 +20,21 @@ interface Props {
 const { prefix } = Astro.props;
 const raw = await Astro.slots.render('default');
 
-let html = raw;
+/* The heading scale: a long section heading (more than three words or
+   20 characters) is set in sentence case, so caps stay for short display
+   titles. Done here, at build, because every case-study block passes
+   through this and the headings come from yaml. */
+const LONG_WORDS = 3;
+const LONG_CHARS = 20;
+let html = raw.replace(/<h2(\s[^>]*?class=")([^"]*\bcs-h2\b[^"]*)("[^>]*>)([\s\S]*?)<\/h2>/g, (m, a, cls, b, inner) => {
+  const text = inner.replace(/<[^>]+>/g, '').replace(/&[a-z#0-9]+;/gi, 'x').trim();
+  const long = text.split(/\s+/).filter(Boolean).length > LONG_WORDS || text.length > LONG_CHARS;
+  return long && !/\btype-display-sentence\b/.test(cls) ? `<h2${a}${cls} type-display-sentence${b}${inner}</h2>` : m;
+});
 if (prefix) {
   const ids = new Set(Array.from(raw.matchAll(/\sid="([^"]+)"/g), (m) => m[1]));
   const swap = (id: string) => (ids.has(id) ? `${prefix}${id}` : id);
-  html = raw
+  html = html
     .replace(/(\sid=")([^"]+)(")/g, (_, a, id, b) => `${a}${swap(id)}${b}`)
     .replace(
       /(\s(?:aria-labelledby|aria-describedby|aria-controls|aria-owns|aria-flowto|aria-activedescendant|aria-details|aria-errormessage|for|headers|list)=")([^"]+)(")/g,

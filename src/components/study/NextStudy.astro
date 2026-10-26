@@ -2,7 +2,7 @@
 import { longestWordEm } from '../../lib/display-fit';
 
 /*
-  Next project. The whole block is one link: the name at the mega step
+  Next project. The whole block is one link: the name at the list step (text-list)
   rising into place line by line, the one-line description under it. On
   hover or focus a tan bar sweeps across under the name and the arrow
   leans forward — the accent as a fill, never as the name's colour.
@@ -20,7 +20,7 @@ const { href, name, line } = Astro.props;
 <nav class="nx" aria-label="Next case study">
   <a href={href} class="nx-link group container-bleed">
     <span class="text-small text-fg-muted">Next project</span>
-    <span class="nx-name text-mega" data-split="lines" style={`--fit: ${longestWordEm(name)}`}>{name}</span>
+    <span class="nx-name text-list" data-split="lines" style={`--fit: ${longestWordEm(name)}`}>{name}</span>
     <span class="nx-bar" aria-hidden="true"></span>
     <span class="nx-line">
       <span class="text-lead text-fg">{line}</span>
@@ -44,9 +44,9 @@ const { href, name, line } = Astro.props;
 
   .nx-name {
     display: block;
-    /* The longest word has to fit the width: "MANUFACTURING" (about 12.4em)
-       ran off the right edge at 1440 with a fixed 9.2. */
-    font-size: min(var(--text-mega), calc((100vw - 2 * var(--grid-margin)) / max(9.2, var(--fit, 9.2) * 1.04)));
+    /* The list step (the heading scale), below the section headings above it;
+       only ever smaller if its longest word wouldn't fit the column. */
+    font-size: min(var(--text-list), calc((100vw - 2 * var(--grid-margin)) / (var(--fit, 9.2) * 1.04)));
     color: var(--color-fg);
     overflow-wrap: normal;
   }
@@ -72,13 +72,6 @@ const { href, name, line } = Astro.props;
     justify-content: space-between;
     gap: 1.5rem;
     max-width: 60rem;
-  }
-
-  /* Phones and tablets: the name as big as its longest word allows (lib/display-fit). */
-  @media (max-width: 63.999rem) {
-    .nx-name {
-      font-size: min(4.5rem, calc((100vw - 2 * var(--grid-margin)) / (var(--fit, 9.2) * 1.04)));
-    }
   }
 
   /* No hover on touch: the tan bar sweeps across as the block scrolls up

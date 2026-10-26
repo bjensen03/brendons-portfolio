@@ -1,11 +1,15 @@
 ---
 import CodeField from './CodeField.astro';
+import ExternalLink from '../ExternalLink.astro';
 import { primaryButton, textLink } from './data';
+import { CONTACT } from '../../config';
+import { RESUME } from '../footer/links';
 
 /*
   Hero. Full screen, and the type is the hero: "Hi, I'm Brendon." at the mega
-  step over a faint field of code from the case studies. One plain sentence
-  and the two actions sit bottom-left.
+  step over a faint field of code from the case studies, with "Full-stack
+  developer" right under the name. One plain sentence and the actions
+  (Projects, the résumé, GitHub) sit bottom-left.
 
   The height is the small viewport minus the sticky nav (padding included,
   border-box), so the fold lands
@@ -38,6 +42,7 @@ import { primaryButton, textLink } from './data';
         <span class="block">Hi, I’m</span>{' '}
         <span class="block">Brendon.</span>
       </h1>
+      <p class="hero-role text-title text-fg">Full-stack developer</p>
 
       {/* Scroll cue. A real link, so it works with no JS at all; with motion
           on, home-motion.ts smooth-scrolls it, plays the idle loop and fades
@@ -45,9 +50,9 @@ import { primaryButton, textLink } from './data';
           shift the layout. */}
       <div class="hero-cue" data-reveal="manual" data-hero-cue>
         <a
-          href="#what-i-build"
+          href="#work"
           class="hero-cue__button"
-          aria-label="Scroll to what I build"
+          aria-label="Scroll to the work"
           data-magnetic="0.3"
           data-hero-cue-link
         >
@@ -69,11 +74,12 @@ import { primaryButton, textLink } from './data';
 
     <div class="hero-foot max-w-[34rem]">
       <p class="text-lead text-fg" data-settle data-hero-line>
-        I'm a full-stack developer with over 5 years of experience. I enjoy building websites and web apps, especially when I get to work on something custom. My background in design and marketing has also helped me understand what businesses actually need from their websites.
+        I have over 5 years of experience building websites and web apps, and I enjoy it most when I get to work on something custom. My background in design and marketing has also helped me understand what businesses actually need from their websites.
       </p>
       <div class="mt-8 flex flex-wrap items-center gap-7" data-reveal="manual" data-hero-actions>
-        <a href="#work" class={primaryButton} data-magnetic="0.25">See the work</a>
-        <a href="/about/" class={textLink}>About me</a>
+        <a href="/work/" class={primaryButton} data-magnetic="0.25">Projects</a>
+        {RESUME && <ExternalLink href={RESUME} newTab class={textLink}>Résumé</ExternalLink>}
+        {CONTACT.github && <ExternalLink href={CONTACT.github} rel="me" class={textLink}>GitHub</ExternalLink>}
       </div>
     </div>
   </div>
@@ -99,6 +105,11 @@ import { primaryButton, textLink } from './data';
     margin-top: 0.07em;
   }
 
+  /* The role, straight under the name. */
+  .hero-role {
+    margin-top: 0.75rem;
+  }
+
   /* ── Scroll cue ─────────────────────────────────────────────────────────
      Hangs under the full stop of "BRENDON.", right-aligned to the
      headline, where the hero is empty at every width (the sentence and the
@@ -110,8 +121,12 @@ import { primaryButton, textLink } from './data';
      --color-fg on the scope surface (5.5+ and 9.5+ at every brightness);
      hovered, --color-on-accent on the accent fill (5.4+), edged in
      --color-focus (4.1+). The trace and pulse are decoration on top. */
-  .hero-cue {
+  /* Set on the hero body, not the cue, so the actions row can read it too
+     (it keeps clear of the cue on phones). */
+  .hero-body {
     --cue-size: 3.25rem;
+  }
+  .hero-cue {
     position: absolute;
     top: calc(100% + clamp(1.25rem, 2.2vw, 2.25rem));
     right: 0;
@@ -119,7 +134,7 @@ import { primaryButton, textLink } from './data';
   }
 
   @media (min-width: 48rem) {
-    .hero-cue {
+    .hero-body {
       --cue-size: 4rem;
     }
   }

@@ -67,9 +67,8 @@ export const ROLES = [
    could be confirmed; the eleven on the Collaborations page of
    thetwilighttrekkers.com keep that page's spelling and their lines, exactly
    as written there (captured 2026-10-23). The rest show the name only.
-   One copy: /twilight-trekkers/, the case study (list:brands via
-   src/lib/study-lists.ts) and the homepage section (home/twilight-data.ts,
-   names only) all read it. */
+   One copy: /twilight-trekkers/ and the case study (list:brands via
+   src/lib/study-lists.ts) both read it. */
 export type BrandGroup = 'brands' | 'stays' | 'excursions';
 
 export const BRAND_GROUP_LABELS: Record<BrandGroup, string> = {

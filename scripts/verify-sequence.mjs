@@ -1,7 +1,8 @@
 /*
   Runtime verification for the home page's motion: the opening, the hero
-  entrance, the code field, What I build, the Selected Work showcase, and the
-  ScrollTrigger lifecycle across view transitions.
+  entrance, the code field, the section order (hero, Selected Work,
+  Technical skills, testimonials, Twilight), the Selected Work showcase, and
+  the ScrollTrigger lifecycle across view transitions.
 
   The checks for the old canyon hero (intro overlay, hiker, walker, contour
   canvas, elevation track, route waypoints) went with those components. What
@@ -193,7 +194,7 @@ ok('code field drifts while the hero is on screen', await p.evaluate(() => {
       looping: document.querySelector('[data-hero-cue]').classList.contains('is-looping'),
     };
   });
-  ok('scroll cue: a link in the hero to the next section', cue.inHero && cue.nextIsTarget && /what i build/i.test(cue.name ?? ''),
+  ok('scroll cue: a link in the hero to the next section', cue.inHero && cue.nextIsTarget && /work/i.test(cue.name ?? '') && cue.href === '#work',
     JSON.stringify(cue));
   ok('scroll cue: target at least 44px', cue.size >= 44, `${cue.size}px`);
   ok('scroll cue: idle loop running while the hero is on screen', cue.looping);
@@ -202,7 +203,7 @@ ok('code field drifts while the hero is on screen', await p.evaluate(() => {
   await p.click('[data-hero-cue-link]');
   await p.waitForTimeout(2000);
   const landed = await p.evaluate(() => ({
-    top: Math.round(document.getElementById('what-i-build').getBoundingClientRect().top),
+    top: Math.round(document.getElementById('work').getBoundingClientRect().top),
     vis: getComputedStyle(document.querySelector('[data-hero-cue]')).visibility,
     looping: document.querySelector('[data-hero-cue]').classList.contains('is-looping'),
   }));
@@ -216,29 +217,28 @@ ok('code field drifts while the hero is on screen', await p.evaluate(() => {
   await p.waitForTimeout(300);
 }
 
-/* ---- What I build: the middle line is lit, the panel follows it. ---- */
-const lineState = async (i) => {
-  await p.evaluate((i) => {
-    const l = document.querySelector(`[data-build-line="${i}"]`);
-    const r = l.getBoundingClientRect();
-    const y = r.top + window.scrollY + r.height / 2 - window.innerHeight / 2;
-    const ln = window.__motion?.lenis;
-    if (ln) ln.scrollTo(y, { immediate: true, force: true });
-    else window.scrollTo(0, y);
-  }, i);
-  await p.waitForTimeout(500);
-  return p.evaluate(() => ({
-    lit: [...document.querySelectorAll('[data-build-line]')].map((l) => Number(l.style.getPropertyValue('--lit') || 0)),
-    active: document.querySelector('[data-build-snippet].is-active')?.dataset.buildSnippet,
-  }));
-};
-const l2 = await lineState(2);
-const l5 = await lineState(5);
-ok('what I build: the centred line is lit and the rest dim',
-  l2.lit[2] > 0.9 && l2.lit[5] < 0.1 && l5.lit[5] > 0.9 && l5.lit[2] < 0.1,
-  `line 2 → ${l2.lit.map((n) => n.toFixed(2)).join(' ')}`);
-ok('what I build: the panel follows the active line', l2.active === '2' && l5.active === '5', `${l2.active}, ${l5.active}`);
+/* ---- Section order: hero, then Selected Work, Technical skills,
+   testimonials, Twilight. (What I build was folded into Technical skills.) */
+const order = await p.evaluate(() => {
+  const at = (el) => (el ? Math.round(el.getBoundingClientRect().top + window.scrollY) : null);
+  return {
+    hero: at(document.querySelector('[data-hero]')),
+    work: at(document.getElementById('work')),
+    skills: at(document.getElementById('skills')),
+    testimonials: at(document.querySelector('section.tm')),
+    twilight: at(document.querySelector('section.td')),
+    oldBuild: !!document.querySelector('[data-build], #what-i-build'),
+  };
+});
+{
+  const seq = [order.hero, order.work, order.skills, order.testimonials, order.twilight];
+  ok('home: hero → work → technical skills → testimonials → Twilight',
+    seq.every((y) => y !== null) && seq.every((y, i) => i === 0 || y > seq[i - 1]), JSON.stringify(order));
+  ok('home: What I build is gone', !order.oldBuild);
+}
 
+await scrollToY(p, await p.evaluate(() => document.getElementById('work').getBoundingClientRect().top + window.scrollY + 400));
+await p.waitForTimeout(600);
 ok('code field pauses once the hero is off screen', await p.evaluate(() =>
   document.querySelector('[data-code-field]').classList.contains('is-paused')));
 
@@ -352,7 +352,8 @@ for (let i = 0; i < expRows; i += 1) {
   const op = await p.evaluate((i) => Number(getComputedStyle(document.querySelectorAll('[data-exp-row]')[i]).opacity), i);
   if (op < 0.95) expHidden.push(`${i + 1}: ${op}`);
 }
-ok('experience: every row visible once scrolled to', expRows > 0 && expHidden.length === 0,
+if (!expRows) note('experience', 'no Experience section on the homepage any more; skipped');
+else ok('experience: every row visible once scrolled to', expHidden.length === 0,
   expHidden.length ? `hidden rows ${expHidden.join(', ')}` : `${expRows} rows`);
 
 /* Scroll to the bottom rather than counting wheel ticks — a fixed number of
@@ -565,13 +566,6 @@ await r.waitForTimeout(800);
 ok('reduced motion: active bar under the current page', (await headerState(r)).bar === '/about/');
 await r.goto(`${BASE}/`, { waitUntil: 'load' });
 await r.waitForTimeout(800);
-ok('reduced motion: every discipline at full strength, every snippet shown', await r.evaluate(() => {
-  const lines = [...document.querySelectorAll('[data-build-line]')];
-  const snippets = [...document.querySelectorAll('[data-build-snippet]')];
-  return lines.every((l) => getComputedStyle(l).getPropertyValue('--lit').trim() === '1')
-    && snippets.every((s) => getComputedStyle(s).visibility === 'visible');
-}));
-
 /* ---------------------------------------------------------------------------
    Mobile: stacked, nothing pinned, no sideways scroll.
    ------------------------------------------------------------------------ */
@@ -632,7 +626,8 @@ ok('mobile: brightness and Menu buttons keep 44px targets', await m.evaluate(() 
     const op = await m.evaluate((i) => Number(getComputedStyle(document.querySelectorAll('[data-exp-row]')[i]).opacity), i);
     if (op < 0.95) hidden.push(`${i + 1}: ${op}`);
   }
-  ok('mobile: every experience row visible once scrolled to', rows > 0 && hidden.length === 0,
+  if (!rows) note('mobile: experience', 'no Experience section on the homepage any more; skipped');
+  else ok('mobile: every experience row visible once scrolled to', hidden.length === 0,
     hidden.length ? `hidden rows ${hidden.join(', ')}` : `${rows} rows`);
   await m.evaluate(() => window.scrollTo(0, 0));
   await m.waitForTimeout(300);
@@ -740,7 +735,9 @@ await m.click('[data-nav-toggle]');
   ok('mobile: carousel Next lands on card 2 and the counter follows a swipe', car.start === '1' && car.afterNext === '2' && car.snapped && car.afterSwipe === '3' && car.prevEnabled, JSON.stringify(car));
   ok('mobile: the carousel stays inside the page', await mp.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
 
-  await mp.goto(`${BASE}/work/rally-trailer/`, { waitUntil: 'load' });
+  /* Studies open on the quick overview; the scroller, step viewers and eras
+     are in the full case study. */
+  await mp.goto(`${BASE}/work/rally-trailer/?view=full`, { waitUntil: 'load' });
   await mp.waitForTimeout(1800);
 
   const ps = await mp.evaluate(async () => {

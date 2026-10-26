@@ -175,7 +175,7 @@ photoSets:
       - label: 'Water'
         items:
           - src: twilight-trekkers/library/water/havasu-falls-01.webp
-            alt: 'Havasu Falls pouring over red cliffs into a turquoise pool, two people on the shore.'
+            alt: 'Mooney Falls plunging over red cliffs into a turquoise pool, two people on the shore.'
             big: true
             focus: '52% 62%'
           - src: twilight-trekkers/library/water/kayak-falls-01.webp

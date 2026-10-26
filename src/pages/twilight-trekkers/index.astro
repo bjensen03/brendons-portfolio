@@ -6,7 +6,7 @@ import TwilightSite from '../../components/twilight/TwilightSite.astro';
 import PhotoSet from '../../components/study/PhotoSet.astro';
 import ReelRow from '../../components/study/ReelRow.astro';
 import { REELS_FULL } from '../../components/media/reels';
-import ListRows from '../../components/study/ListRows.astro';
+import TwilightBrands from '../../components/twilight/TwilightBrands.astro';
 import TwilightPhotoGallery from '../../components/twilight/TwilightPhotoGallery.astro';
 import { textLink } from '../../components/home/data';
 import ExternalLink from '../../components/ExternalLink.astro';
@@ -14,8 +14,6 @@ import { Picture } from 'astro:assets';
 import { md } from '../../lib/markdown';
 import '../../styles/study.css';
 import {
-  BRAND_GROUP_LABELS,
-  BRANDS,
   FEED_SHOT,
   FOLLOWERS,
   FOLLOWERS_AS_OF,
@@ -106,7 +104,7 @@ const follow = [
       roles are short, and two section paddings in a row left a blank band. */}
   <section class="cs-sec" style="padding-bottom: 0" aria-labelledby="tt-roles">
     <div class="container-bleed">
-      <h2 id="tt-roles" class="text-heading text-fg md:text-display" data-split>What I do</h2>
+      <h2 id="tt-roles" class="text-section text-fg" data-split>What I do</h2>
       <ul role="list" class="tt-roles mt-block grid grid-cols-4 gap-x-(--grid-gutter) md:grid-cols-6 lg:grid-cols-12" data-reveal-group>
         {
           ROLES.map((r) => (
@@ -125,7 +123,7 @@ const follow = [
     heading="From the trail"
     introHtml={libraryIntro}
     categories={library.categories}
-    headingClass="text-heading text-fg md:text-display"
+    headingClass="text-section text-fg"
   />
 
   <ReelRow
@@ -133,19 +131,13 @@ const follow = [
     heading="The reels"
     introHtml={reelsIntro}
     items={reels}
-    headingClass="text-heading text-fg md:text-display"
+    headingClass="text-section text-fg"
   />
 
   {/* Every photo in the library, once each, with a lightbox. */}
   <TwilightPhotoGallery />
 
-  <ListRows
-    id="tt-brands"
-    heading="Brands we’ve worked with"
-    introHtml="<p>Every brand, stay and excursion we've worked with: 34 so far. The eleven on our Collaborations page each get a photo from the trip and a line from us on why we liked it.</p>"
-    items={BRANDS.map((b) => ({ name: b.name, body: b.line ?? '', group: BRAND_GROUP_LABELS[b.group] }))}
-    headingClass="text-heading text-fg md:text-display"
-  />
+  <TwilightBrands />
 
   <TwilightSite />
 
@@ -153,7 +145,7 @@ const follow = [
     <div class="container-bleed">
       <div class="grid grid-cols-4 items-center gap-x-(--grid-gutter) gap-y-block md:grid-cols-6 lg:grid-cols-12">
         <div class="col-span-full lg:col-span-7">
-          <h2 id="tt-follow" class="text-display text-fg" data-split>Follow along</h2>
+          <h2 id="tt-follow" class="text-section text-fg" data-split>Follow along</h2>
           <p class="mt-stack max-w-measure text-body text-fg-muted" data-reveal>
             We share the day-to-day adventures and the behind-the-scenes moments on Instagram.
           </p>

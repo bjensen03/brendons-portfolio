@@ -36,7 +36,7 @@ const widthsFor = (w: number) => [480, 800, 1200, 1600].filter((x) => x <= w);
 ---
 
 <section class:list={['scr', `scr--${size}`]} aria-label={label ?? 'The screens'} data-screens>
-  {label && <h2 class="scr__title">{label}</h2>}
+  {label && <h2 class="scr__title text-section text-fg">{label}</h2>}
   <ul class="scr__list" role="list">
     {
       items.map((item) => (
@@ -60,14 +60,6 @@ const widthsFor = (w: number) => [480, 800, 1200, 1600].filter((x) => x <= w);
 
 <style>
   .scr__title {
-    font-family: var(--font-display);
-    font-stretch: var(--display-stretch);
-    text-transform: var(--display-case);
-    font-size: var(--text-heading);
-    line-height: var(--text-heading--line-height);
-    letter-spacing: var(--text-heading--letter-spacing);
-    font-weight: var(--text-heading--font-weight);
-    color: var(--color-fg);
     margin-bottom: var(--spacing-stack);
   }
 

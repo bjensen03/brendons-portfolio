@@ -17,8 +17,8 @@ import trekkersPhoto from '../content/projects/images/twilight-trekkers/img-0864
   the dark range, graphite with light type in the light range. The bar takes
   the same tone while it's open.
 
-  Contents: Projects, The Twilight Trekkers, About and Contact as giant
-  display words, the featured projects under Projects, the email and GitHub
+  Contents: Projects, The Twilight Trekkers, About and Contact as a list in
+  the display face, the featured projects as one light row under Projects, the email and GitHub
   at the foot, and faint code behind (the same case-study snippets as the
   hero field). On a fine pointer, hovering a word dims the others and a
   small preview sits beside it, following the cursor: the project's
@@ -231,40 +231,44 @@ const [emailUser, emailHost] = (CONTACT.email ?? '').split('@');
   }
 
   /*
-    The giant words. Sized so the longest single words (PROJECTS, TREKKERS,
-    ~6.6em in Archivo at 115% width) fit the column at 390, and from 1024 so
-    that THE TWILIGHT (~8.6em) holds one line and the four entries (five
-    lines) fit the screen's height.
+    The four pages, one per line, in the display face. Set well below the
+    page titles and at 600, not 900, so the menu reads as a list rather than
+    a poster: 32px on a 320 phone, about 44 at 768, 60 at 1440 and up. The
+    svh term keeps the list, the project names and the foot inside a short
+    window, so the menu doesn't scroll and nothing slides under the bar.
   */
   .menu__list {
-    --menu-size: min(var(--text-mega), calc((100vw - 2 * var(--grid-margin)) / 7), 14svh);
+    --menu-size: min(clamp(2rem, 1.3rem + 3vw, 3.75rem), 8svh);
     display: flex;
     flex-direction: column;
-    gap: 0.06em;
+    /* The items' own padding (44px targets) already spaces the lines on
+       phones; the gap only adds air once the type is bigger. */
+    gap: clamp(0rem, 1.4svh - 0.5rem, 1rem);
     font-size: var(--menu-size);
   }
 
-  /* The rows set their own line box; body leading at this size would open
-     a gap of a whole extra line between the words. */
   .menu__row {
-    line-height: 0.86;
+    line-height: 1;
   }
 
   .menu__row--work {
     display: flex;
     flex-direction: column;
-    gap: 0.9rem;
+    gap: 0.35rem;
   }
 
   .menu__item {
     display: inline-block;
     font-family: var(--font-display);
     font-stretch: var(--display-stretch);
-    font-weight: 900;
+    font-weight: 600;
     text-transform: var(--display-case);
     font-size: 1em;
-    line-height: 0.86;
-    letter-spacing: -0.03em;
+    line-height: 1;
+    letter-spacing: -0.015em;
+    /* At phone sizes one line is under 44px tall; pad it up to a 44px
+       target without making the type bigger or heavier. */
+    padding-block: max(0px, calc((2.75rem - 1em) / 2));
   }
 
   /* Word masks: the word rises into a box that clips at its own line. */
@@ -280,77 +284,28 @@ const [emailUser, emailHost] = (CONTACT.email ?? '').split('@');
     display: inline-block;
   }
 
+  /* The featured projects: one light row under Projects, in the body face,
+     muted until hovered or focused. Each is still a 44px target. */
   .menu__subs {
-    line-height: 1.15;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.5rem var(--grid-gutter);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 clamp(1rem, 2.5vw, 2rem);
     font-size: var(--text-body);
+    line-height: 1.2;
   }
   .menu__sub {
     display: inline-flex;
     min-height: 2.75rem;
     align-items: center;
     font-family: var(--font-body);
-    font-size: var(--text-lead);
-    line-height: 1.15;
-    letter-spacing: -0.01em;
+    font-size: var(--text-body);
+    font-weight: 400;
+    color: var(--color-fg-muted);
+    transition: color var(--duration-fast) var(--ease-out-soft);
   }
-
-  /* Tablet up: the project names in one wrapping row under PROJECTS. */
-  @media (min-width: 48rem) {
-    .menu__subs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0 clamp(1.5rem, 3vw, 2.5rem);
-    }
-  }
-
-  /* Tablets in a short window (834×600, a landscape split screen): the
-     same height term as 1024+, with more room for the project rows here,
-     so the menu fits instead of scrolling. Tall tablets are unchanged. */
-  @media (min-width: 48rem) and (max-width: 63.999rem) {
-    .menu__list {
-      --menu-size: min(
-        var(--text-mega),
-        calc((100vw - 2 * var(--grid-margin)) / 7),
-        14svh,
-        calc((100svh - 25rem) / 4.6)
-      );
-    }
-  }
-
-  /* Wide enough that THE TWILIGHT holds one line between the margins, so
-     the four entries make five lines. */
-  @media (min-width: 64rem) {
-    .menu__list {
-      /* The last term keeps all five lines, the project names and the foot
-         inside a short window (about 800px tall and under), so the menu
-         doesn't scroll there and nothing slides under the bar. */
-      --menu-size: min(
-        var(--text-mega),
-        calc((100vw - 2 * var(--grid-margin)) / 8.8),
-        13.5svh,
-        calc((100svh - 23rem) / 4.35)
-      );
-    }
-  }
-
-  /* Room beside PROJECTS for the longest name: the list moves up next to
-     it, one name per line, top-aligned with the cap height. */
-  @media (min-width: 80rem) {
-    .menu__row--work {
-      flex-direction: row;
-      align-items: flex-start;
-      gap: clamp(2rem, 4vw, 5rem);
-    }
-    .menu__subs {
-      flex-direction: column;
-      flex-wrap: nowrap;
-      gap: 0.15rem;
-      padding-top: 0.6rem;
-      white-space: nowrap;
-    }
+  .menu__sub:hover,
+  .menu__sub:focus-visible {
+    color: var(--color-fg);
   }
 
   .menu__foot {
@@ -497,12 +452,6 @@ const [emailUser, emailHost] = (CONTACT.email ?? '').split('@');
     .menu__nav {
       justify-content: flex-end;
     }
-    .menu__list {
-      gap: 0.12em;
-    }
-    .menu__item {
-      padding-block: 0.06em;
-    }
     /* Email on its own line; GitHub and the round Close under it, the
        Close in the bottom-right corner. */
     .menu__foot {
@@ -524,16 +473,8 @@ const [emailUser, emailHost] = (CONTACT.email ?? '').split('@');
       grid-column: 1 / -1;
       border-bottom: 1px solid var(--color-edge);
     }
-    /* The project names under PROJECTS: each starts at the top of its cell
-       (a two-line name no longer pushes its neighbour down to centre), with
-       a little air above and below the pair of rows. */
     .menu__subs {
-      align-items: start;
-      margin-block: 0.4rem 0.7rem;
-    }
-    .menu__sub {
-      align-items: flex-start;
-      padding-block: 0.55rem;
+      gap: 0 1rem;
     }
     .menu__foot > .menu__close {
       grid-column: 2;

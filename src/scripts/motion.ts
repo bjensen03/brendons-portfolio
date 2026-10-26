@@ -906,10 +906,10 @@ const wireDeclarative = (): void => {
 };
 
 /* Split headings are wired after the registered setups, not with the rest:
-   a split holds the line breaks it reads (holdLineBreaks), and fitHeadings
-   resizes the phone headings in its setup. Split first, and Lincoln's 31px
-   heading kept its two-line breaks after it was fitted to 34px, then jumped
-   to three lines when the split reverted. */
+   a split holds the line breaks it reads (holdLineBreaks), so anything a
+   setup does to a heading's size has to happen first. (fitHeadings used to;
+   headings are a fixed scale now, but the order is kept for any setup that
+   changes layout.) */
 const wireSplits = (): void => {
   document.querySelectorAll<HTMLElement>('[data-split]').forEach((el) =>
     guard('data-split', () => splitHeadline(el, { by: el.dataset.split === 'lines' ? 'lines' : 'words' })),

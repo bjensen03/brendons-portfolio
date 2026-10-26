@@ -216,6 +216,8 @@ const CONCEPTS: Array<{ id: string; name: string; shot: string; alt?: string }> 
 
 /** A concept's short name ("Zion Explorer"), for its own page's title. */
 export const conceptName = (id: string): string | undefined => CONCEPTS.find((c) => c.id === id)?.name;
+/** Every concept's short name, so their page titles can share one size. */
+export const conceptNames: string[] = CONCEPTS.map((c) => c.name);
 
 export const projectGroups = async (): Promise<ProjectGroup[]> => {
   const all = await getCollection('studies');

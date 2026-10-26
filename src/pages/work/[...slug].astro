@@ -12,7 +12,7 @@ import ConceptScreens from '../../components/study/ConceptScreens.astro';
 import NextStudy from '../../components/study/NextStudy.astro';
 import { topLevelStudies } from '../../lib/studies';
 import { longestWordEm } from '../../lib/display-fit';
-import { conceptName } from '../../components/projects/data';
+import { conceptName, conceptNames } from '../../components/projects/data';
 
 /*
   The project pages still written in MDX — today, the six design concepts.
@@ -63,6 +63,9 @@ const components = { Stat, Stats, Figure, BeforeAfter, UnderTheHood, Exhibit, Ga
    line under it. Where the title is the name already (ExoticRides), the
    outcome is the one line instead. */
 const name = conceptName(entry.id) ?? data.title;
+/* Every concept title is one size: the page step, capped so the longest
+   word among all the concept names fits the column (EXOTICRIDES). */
+const conceptFit = Math.max(...[...conceptNames, name].map((n) => parseFloat(longestWordEm(n)))).toFixed(3);
 const line = data.title === name ? data.outcome.trim() : data.title;
 const isConcept = data.depth === 'concept';
 
@@ -97,9 +100,9 @@ const nextLine = next ? (next.data.title === nextName ? next.data.outcome.trim()
         </p>
 
         <h1
-          class="cc-name text-mega"
+          class="cc-name text-page"
           data-split="lines"
-          style={`--cc-fit: ${longestWordEm(name)}`}
+          style={`--cc-fit: ${conceptFit}`}
           transition:name={`study-${entry.id}`}
         >
           {name}
@@ -159,16 +162,11 @@ const nextLine = next ? (next.data.title === nextName ? next.data.outcome.trim()
     color: var(--color-fg);
   }
 
-  /* The study hero's name: the mega step, capped so the longest word fits. */
+  /* The page step, capped so the longest word of any concept name fits. */
   .cc-name {
-    font-size: min(var(--text-mega), calc((100vw - 2 * var(--grid-margin)) / 12.6));
+    font-size: min(var(--text-page), calc((100vw - 2 * var(--grid-margin)) / (var(--cc-fit, 12.6) * 1.04)));
     color: var(--color-fg);
     overflow-wrap: normal;
-  }
-  @media (max-width: 63.999rem) {
-    .cc-name {
-      font-size: min(4.5rem, calc((100vw - 2 * var(--grid-margin)) / (var(--cc-fit, 12.6) * 1.04)));
-    }
   }
 
   .cc-grid {

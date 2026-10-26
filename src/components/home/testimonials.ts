@@ -6,9 +6,9 @@ import { CONTACT } from '../../config';
   exactly as written. Text may be trimmed with "…" but never reworded.
 
   `quote` is the full recommendation, with paragraphs separated by a blank
-  line. `short` is one or two sentences for the homepage. `placement` says
-  where it belongs: Kaylee is his wife, so hers goes on About rather than the
-  homepage.
+  line. `short` is one or two sentences for the homepage carousel, which
+  shows all of them, in this order (2026-10-25: Kaylee's moved
+  there from About so the recommendations are together).
 */
 
 export type Testimonial = {
@@ -25,7 +25,6 @@ export type Testimonial = {
   date: string;
   /** Where people can see it on LinkedIn. */
   href: string;
-  placement: 'home' | 'about';
 };
 
 /* LinkedIn's standard address for a profile's recommendations. */
@@ -45,7 +44,6 @@ Brendon and Kaylee are truly a power duo, and any team would be lucky to have so
     relation: 'Worked with Brendon at different companies',
     date: '2026-07-08',
     href: RECOMMENDATIONS,
-    placement: 'home',
   },
   {
     short:
@@ -60,7 +58,6 @@ I am really grateful that I was given the opportunity to work on the PROLOOK pro
     relation: 'Worked with Brendon on the same team',
     date: '2026-09-22',
     href: RECOMMENDATIONS,
-    placement: 'home',
   },
   {
     short:
@@ -77,9 +74,8 @@ I'm really proud of him and everything he's built, and I feel pretty lucky that 
     relation: 'Worked with Brendon on the same team',
     date: '2026-09-02',
     href: RECOMMENDATIONS,
-    placement: 'about',
   },
 ];
 
-export const HOME_TESTIMONIALS = TESTIMONIALS.filter((t) => t.placement === 'home');
-export const ABOUT_TESTIMONIALS = TESTIMONIALS.filter((t) => t.placement === 'about');
+/* Everything the homepage carousel shows. */
+export const HOME_TESTIMONIALS = TESTIMONIALS;

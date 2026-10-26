@@ -37,7 +37,7 @@ import { BRAND_HERO as HERO } from './data';
   <div class="tt-hero__scrim" aria-hidden="true"></div>
 
   <div class="tt-hero__body container-bleed relative flex min-h-[calc(100svh-var(--spacing-nav))] flex-col justify-end pb-block">
-    <h1 id="tt-title" class="tt-title text-mega text-fg" data-tone="dark" data-split>
+    <h1 id="tt-title" class="tt-title text-page text-fg" data-tone="dark" data-split>
       <span class="block">The</span>{' '}
       <span class="block">Twilight</span>{' '}
       <span class="block">Trekkers</span>
@@ -95,7 +95,7 @@ import { BRAND_HERO as HERO } from './data';
      plus air have to fit the fold, hence the svh cap. */
   .tt-title {
     background-color: transparent;
-    font-size: min(calc((100vw - 2 * var(--grid-margin)) / 6.9), 21svh, 22rem);
+    font-size: min(var(--text-page), calc((100vw - 2 * var(--grid-margin)) / 6.9), 21svh);
     line-height: 0.86;
   }
   /* Wide screens: the hiker stands about 41% across, just above where the
@@ -103,7 +103,7 @@ import { BRAND_HERO as HERO } from './data';
      so the name stays below and left of him. */
   @media (min-width: 64rem) and (min-aspect-ratio: 1 / 1) {
     .tt-title {
-      font-size: min(calc((100vw - 2 * var(--grid-margin)) * 0.42 / 6.9), 21svh, 22rem);
+      font-size: min(var(--text-page), calc((100vw - 2 * var(--grid-margin)) * 0.42 / 6.9), 21svh);
     }
   }
 </style>

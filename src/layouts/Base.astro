@@ -215,13 +215,11 @@ const ogAlt =
     <SiteFooter contact={footerContact} />
 
     <script>
-      import { initMotion, registerMotion } from '../scripts/motion';
-      import { fitHeadings } from '../scripts/fit-headings';
+      import { initMotion } from '../scripts/motion';
 
+      /* Headings are a fixed scale now (2026-10-25): no per-heading
+         fitting to the screen. */
       initMotion();
-      /* Phones: section headings sized to the screen (not motion, so it
-         also runs with reduced motion). */
-      registerMotion(fitHeadings, { reduced: true });
 
       /* ClientRouter replaces the root attributes on navigation. Bound once,
          at module scope (this script runs once per session). */

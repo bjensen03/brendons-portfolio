@@ -1,7 +1,8 @@
 /*
   The homepage Twilight Trekkers section (TwilightSection.astro): its
-  photos, the words beside them and the brands. One file, so swapping a
-  photo is a one-line change. The reels live with ReelSlot in
+  cover photo, the follower count and the link. The photos below are the
+  ranked picks from our library, kept here so swapping the cover is a
+  one-line change. The reels live with ReelSlot in
   src/components/media/reels.ts.
 
   Photos come from our own library, sorted into
@@ -10,19 +11,14 @@
   Alt text describes what is in the frame; place names only where the file
   name already names the landmark.
 
-  Facts only: Kaylee and I run it, started 2021, the follower count as
-  written in ../twilight/data, I write the blogs, do the website, fly the
-  drone and shoot some of the photo and video.
-  Brands: the 11 on the site's Collaborations page, spelled as there. No
-  other numbers.
+  Facts only: Kaylee and I run it, started 2021, and the follower count as
+  written in ../twilight/data.
 */
 
-import { BRANDS as BRAND_LIST, FOLLOWERS } from '../twilight/data';
-export { LOOPS, REELS, type Reel } from '../media/reels';
+import { FOLLOWERS } from '../twilight/data';
 
 export { FOLLOWERS };
 export const TWILIGHT_PAGE = '/twilight-trekkers/';
-export const ABOUT_PAGE = '/about/';
 
 const LIBRARY = import.meta.glob<ImageMetadata>(
   '../../content/projects/images/twilight-trekkers/library/*/*.webp',
@@ -48,7 +44,7 @@ export const SHOTS = {
   /* [1] */ subway: shot('canyons/zion-subway-01.webp', 'The Subway in Zion: a keyhole pool of green water under curving sandstone, a tiny hiker behind.', '50% 68%'),
   /* [2] */ reflection: shot('desert/reflection-canyon-01.webp', 'Brendon at the rim of Reflection Canyon, water winding far below under sunbeams.', '58% 55%'),
   /* [3] small only */ mesaArch: shot('desert/mesa-arch-glow-01.webp', 'Mesa Arch glowing orange at sunrise, framing towers and canyon below.', '52% 58%'),
-  /* [4] */ havasu: shot('water/havasu-falls-01.webp', 'Havasu Falls pouring over red cliffs into a turquoise pool, two people on the shore.', '52% 62%'),
+  /* [4] The file is named havasu-falls, but it's Mooney Falls. */ mooney: shot('water/havasu-falls-01.webp', 'Mooney Falls pouring over red cliffs into a turquoise pool, two people on the shore.', '52% 62%'),
   /* [5] */ antelope: shot('us/antelope-canyon-couple-01.webp', 'Brendon and Kaylee standing together in a glowing orange slot canyon.', '50% 58%'),
   /* [6] small only */ saltFlat: shot('us/salt-flat-reflection-01.webp', 'Brendon and Kaylee walking on a mirror-like salt flat at sunset.', '38% 62%'),
   /* [8] */ halfDome: shot('mountains/half-dome-light-01.webp', 'Half Dome with light rays across the valley at sunrise.', '30% 35%'),
@@ -66,36 +62,3 @@ export const SHOTS = {
   archSunrise: shot('desert/mesa-arch-sitting-01.webp', 'A person in a beanie sitting on slickrock under a long sandstone arch, its underside glowing orange at sunrise, a canyon of rock towers beyond.', '62% 62%'),
   seaStacks: shot('coast/sea-stack-beach-reflection-01.webp', 'Tree-topped sea stacks reflected on a wet sand beach at dusk.', '50% 50%'),
 } satisfies Record<string, Shot>;
-
-
-/* What I do for it. Plain first-person sentences, one each. */
-export const ROLES = [
-  { key: 'blogs', word: 'Blogs', line: 'I write the blogs.' },
-  { key: 'site', word: 'The site', line: 'I build and run the website.' },
-  { key: 'drone', word: 'Drone', line: 'I fly the drone and make the drone videos.' },
-  { key: 'photo', word: 'Photo & video', line: 'I shoot some of the photos and video. Kaylee takes most of the photos.' },
-] as const;
-
-/* Every brand, stay and excursion we've worked with, names only. One list
-   for the site: the names, groups and lines live in ../twilight/data. */
-export const BRANDS = BRAND_LIST.map((b) => b.name);
-
-/* The homepage teaser shows a short run of these (a mix of gear, stays and
-   excursions people will recognise), then "and N more" linking to the full
-   list on /twilight-trekkers/. Names must match ../twilight/data exactly;
-   anything not found is skipped, so a rename can't print a stale name. */
-const FEATURED = [
-  'Rush Creek Lodge',
-  'Insta360',
-  'Stio',
-  'Topo Designs',
-  'Free Fly',
-  'Merino Tech',
-  'Reset Hotel',
-  'Redtail Air',
-  'Dolphins and You',
-];
-export const BRANDS_FEATURED = FEATURED.filter((n) => BRANDS.includes(n));
-export const BRANDS_MORE = BRANDS.length - BRANDS_FEATURED.length;
-/* The heading of the brands list on that page (ListRows id "tt-brands"). */
-export const BRANDS_HREF = '/twilight-trekkers/#lr-tt-brands-title';

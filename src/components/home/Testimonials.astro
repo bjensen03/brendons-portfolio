@@ -1,95 +1,120 @@
 ---
 import ExternalLink from '../ExternalLink.astro';
 import { textLink } from './data';
-import { HOME_TESTIMONIALS, ABOUT_TESTIMONIALS, type Testimonial } from './testimonials';
+import { HOME_TESTIMONIALS, type Testimonial } from './testimonials';
 
 /*
   What people say. LinkedIn recommendations, quoted verbatim (the short
   version; the full one is on LinkedIn). Words in testimonials.ts.
 
-  Two renderings:
-    section (default, homepage): a heading and the quotes, each one big
-             type and plain attribution. The first quote is the lead, set
-             at the title step across most of the row; the next sits a
-             step smaller and further right, so the pair reads like a
-             printed spread rather than a row of cards.
-    single   one quote with no heading, for a page that places it inside
-             its own section (About, next to the Twilight Trekkers part):
-             <Testimonials variant="single" />  (the About-placed ones)
+  The homepage section: a heading and a carousel of every quote (Kiana,
+  Marco, Kaylee).
+
+  The carousel (2026-10-25): one quote at a time, sliding gently
+  sideways. All slides share one grid cell, so the box is always as tall as
+  the longest quote and nothing below moves when the quote changes. Under
+  the quote: Previous / Next, the position ("2 / 3") and a dot per quote.
+  Swipe on touch; Left/Right arrows while anything in it has focus.
+
+  It moves on by itself every 9 seconds, but only while it's on screen,
+  never while the pointer is over it or anything in it has focus, never
+  under reduced motion, and never after the visitor presses Pause (a
+  visible control beside the others). A quote is never pulled away while
+  someone is reading it with the mouse or keyboard on it.
+
+  Without JavaScript the quotes simply stack, all readable, no controls.
 
   Homepage: top padding only. The Twilight section that follows is on the
   same ground and brings its own top padding, so the gap between them is
-  one section's worth, not two.
-
-  No photos, no stars, no carousel, no cards. A tan rule is the only
-  accent (a marker, never text). Name and title are plain sentence case.
+  one section's worth, not two. No photos, no stars, no cards. A tan rule
+  is the only accent (a marker, never text). Name and title are plain
+  sentence case.
 */
 
 interface Props {
-  /** section: the homepage block. single: the About-placed quote(s), bare. */
-  variant?: 'section' | 'single';
   class?: string;
 }
 
-const { variant = 'section', class: cls } = Astro.props;
-const items: Testimonial[] = variant === 'section' ? HOME_TESTIMONIALS : ABOUT_TESTIMONIALS;
+const { class: cls } = Astro.props;
+const items: Testimonial[] = HOME_TESTIMONIALS;
+const n = items.length;
 ---
 
-{
-  variant === 'section' ? (
-    <section class:list={['tm bg-surface pt-section', cls]} aria-labelledby="tm-title">
-      <div class="container-bleed">
-        <h2 id="tm-title" class="text-heading text-fg" data-split>
-          What people say
-        </h2>
+<section class:list={['tm bg-surface pt-section', cls]} aria-labelledby="tm-title">
+  <div class="container-bleed">
+    <h2 id="tm-title" class="text-section text-fg" data-split>
+      What people say
+    </h2>
 
-        <div class="mt-block grid grid-cols-4 gap-x-(--grid-gutter) gap-y-block md:grid-cols-6 lg:grid-cols-12">
-          {items.map((t, i) => (
-            <figure
-              class:list={[
-                'tm-quote col-span-full',
-                i === 0 ? 'tm-quote--lead lg:col-span-9' : 'tm-quote--next md:col-span-5 md:col-start-2 lg:col-span-7 lg:col-start-6',
-              ]}
-              data-reveal
-            >
-              <span class="tm-rule" aria-hidden="true" />
-              <blockquote class:list={['tm-text text-fg', i === 0 ? 'text-title' : 'text-lead']}>
-                <p>{t.short}</p>
-              </blockquote>
-              <figcaption class="tm-cite">
-                <span class="block text-body font-medium text-fg">{t.name}</span>
-                <span class="block text-body text-fg-muted">{t.title}</span>
-                {t.href && (
-                  <ExternalLink href={t.href} class:list={[textLink, 'group mt-3 inline-flex whitespace-nowrap text-small']}>
-                    Read on LinkedIn
-                  </ExternalLink>
-                )}
-              </figcaption>
-            </figure>
-          ))}
-        </div>
+    <div
+      class="tm-car mt-block"
+      role="region"
+      aria-roledescription="carousel"
+      aria-labelledby="tm-title"
+      data-tm
+      data-reveal
+    >
+      <div class="tm-track" aria-live="off" data-tm-track>
+        {items.map((t, i) => (
+          <figure
+            class="tm-quote tm-slide"
+            role="group"
+            aria-roledescription="slide"
+            aria-label={`${i + 1} of ${n}`}
+            data-tm-slide={i}
+            data-active={i === 0 ? '' : undefined}
+          >
+            <span class="tm-rule" aria-hidden="true" />
+            <blockquote class="tm-text text-title text-fg">
+              <p>{t.short}</p>
+            </blockquote>
+            <figcaption class="tm-cite">
+              <span class="block text-body font-medium text-fg">{t.name}</span>
+              <span class="block text-body text-fg-muted">{t.title}</span>
+              {t.href && (
+                <ExternalLink href={t.href} class:list={[textLink, 'group mt-3 inline-flex whitespace-nowrap text-small']}>
+                  Read on LinkedIn
+                </ExternalLink>
+              )}
+            </figcaption>
+          </figure>
+        ))}
       </div>
-    </section>
-  ) : (
-    items.map((t) => (
-      <figure class:list={['tm-quote tm-quote--single', cls]} data-reveal>
-        <span class="tm-rule" aria-hidden="true" />
-        <blockquote class="tm-text text-lead text-fg">
-          <p>{t.short}</p>
-        </blockquote>
-        <figcaption class="tm-cite">
-          <span class="block text-body font-medium text-fg">{t.name}</span>
-          <span class="block text-body text-fg-muted">{t.title}</span>
-          {t.href && (
-            <ExternalLink href={t.href} class:list={[textLink, 'group mt-3 inline-flex whitespace-nowrap text-small']}>
-              Read on LinkedIn
-            </ExternalLink>
-          )}
-        </figcaption>
-      </figure>
-    ))
-  )
-}
+
+      {n > 1 && (
+        <div class="tm-controls" data-tm-controls>
+          <div class="tm-nav">
+            <button type="button" class="tm-btn" data-tm-prev>
+              <span aria-hidden="true">←</span> Previous
+            </button>
+            <button type="button" class="tm-btn" data-tm-next>
+              Next <span aria-hidden="true">→</span>
+            </button>
+          </div>
+          <p class="tm-pos text-small text-fg-muted tabular-nums">
+            <span data-tm-count>1</span> / {n}
+          </p>
+          <div class="tm-dots" role="group" aria-label="Choose a quote">
+            {items.map((t, i) => (
+              <button
+                type="button"
+                class="tm-dot"
+                aria-label={`Quote ${i + 1} of ${n}: ${t.name}`}
+                aria-current={i === 0 ? 'true' : undefined}
+                data-tm-dot={i}
+              >
+                <span aria-hidden="true" />
+              </button>
+            ))}
+          </div>
+          <button type="button" class="tm-btn tm-play" aria-pressed="false" hidden data-tm-play>
+            Pause
+          </button>
+        </div>
+      )}
+    </div>
+  </div>
+</section>
 
 <style>
   .tm-quote {
@@ -108,13 +133,9 @@ const items: Testimonial[] = variant === 'section' ? HOME_TESTIMONIALS : ABOUT_T
     max-width: 34ch;
     text-wrap: pretty;
   }
-  .tm-quote--lead .tm-text {
-    max-width: 30ch;
+  .tm-slide .tm-text {
+    max-width: 36ch;
     font-weight: 500;
-  }
-  .tm-quote--next .tm-text,
-  .tm-quote--single .tm-text {
-    max-width: 44ch;
   }
   /* Typographic quote marks hang into the margin so the text block's left
      edge stays on the grid. */
@@ -133,4 +154,258 @@ const items: Testimonial[] = variant === 'section' ? HOME_TESTIMONIALS : ABOUT_T
       margin-left: 0;
     }
   }
+
+  /* ── The carousel ───────────────────────────────────────────────────
+     Without JS: the quotes stack (each with its own top space) and the
+     controls are hidden. With JS: every slide in one grid cell, so the
+     track is as tall as the longest quote; only the active one shows. */
+  .tm-track {
+    display: grid;
+    gap: var(--spacing-block);
+  }
+  :global(html:not(.js)) .tm-controls {
+    display: none;
+  }
+  /* overflow hides the slides on their way in and out; the padding (taken
+     back with a negative margin) leaves room for the hanging opening quote
+     mark so it isn't clipped. */
+  :global(html.js) .tm-track {
+    gap: 0;
+    overflow: hidden;
+    touch-action: pan-y;
+    padding-inline-start: 2rem;
+    margin-inline-start: -2rem;
+  }
+  :global(html.js) .tm-slide {
+    grid-area: 1 / 1;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(var(--from, 3rem));
+    transition:
+      opacity var(--duration-slow) var(--ease-out-soft),
+      transform var(--duration-slow) var(--ease-out-soft),
+      visibility 0s linear var(--duration-slow);
+  }
+  :global(html.js) .tm-slide[data-active] {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition:
+      opacity var(--duration-slow) var(--ease-out-soft),
+      transform var(--duration-slow) var(--ease-out-soft),
+      visibility 0s;
+  }
+  /* The slide on its way out goes the other way. */
+  :global(html.js) .tm-slide[data-leaving] {
+    transform: translateX(calc(-1 * var(--from, 3rem)));
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.js) .tm-slide,
+    :global(html.js) .tm-slide[data-active],
+    :global(html.js) .tm-slide[data-leaving] {
+      transform: none;
+      transition: none;
+    }
+  }
+
+  .tm-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.25rem;
+    margin-top: var(--spacing-block);
+    padding-top: var(--spacing-stack);
+    border-top: 1px solid var(--color-edge);
+  }
+  .tm-nav {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .tm-btn {
+    min-height: 2.75rem;
+    padding: 0 1rem;
+    border: 1px solid var(--color-edge-strong);
+    border-radius: var(--radius-control);
+    color: var(--color-fg);
+    font-size: var(--text-small);
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background-color var(--duration-fast) var(--ease-out-soft);
+  }
+  .tm-btn:hover {
+    background: var(--color-surface-raised);
+  }
+  .tm-btn:focus-visible,
+  .tm-dot:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+  .tm-dots {
+    display: flex;
+  }
+  .tm-dot {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 999px;
+  }
+  .tm-dot span {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--color-fg-muted);
+    transition: transform var(--duration-fast) var(--ease-out-soft);
+  }
+  .tm-dot[aria-current='true'] span {
+    background: var(--color-accent-fill);
+    transform: scale(1.5);
+  }
+  .tm-play {
+    margin-left: auto;
+  }
+  /* Phones: Previous / Next share the row; the position, dots and Pause
+     go on the line under them. */
+  @media (max-width: 29.999rem) {
+    .tm-nav {
+      width: 100%;
+    }
+    .tm-nav .tm-btn {
+      flex: 1;
+    }
+    .tm-dots {
+      margin-left: -0.75rem;
+    }
+  }
 </style>
+
+<script>
+  import { registerMotion, prefersReducedMotion } from '../../scripts/motion';
+
+  const INTERVAL = 9000;
+
+  /* Registered with reduced: true — the controls work with motion off; only
+     the sliding and the auto-advance are motion, and both are off then. */
+  const testimonialCarousel = () => {
+    const root = document.querySelector<HTMLElement>('[data-tm]');
+    if (!root) return;
+    const slides = Array.from(root.querySelectorAll<HTMLElement>('[data-tm-slide]'));
+    const n = slides.length;
+    if (n < 2) return;
+    const prevBtn = root.querySelector<HTMLButtonElement>('[data-tm-prev]')!;
+    const nextBtn = root.querySelector<HTMLButtonElement>('[data-tm-next]')!;
+    const dots = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-tm-dot]'));
+    const count = root.querySelector<HTMLElement>('[data-tm-count]')!;
+    const track = root.querySelector<HTMLElement>('[data-tm-track]')!;
+    const playBtn = root.querySelector<HTMLButtonElement>('[data-tm-play]')!;
+
+    let current = slides.findIndex((s) => s.hasAttribute('data-active'));
+    if (current < 0) current = 0;
+
+    const show = (i: number, dir: 1 | -1, announce: boolean) => {
+      const next = (i + n) % n;
+      if (next === current) return;
+      const prev = slides[current];
+      slides.forEach((s) => s.removeAttribute('data-leaving'));
+      root.style.setProperty('--from', `${dir * 3}rem`);
+      prev.removeAttribute('data-active');
+      prev.setAttribute('data-leaving', '');
+      prev.inert = true;
+      slides[next].setAttribute('data-active', '');
+      slides[next].inert = false;
+      current = next;
+      count.textContent = String(current + 1);
+      dots.forEach((d, j) => (j === current ? d.setAttribute('aria-current', 'true') : d.removeAttribute('aria-current')));
+      /* Read the new quote out when the visitor moved it, not on the timer. */
+      track.setAttribute('aria-live', announce ? 'polite' : 'off');
+    };
+    slides.forEach((s, j) => (s.inert = j !== current));
+
+    /* Auto-advance: on screen, not hovered, nothing focused inside, not
+       paused by the visitor, motion allowed. */
+    const auto = !prefersReducedMotion();
+    let timer = 0;
+    let hovered = false;
+    let focused = false;
+    let visible = false;
+    let userPaused = false;
+    const running = () => auto && visible && !hovered && !focused && !userPaused;
+    const schedule = () => {
+      window.clearTimeout(timer);
+      if (running()) timer = window.setTimeout(() => { show(current + 1, 1, false); schedule(); }, INTERVAL);
+    };
+    if (auto) playBtn.hidden = false;
+    const syncPlay = () => {
+      playBtn.textContent = userPaused ? 'Play' : 'Pause';
+      playBtn.setAttribute('aria-pressed', String(userPaused));
+    };
+    syncPlay();
+
+    const go = (i: number, dir: 1 | -1) => {
+      show(i, dir, true);
+      schedule();
+    };
+    const onPrev = () => go(current - 1, -1);
+    const onNext = () => go(current + 1, 1);
+    const onDot = (e: Event) => {
+      const i = Number((e.currentTarget as HTMLElement).dataset.tmDot);
+      go(i, i > current ? 1 : -1);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement).closest('a, input, textarea')) return;
+      if (e.key === 'ArrowLeft') { e.preventDefault(); onPrev(); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); onNext(); }
+    };
+    const onPlay = () => { userPaused = !userPaused; syncPlay(); schedule(); };
+    const onEnter = () => { hovered = true; schedule(); };
+    const onLeave = () => { hovered = false; schedule(); };
+    const onFocusIn = () => { focused = true; schedule(); };
+    const onFocusOut = (e: FocusEvent) => { if (!root.contains(e.relatedTarget as Node)) { focused = false; schedule(); } };
+
+    /* Swipe: a mostly sideways touch drag of 40px or more. */
+    let sx = 0, sy = 0, tracking = false;
+    const down = (e: PointerEvent) => { if (e.pointerType === 'mouse') return; tracking = true; sx = e.clientX; sy = e.clientY; };
+    const up = (e: PointerEvent) => {
+      if (!tracking) return;
+      tracking = false;
+      const dx = e.clientX - sx, dy = e.clientY - sy;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) (dx < 0 ? onNext : onPrev)();
+    };
+    const cancel = () => (tracking = false);
+
+    const io = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; schedule(); }, { threshold: 0.4 });
+    io.observe(root);
+
+    prevBtn.addEventListener('click', onPrev);
+    nextBtn.addEventListener('click', onNext);
+    dots.forEach((d) => d.addEventListener('click', onDot));
+    playBtn.addEventListener('click', onPlay);
+    root.addEventListener('keydown', onKey);
+    root.addEventListener('pointerenter', onEnter);
+    root.addEventListener('pointerleave', onLeave);
+    root.addEventListener('focusin', onFocusIn);
+    root.addEventListener('focusout', onFocusOut);
+    track.addEventListener('pointerdown', down);
+    track.addEventListener('pointerup', up);
+    track.addEventListener('pointercancel', cancel);
+
+    return () => {
+      window.clearTimeout(timer);
+      io.disconnect();
+      prevBtn.removeEventListener('click', onPrev);
+      nextBtn.removeEventListener('click', onNext);
+      dots.forEach((d) => d.removeEventListener('click', onDot));
+      playBtn.removeEventListener('click', onPlay);
+      root.removeEventListener('keydown', onKey);
+      root.removeEventListener('pointerenter', onEnter);
+      root.removeEventListener('pointerleave', onLeave);
+      root.removeEventListener('focusin', onFocusIn);
+      root.removeEventListener('focusout', onFocusOut);
+      track.removeEventListener('pointerdown', down);
+      track.removeEventListener('pointerup', up);
+      track.removeEventListener('pointercancel', cancel);
+    };
+  };
+
+  registerMotion(testimonialCarousel, { reduced: true });
+</script>

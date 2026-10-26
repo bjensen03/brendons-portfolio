@@ -1,66 +1,20 @@
 ---
 import { Picture } from 'astro:assets';
-import ReelSlot from '../media/ReelSlot.astro';
-import Brands from './TwilightBrands.astro';
 import { textLink } from './data';
-import { SHOTS, LOOPS, FOLLOWERS, ROLES, TWILIGHT_PAGE, ABOUT_PAGE, type Shot, type Reel } from './twilight-data';
+import { SHOTS, FOLLOWERS, TWILIGHT_PAGE } from './twilight-data';
 
 /*
-  The Twilight Trekkers, on the homepage after Experience. "The cover, then
-  the trail": a calm cover, a gallery that scrolls, and every photo and
-  reel properly seeable. Replaced the old "Away from the desk" section (AboutPreview),
-  keeping both its links: the Twilight page and About.
-
-  1. The cover: Reflection Canyon with the name over its lower
-     third, the story, 26K. More motion than B had: the photo settles from
-     a slight zoom as it arrives and drifts while it's on screen, the name
-     rises in, the count ticks up.
-
-  2. The gallery: nine items, six Best-tier photos and three reels.
-     Desktop (1024+, motion on): the gallery holds still under the nav
-     (CSS sticky, the page itself keeps scrolling normally) and every
-     ~55% of a screen of scroll moves it on by exactly one item. Each item
-     is shown whole, at its own shape, as big as the stage allows (a
-     landscape ~890px wide, a portrait or reel ~750px tall at 1440), with
-     its category, caption, a ticking count and dots. The change between
-     items is a timed wipe, not scrubbed, so whatever the scroll position
-     the item on screen is at rest and complete. Dots jump to an item.
-     Phones, tablets, reduced motion and no JS: a sideways swipe with snap
-     points, one item the full width on phones, every frame the same 3:4
-     so nothing leaves a gap, the count and dots underneath.
-
-     Reels play as plain tiles, the same radius and the same frame as the
-     photos (no phone bezel). Only the item on show plays (on the stage
-     the others are held; in the swipe a reel has to be half in view), so
-     never more than two at once, and none under reduced motion.
-
-  3. What I do for it, the brands, the links, revealed in.
+  The Twilight Trekkers, near the end of the homepage: kept short on
+  purpose. One photo with the name over it, a sentence, the follower count
+  and a link to /twilight-trekkers/, where the photos, reels and brands
+  live. The photo settles from a slight zoom as it arrives and drifts while
+  it's on screen; the name rises in and the count ticks up.
 */
-
-type Item =
-  | { kind: 'photo'; shot: Shot; cat: string; cap: string }
-  | { kind: 'reel'; reel: Reel; cat: string; cap: string };
-
-const ITEMS: Item[] = [
-  { kind: 'photo', shot: SHOTS.subway, cat: 'Canyons & slots', cap: 'The Subway, Zion' },
-  { kind: 'photo', shot: SHOTS.havasu, cat: 'Water', cap: 'Havasu Falls' },
-  { kind: 'reel', reel: LOOPS.alcove, cat: 'Reel · Canyons & slots', cap: 'Golden Cathedral, Neon Canyon' },
-  { kind: 'photo', shot: SHOTS.antelope, cat: 'The two of us', cap: 'Kaylee and me in Antelope Canyon' },
-  { kind: 'photo', shot: SHOTS.halfDome, cat: 'Mountains', cap: 'Half Dome at sunrise' },
-  { kind: 'reel', reel: LOOPS.utahFall, cat: 'Reel · Drone', cap: 'Fall in Utah, from the drone' },
-  { kind: 'photo', shot: SHOTS.delicate, cat: 'Desert', cap: 'Delicate Arch at sunset' },
-  { kind: 'photo', shot: SHOTS.badlandsDrone, cat: 'Drone', cap: 'Bentonite Hills from above' },
-  { kind: 'reel', reel: LOOPS.cascades, cat: 'Reel · Mountains', cap: 'The North Cascades' },
-];
-const N = ITEMS.length;
-const pad = (n: number) => String(n).padStart(2, '0');
-const ratio = (it: Item) => (it.kind === 'reel' ? 9 / 16 : it.shot.src.width / it.shot.src.height);
 
 const COVER = SHOTS.archSunrise;
 ---
 
-<section class="td bg-white pt-section" aria-labelledby="td-title">
-  <!-- 1. Cover -->
+<section class="td bg-white py-section" aria-labelledby="td-title">
   <div class="container-bleed">
     <div class="grid grid-cols-4 gap-x-(--grid-gutter) md:grid-cols-6 lg:grid-cols-12">
       <div class="td-cover col-span-full lg:col-span-8">
@@ -102,99 +56,9 @@ const COVER = SHOTS.archSunrise;
           <p class="td-count text-fg tabular-nums" data-count>{FOLLOWERS}</p>
           <p class="mt-3 max-w-measure text-lead text-fg">people follow along on Instagram.</p>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 2. Gallery -->
-  <div class="td-gal mt-block" style={`--n:${N}`} role="region" aria-roledescription="carousel" aria-label="Photos and reels" data-tdg>
-    <div class="td-gal__stage container-bleed">
-      <div class="td-gal__info" aria-live="polite">
-        <p class="text-body text-fg-muted" data-tdg-cat>{ITEMS[0].cat}</p>
-        <p class="td-gal__cap mt-2 text-title text-fg" data-tdg-cap>{ITEMS[0].cap}</p>
-      </div>
-
-      <div class="td-gal__view" data-tdg-view data-lenis-prevent-horizontal tabindex="0" aria-label="Photos and reels, swipe or scroll sideways">
-        <ul class="td-gal__track">
-          {
-            ITEMS.map((it, i) => (
-              <li
-                class="td-slide"
-                style={`--ar:${ratio(it).toFixed(4)}`}
-                aria-roledescription="slide"
-                aria-label={`${i + 1} of ${N}: ${it.cap}`}
-                data-tdg-slide
-                data-cat={it.cat}
-                data-cap={it.cap}
-              >
-                <div class="td-fig">
-                  <div class="td-fig__mask" data-tdg-mask>
-                    {it.kind === 'photo' ? (
-                      <Picture
-                        src={it.shot.src}
-                        alt={it.shot.alt}
-                        formats={['avif', 'webp']}
-                        widths={[480, 720, 960, 1280, 1600, 2000].filter((w) => w <= it.shot.src.width)}
-                        sizes="(min-width: 64rem) 62vw, (min-width: 48rem) 46vw, 92vw"
-                        loading="lazy"
-                        pictureAttributes={{ class: 'block h-full w-full' }}
-                        class="h-full w-full object-cover"
-                        style={`object-position:${it.shot.focus}`}
-                      />
-                    ) : (
-                      <ReelSlot reel={it.reel} fill sizes="(min-width: 64rem) 30vw, 92vw" />
-                    )}
-                  </div>
-                </div>
-                <p class="td-slide__cap">
-                  <span class="block text-body text-fg-muted">{it.cat}</span>
-                  <span class="mt-1 block text-lead text-fg">{it.cap}</span>
-                </p>
-              </li>
-            ))
-          }
-        </ul>
-      </div>
-
-      <div class="td-gal__controls">
-        <p class="td-gal__count text-fg" aria-hidden="true">
-          <span class="td-gal__num"><span class="td-gal__digits" data-tdg-num>01</span></span><span class="td-gal__of text-fg-muted"> / {pad(N)}</span>
-        </p>
-        <div class="td-gal__dots" role="group" aria-label="Go to item">
-          {
-            ITEMS.map((it, i) => (
-              <button
-                type="button"
-                class="td-dot"
-                aria-label={`${i + 1} of ${N}: ${it.cap}`}
-                aria-current={i === 0 ? 'true' : undefined}
-                data-tdg-dot={i}
-              >
-                <span aria-hidden="true" />
-              </button>
-            ))
-          }
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 3. Roles, brands, links -->
-  <div class="container-bleed py-section">
-    <div class="grid grid-cols-4 gap-x-(--grid-gutter) gap-y-block md:grid-cols-6 lg:grid-cols-12">
-      <ul class="td-roles col-span-full lg:col-span-6" data-reveal-group>
-        {ROLES.map((r) => <li class="text-title text-fg" data-reveal>{r.line}</li>)}
-      </ul>
-      <div class="col-span-full flex flex-col justify-between gap-block lg:col-span-5 lg:col-start-8" data-reveal-group>
-        <div data-reveal>
-          <Brands />
-        </div>
-        <p class="flex flex-wrap gap-x-8 gap-y-3 text-body" data-reveal>
+        <p class="text-body" data-reveal>
           <a href={TWILIGHT_PAGE} class:list={[textLink, 'group']}>
             See the Twilight Trekkers<span class="link-arrow ml-1" aria-hidden="true">→</span>
-          </a>
-          <a href={ABOUT_PAGE} class:list={[textLink, 'group']}>
-            More about me<span class="link-arrow ml-1" aria-hidden="true">→</span>
           </a>
         </p>
       </div>
@@ -203,7 +67,6 @@ const COVER = SHOTS.archSunrise;
 </section>
 
 <style>
-  /* overflow: clip, not hidden, so the gallery's sticky stage still sticks. */
   .td {
     overflow: clip;
   }
@@ -316,241 +179,11 @@ const COVER = SHOTS.archSunrise;
       font-size: min(calc((100vw - 2 * var(--grid-margin)) * 4 / 12 / 2.5), 11rem);
     }
   }
-
-  /* ── 2. Gallery: the swipe (default) ─────────────────────────────── */
-  .td-gal__stage {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: 'view' 'controls';
-    row-gap: var(--spacing-stack);
-  }
-  .td-gal__info {
-    display: none;
-  }
-  .td-gal__view {
-    grid-area: view;
-    margin-inline: calc(-1 * var(--grid-margin));
-    padding-inline: var(--grid-margin);
-    scroll-padding-inline: var(--grid-margin);
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-    container-type: inline-size;
-  }
-  .td-gal__view::-webkit-scrollbar {
-    display: none;
-  }
-  .td-gal__view:focus-visible {
-    outline: 2px solid var(--color-focus);
-    outline-offset: -2px;
-  }
-  /* The gap equals the page margin and the items divide the row exactly,
-     so whatever is in view is whole and the next item starts right at the
-     screen edge (no sliver, nothing cut off). Phones: one item. Tablets:
-     two. Desktop without the stage (reduced motion, no JS): three. Every
-     frame 3:4, so the row is one height and nothing leaves a gap.
-     cqw is the view's content box (the row less its side padding). */
-  .td-gal__track {
-    display: flex;
-    gap: var(--grid-margin);
-    width: max-content;
-  }
-  .td-slide {
-    flex: none;
-    width: 100cqw;
-    scroll-snap-align: start;
-  }
-  @media (min-width: 48rem) {
-    .td-slide {
-      width: calc((100cqw - var(--grid-margin)) / 2);
-    }
-  }
-  @media (min-width: 64rem) {
-    .td-slide {
-      width: calc((100cqw - 2 * var(--grid-margin)) / 3);
-    }
-  }
-  .td-fig {
-    aspect-ratio: 3 / 4;
-  }
-  .td-fig__mask {
-    height: 100%;
-    overflow: hidden;
-    border-radius: var(--radius-media);
-    background: var(--color-surface-raised);
-  }
-  .td-slide__cap {
-    margin-top: 0.75rem;
-  }
-
-  .td-gal__controls {
-    grid-area: controls;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-  .td-gal__count {
-    flex: none;
-    white-space: nowrap;
-    font-size: var(--text-lead);
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-  }
-  /* The number rolls when it changes (stage), so it sits in a clip. */
-  .td-gal__num {
-    display: inline-block;
-    overflow: hidden;
-    vertical-align: bottom;
-  }
-  .td-gal__digits {
-    display: inline-block;
-  }
-  .td-gal__dots {
-    display: flex;
-  }
-  /* Targets around an 8px dot (wider on phones, below); the current one is
-     a tan marker. */
-  .td-dot {
-    display: grid;
-    place-items: center;
-    width: 1.5rem;
-    height: 1.75rem;
-    border-radius: 999px;
-  }
-  @media (min-width: 48rem) {
-    .td-dot {
-      width: 1.75rem;
-    }
-  }
-  /* Phones: each dot a finger-sized target. The row shares the screen
-     width (nine dots, ~32px each at 375) and the hit area runs the full
-     44px height; the visible dot doesn't change. */
-  @media (max-width: 47.999rem) {
-    .td-gal__dots {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      justify-content: flex-end;
-      gap: 0;
-    }
-    .td-dot {
-      flex: 0 1 2.25rem;
-      min-width: 1.5rem;
-      height: 2.75rem;
-    }
-  }
-  .td-dot span {
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 999px;
-    background: var(--color-fg-muted);
-    transition:
-      transform var(--duration-fast) var(--ease-out-soft),
-      background-color var(--duration-fast) var(--ease-out-soft);
-  }
-  .td-dot[aria-current='true'] span {
-    background: var(--color-accent-fill);
-    transform: scale(1.5);
-  }
-  .td-dot:focus-visible {
-    outline: 2px solid var(--color-focus);
-  }
-
-  /* ── 2. Gallery: the stage (desktop, motion on; JS sets data-stage) ── */
-  .td-gal[data-stage] {
-    /* One screen for the stage plus ~55% of a screen per item after the
-       first. */
-    height: calc(100svh - var(--spacing-nav) + (var(--n) - 1) * 55svh);
-  }
-  .td-gal[data-stage] .td-gal__stage {
-    position: sticky;
-    top: var(--spacing-nav);
-    height: calc(100svh - var(--spacing-nav));
-    padding-block: clamp(1.5rem, 3svh, 2.5rem);
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    grid-template-rows: 1fr auto;
-    grid-template-areas:
-      'info info info info view view view view view view view view'
-      'controls controls controls controls view view view view view view view view';
-    column-gap: var(--grid-gutter);
-    row-gap: var(--spacing-stack);
-  }
-  .td-gal[data-stage] .td-gal__info {
-    grid-area: info;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-  }
-  .td-gal[data-stage] .td-gal__cap {
-    max-width: 22ch;
-  }
-  .td-gal[data-stage] .td-gal__view {
-    margin: 0;
-    padding: 0;
-    overflow: visible;
-    position: relative;
-    container-type: size;
-    min-height: 0;
-  }
-  .td-gal[data-stage] .td-gal__track {
-    position: absolute;
-    inset: 0;
-    width: auto;
-  }
-  /* Every item whole, at its own shape, as large as the stage allows. */
-  .td-gal[data-stage] .td-slide {
-    position: absolute;
-    inset: 0;
-    width: auto;
-    display: grid;
-    place-items: center;
-  }
-  .td-gal[data-stage] .td-fig {
-    aspect-ratio: var(--ar);
-    width: min(100cqw, calc(100cqh * var(--ar)));
-  }
-  .td-gal[data-stage] .td-slide__cap {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-  .td-gal[data-stage] .td-gal__controls {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1.25rem;
-  }
-  .td-gal[data-stage] .td-gal__count {
-    font-family: var(--font-display);
-    font-stretch: var(--display-stretch);
-    font-weight: 900;
-    letter-spacing: -0.03em;
-    font-size: clamp(4rem, 2rem + 5vw, 8rem);
-    line-height: 0.9;
-  }
-  .td-gal[data-stage] .td-gal__of {
-    font-family: var(--font-body);
-    font-stretch: normal;
-    font-weight: 400;
-    letter-spacing: 0;
-    font-size: var(--text-lead);
-  }
-
-  /* ── 3. Roles ─────────────────────────────────────────────────────── */
-  .td-roles li + li {
-    margin-top: 0.6em;
-  }
 </style>
 
 <script>
   import { registerMotion } from '../../scripts/motion';
-  import { twilightCoverZoom, twilightStage, twilightSwipe } from '../../scripts/twilight-motion';
+  import { twilightCoverZoom } from '../../scripts/twilight-motion';
 
   registerMotion(twilightCoverZoom);
-  registerMotion(twilightStage);
-  /* The swipe's count and dots work with motion off too. */
-  registerMotion(twilightSwipe, { reduced: true });
 </script>

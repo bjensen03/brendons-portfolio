@@ -1,5 +1,5 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import { getCollection, type CollectionEntry } from 'astro:content';
 import ExternalLink from '../ExternalLink.astro';
 import StudyVideo from './StudyVideo.astro';
 import StudyImage from './StudyImage.astro';
@@ -49,7 +49,18 @@ const META = [
 ].filter((m) => m.value);
 
 /* Phones size the name so its longest word fills the column (CSS below). */
-const nameFit = longestWordEm(d.name);
+/* Every study's H1 is the page step, the same size on every study (the
+   heading scale). Long names (more than three words or 20 characters) are set in sentence case, which is far narrower than caps, so
+   only the caps names limit the size: the longest caps word of any study
+   ("TOURNAMENT", ~8.8em) has to fit the column on a phone, and every study
+   H1 steps down together to that — never each to its own name. */
+const isLong = (name: string) => name.trim().split(/\s+/).length > 3 || name.trim().length > 20;
+const nameFit = Math.max(
+  ...(await getCollection('studies'))
+    .filter((s) => !isLong(s.data.name))
+    .map((s) => Number(longestWordEm(s.data.name))),
+).toFixed(3);
+const longName = isLong(d.name);
 
 const liveLabel = d.live?.replace(/^https?:\/\//, '').replace(/\/$/, '');
 const media = d.heroMedia;
@@ -84,7 +95,7 @@ const imageSizes =
       )
     }
 
-    <h1 class="sh-name text-mega" data-split="lines" style={`--sh-fit: ${nameFit}`}>{d.name}</h1>
+    <h1 class:list={['sh-name text-page', longName && 'type-display-sentence']} data-split="lines" style={`--sh-fit: ${nameFit}`}>{d.name}</h1>
 
     <div class="sh-grid">
       <p class="sh-label text-lead" data-reveal>{d.label}</p>
@@ -202,19 +213,13 @@ const imageSizes =
 
   /* The longest word has to fit the column: MANUFACTURING is ~12.4em of
      Archivo at 900 / 115%. */
+  /* The page step, capped so the longest word of any study name fits the
+     column (--sh-fit, with 4% kept back for kerning). Same size on every
+     study at any width. */
   .sh-name {
-    font-size: min(var(--text-mega), calc((100vw - 2 * var(--grid-margin)) / 12.6));
+    font-size: min(var(--text-page), calc((100vw - 2 * var(--grid-margin)) / (var(--sh-fit, 11) * 1.04)));
     color: var(--color-fg);
     overflow-wrap: normal;
-  }
-
-  /* Phones and tablets: the longest word of the name fills the column (--sh-fit is its
-     width in em, worked out above, with 4% kept back for kerning), up to
-     4.5rem. "MEAL PLANNER" lands at 55px instead of 28. */
-  @media (max-width: 63.999rem) {
-    .sh-name {
-      font-size: min(4.5rem, calc((100vw - 2 * var(--grid-margin)) / (var(--sh-fit, 12.6) * 1.04)));
-    }
   }
 
   .sh-grid {
