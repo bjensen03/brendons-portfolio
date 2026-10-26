@@ -1,0 +1,78 @@
+---
+# CONFIRM BEFORE SHIPPING:
+#   1. The year. Set to 2026 to match the other self-directed entries; the
+#      source files were uploaded late 2025, which is not the same thing.
+#   2. That this was self-directed rather than coursework or client work. It is
+#      labelled a concept, which is the honest framing for unsolicited work on
+#      an existing brand — but if it was set by a course or a client, say so.
+
+title: A smart-home app that leads with rooms, not devices
+client: Self-directed
+year: 2026
+
+disciplines: ['design']
+
+role: ['Product design', 'UI design', 'Interaction design']
+
+depth: concept
+
+outcome: >
+  An unsolicited redesign of a smart-lighting app, organized around the rooms
+  people actually think in rather than the device list the hardware exposes.
+
+summary: >
+  A concept app for controlling Feit Electric smart lighting. Most smart-home
+  apps present a flat list of paired devices, which matches how the hardware is
+  registered and not how anyone reasons about their house. This set organizes
+  the same controls by room first — kitchen, living room, garage — and treats
+  the device list as the secondary view. Alongside control it covers the two
+  screens these apps usually bury: what the lighting is costing, and what it
+  is saving.
+
+cover: ./images/ux-feit/feit-electric-1.webp
+coverAlt: Three phone screens from the Feit Electric concept, showing the welcome screen and the room dashboard in navy and amber.
+
+stack: ['Figma', 'iOS']
+
+order: 11
+---
+
+import welcome from './images/ux-feit/iphone-14-15-pro-before-log-in.webp';
+import login from './images/ux-feit/iphone-14-15-pro-log-in.webp';
+import rooms from './images/ux-feit/iphone-14-15-pro-main-page-rooms.webp';
+import lights from './images/ux-feit/iphone-14-15-pro-main-page-lights.webp';
+import room from './images/ux-feit/iphone-14-15-pro-main-page-rooms-1.webp';
+import devices from './images/ux-feit/iphone-14-15-pro-settings-device-connection.webp';
+import savings from './images/ux-feit/iphone-14-15-pro-second-icon-savings.webp';
+import usage from './images/ux-feit/iphone-14-15-pro-second-icon-stats-usage.webp';
+
+## The idea
+
+A smart bulb is registered as a device, so most apps for them show you a list of
+devices. That is the manufacturer's model, not the customer's. Nobody stands in
+their kitchen thinking about a paired endpoint; they think *kitchen*.
+
+So the primary screen here is rooms, each showing what is on and what it is
+drawing. Devices still exist — you need them to pair hardware and to fix things
+— but they sit behind a tab rather than in front of the person who just wants
+the pendants off.
+
+The other decision worth naming is that consumption is a first-class screen
+rather than a settings page. A smart bulb's whole commercial argument is that it
+costs less to run, and an app that never shows you the number is not making the
+argument it was bought on.
+
+<Gallery
+  label="The screens"
+  size="narrow"
+  items={[
+    { src: welcome, alt: 'The welcome screen, with the brand mark and a start button.', caption: 'Welcome' },
+    { src: login, alt: 'Log in, with register as the secondary action.', caption: 'Log in' },
+    { src: rooms, alt: 'The room dashboard listing kitchen, living room, garage and bedrooms with device counts.', caption: 'Rooms — the default view' },
+    { src: room, alt: 'A single room with pendants, fan and can trims as individual toggles.', caption: 'Inside a room' },
+    { src: lights, alt: 'The living room detail, with ceiling fan speed, color swatches and back light controls.', caption: 'Fixture controls' },
+    { src: devices, alt: 'Nine devices connected, including a smart TV, computer and Google Assistant.', caption: 'Devices' },
+    { src: usage, alt: 'Electricity usage as a bar chart with 350 kWh used and 250 dollars spent.', caption: 'Usage' },
+    { src: savings, alt: 'Estimated savings broken down per room.', caption: 'Savings, per room' },
+  ]}
+/>

@@ -1,15 +1,453 @@
 ---
 import Base from '../../layouts/Base.astro';
-import Section from '../../components/Section.astro';
+import { CONTACT } from '../../config';
+import { primaryButton, textLink } from '../../components/home/data';
+import CopyEmail from '../../components/footer/CopyEmail.astro';
+import ExternalLink from '../../components/ExternalLink.astro';
+import { RESUME } from '../../components/footer/links';
+import { SPACE_EM, wordEm } from '../../lib/display-fit';
 
-/* Placeholder route. Real content is Phase 4 — this exists so the nav
-   resolves and client-side transitions can be exercised against the shell. */
+/*
+  Contact.
+
+  The email is given plainly and first. Plenty of people would rather write an
+  email than fill in fields, and making them fill in fields to reach you loses
+  some of them for no benefit.
+
+  With the key set the form sits in the same grid as the lead, under it,
+  with the email block beside it on desktop: one band, no empty half.
+
+  The form posts to Web3Forms because this is a static site with no server.
+  The access key is CONTACT.web3formsKey in src/config.ts. It works without
+  JS as a normal POST (Web3Forms shows its own confirmation page); with JS it
+  sends through fetch and shows the result here, with inline field errors.
+
+  Two anti-spam measures that need no third-party script: Web3Forms' botcheck
+  honeypot, which bots tick and people never see, and a timing check, because
+  a form completed in under three seconds was not completed by a person.
+
+  Until the key is set there is no form at all. A form that can't send is
+  worse than none, so visitors get the email and Copy email, and only the dev
+  server says the key is missing.
+
+  Type and layout follow the rest of the site (October pass): the title at
+  a display step sized to the page, Geist lead / body copy at a readable
+  measure on the 12-column grid, no uppercase mono labels, and tan only as a
+  fill (the buttons, a chosen topic, the bar beside the endpoint note).
+*/
+
+const FORM_ENDPOINT = 'https://api.web3forms.com/submit';
+const formKey = CONTACT.web3formsKey.trim();
+const SUBJECT = 'New message from brendonjensen portfolio';
+/* The address may only break at the @, never mid-word ("gmail.c / om"). */
+const [emailUser, emailHost] = CONTACT.email.split('@');
+
+const PROJECT_TYPES = [
+  'A new site',
+  'Fixing or improving an existing one',
+  'Automation or integrations',
+  'A role or contract',
+  'Something else',
+];
+
+/* Phones: "TELL ME" (the widest pair that should stay together) sets the
+   title size, so it breaks as TELL ME / WHAT IT / NEEDS / TO DO. */
+const pairFit = (['Tell', 'me'].reduce((sum, w) => sum + wordEm(w), 0) + SPACE_EM).toFixed(3);
+
+const field =
+  'transition-soft min-h-12 w-full rounded-control border border-edge-strong bg-surface px-4 py-3 text-body text-fg placeholder:text-fg-muted focus:border-focus';
 ---
 
-<Base title="Contact">
-  <Section width="measure">
-    <p class="text-2xs tracking-widest text-accent uppercase">Phase 4</p>
-    <h1 class="mt-6 font-display text-3xl tracking-tightest md:text-4xl" data-split>Contact</h1>
-    <p class="mt-6 text-lg text-fg-muted">The form, endpoint and spam handling are Phase 4.</p>
-  </Section>
+<Base
+  title="Contact"
+  footerContact={false}
+  description="Get in touch with Brendon Jensen about a project, a fix, or a role."
+>
+  <section class="ct-open" aria-labelledby="contact-title">
+    <div class="container-bleed">
+      <h1 id="contact-title" class="ct-title text-mega text-fg" data-split="lines" style={`--pair-fit: ${pairFit}`}>
+        Tell me what it needs to do.
+      </h1>
+
+      <div class="ct-grid mt-block" data-reveal-group>
+        <p class="ct-lead max-w-measure text-lead text-fg" data-reveal>
+          Contract work, a stuck project, a site that has stopped earning its keep, or a
+          role. Tell me what the thing needs to do and I&rsquo;ll tell you honestly
+          whether I&rsquo;m the right person &mdash; including when I&rsquo;m not.
+        </p>
+
+        <div class="ct-mail" data-reveal>
+          <p class="text-small text-fg-muted">{formKey ? 'Or just email me' : 'Email me'}</p>
+          <div class="mt-3 text-title">
+            <a href={`mailto:${CONTACT.email}`} class:list={[textLink, 'link-reveal--lg ct-address']}>
+              {emailUser}<wbr />@{emailHost}
+            </a>
+          </div>
+          <div class="mt-stack">
+            <CopyEmail email={CONTACT.email} tone={formKey ? 'line' : 'fill'} />
+          </div>
+          <p class="mt-stack text-body text-fg-muted">Based in Utah. I reply to everything.</p>
+          <p class="mt-3 text-body">
+            <ExternalLink href={RESUME} newTab class={textLink}>Résumé (PDF)</ExternalLink>
+          </p>
+          {
+            !formKey && import.meta.env.DEV && (
+              <p class="ct-devnote mt-stack text-small text-fg-muted">
+                Dev only: the contact form is hidden because CONTACT.web3formsKey in
+                src/config.ts is empty.
+              </p>
+            )
+          }
+        </div>
+
+        {
+          formKey && (
+            <div class="ct-formcol" aria-labelledby="form-title" role="region">
+          <h2 id="form-title" class="sr-only">Send a message</h2>
+          <form
+            action={FORM_ENDPOINT}
+            method="POST"
+            class="flex max-w-measure flex-col gap-8"
+            data-contact-form
+            data-reveal
+          >
+            <input type="hidden" name="access_key" value={formKey} />
+            <input type="hidden" name="subject" value={SUBJECT} />
+            <input type="hidden" name="from_name" value="brendonjensen portfolio" />
+
+            {/*
+              Web3Forms' honeypot. display:none keeps it out of sight, the
+              accessibility tree and the tab order; a submission with it
+              ticked is dropped as spam.
+            */}
+            <input type="checkbox" name="botcheck" class="hidden" style="display: none" tabindex="-1" autocomplete="off" />
+
+            <div class="flex flex-col gap-2">
+              <label for="name" class="text-small font-medium text-fg">
+                Your name
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                required
+                autocomplete="name"
+                class={field}
+                aria-describedby="name-error"
+                data-error-missing="Enter your name."
+              />
+              <p id="name-error" class="ct-error text-small" data-field-error hidden />
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label for="email" class="text-small font-medium text-fg">
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                autocomplete="email"
+                spellcheck="false"
+                pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
+                class={field}
+                aria-describedby="email-error"
+                data-error-missing="Enter your email address, so I can reply."
+                data-error-invalid="That email address doesn’t look complete. Check it for a typo."
+              />
+              <p id="email-error" class="ct-error text-small" data-field-error hidden />
+            </div>
+
+            <fieldset class="flex flex-col gap-3">
+              <legend class="mb-3 text-small font-medium text-fg">
+                What&rsquo;s this about
+              </legend>
+              <div class="flex flex-wrap gap-2">
+                {PROJECT_TYPES.map((type, index) => (
+                  <label class="transition-soft inline-flex min-h-11 cursor-pointer items-center rounded-control border border-edge-strong px-4 text-small text-fg-muted hover:text-fg has-checked:border-transparent has-checked:bg-accent-fill has-checked:text-on-accent has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-focus">
+                    <input type="radio" name="topic" value={type} checked={index === 0} class="sr-only" />
+                    {type}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            <div class="flex flex-col gap-2">
+              <label for="message" class="text-small font-medium text-fg">
+                What it needs to do
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                rows="6"
+                required
+                class:list={[field, 'resize-y']}
+                aria-describedby="message-error"
+                data-error-missing="Tell me a little about what it needs to do."
+              />
+              <p id="message-error" class="ct-error text-small" data-field-error hidden />
+            </div>
+
+            <div class="flex flex-wrap items-center gap-5">
+              <button type="submit" class:list={[primaryButton, 'cursor-pointer disabled:cursor-wait disabled:opacity-70']} data-submit>
+                <span data-submit-label>Send it</span>
+              </button>
+              <p class="text-small text-fg-muted" data-form-note role="status" aria-live="polite" />
+            </div>
+
+            {/* Shown when Web3Forms says no or the network fails. Keeps what
+                they wrote, and gives the address as the way round it. */}
+            <div class="ct-alert" data-form-error role="alert" tabindex="-1" hidden>
+              <p class="text-body font-medium text-fg">That didn&rsquo;t send.</p>
+              <p class="mt-2 text-body text-fg-muted">
+                Your message is still here, so you can try again. Or email it to{' '}
+                <a href={`mailto:${CONTACT.email}`} class:list={[textLink, 'break-words']}>{emailUser}<wbr />@{emailHost}</a>.
+              </p>
+            </div>
+          </form>
+
+          <div class="ct-done max-w-measure" data-form-done tabindex="-1" hidden>
+            <p class="text-title text-fg">Thanks, that&rsquo;s sent.</p>
+            <p class="mt-stack text-body text-fg-muted">
+              I&rsquo;ll reply to <span class="text-fg break-words" data-form-done-email>the address you gave</span>.
+            </p>
+          </div>
+            </div>
+          )
+        }
+      </div>
+    </div>
+  </section>
+
 </Base>
+
+<style>
+  /* Rhythm, the same as /about/ and /work/: the title a block under the
+     bar, a full section of air round each band. */
+  .ct-open {
+    padding-top: var(--spacing-block);
+    padding-bottom: var(--spacing-section);
+  }
+
+  /* The address breaks only at the @ (a <wbr> in the markup), not mid-word.
+     break-word is the last resort for a screen too narrow for either half. */
+  .ct-address {
+    overflow-wrap: break-word;
+  }
+
+  /* Phones: TELL ME fills the column, up to the case-study title's phone
+     size. From 768 the homepage contact headline's treatment: the display
+     step, growing with the content width from 1024. */
+  .ct-title {
+    font-size: min(4.5rem, calc((100vw - 2 * var(--grid-margin)) / (var(--pair-fit) * 1.04)));
+    overflow-wrap: normal;
+  }
+
+  @media (min-width: 48rem) {
+    .ct-title {
+      font-size: max(var(--text-display), min(calc((100vw - 2 * var(--grid-margin)) * 0.088), 13rem));
+    }
+  }
+
+  .ct-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+    row-gap: var(--spacing-block);
+  }
+
+  .ct-grid > :global(*) {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  /* Desktop: the lead and then the form down the left, the email block
+     beside them on the right, staying in view while the form scrolls past.
+     Phones and tablets keep the source order: lead, email, form. */
+  @media (min-width: 64rem) {
+    .ct-lead {
+      grid-column: 1 / span 6;
+    }
+    .ct-mail {
+      grid-column: 8 / -1;
+      grid-row: 1 / span 2;
+      align-self: start;
+      position: sticky;
+      top: calc(var(--spacing-nav) + 1.5rem);
+    }
+    .ct-formcol {
+      grid-column: 1 / span 6;
+      grid-row: 2;
+    }
+  }
+
+  /* Field errors. There's no error colour in the palette, so an error is
+     carried by words, weight and a stronger border, not by red. */
+  .ct-error {
+    color: var(--color-fg);
+    font-weight: 500;
+  }
+  .ct-error::before {
+    content: '!';
+    display: inline-grid;
+    place-items: center;
+    width: 1.15em;
+    height: 1.15em;
+    margin-right: 0.5em;
+    border-radius: 50%;
+    background: var(--color-fg);
+    color: var(--color-surface-sunken);
+    font-size: 0.8em;
+    font-weight: 700;
+    vertical-align: 0.1em;
+  }
+  .ct-formcol :global([aria-invalid='true']) {
+    border-color: var(--color-fg);
+    border-width: 2px;
+  }
+
+  /* The send-failed message and the sent message: a tan bar beside each
+     (a fill), the same mark the old endpoint note used. */
+  .ct-alert,
+  .ct-done,
+  .ct-devnote {
+    padding-left: var(--spacing-stack);
+    border-left: 3px solid var(--color-accent-fill);
+  }
+  .ct-alert[hidden],
+  .ct-done[hidden] {
+    display: none;
+  }
+  .ct-alert:focus,
+  .ct-done:focus {
+    outline: none;
+  }
+</style>
+
+<script>
+  /*
+    The form, with JS: inline validation, the timing check, and a fetch to
+    Web3Forms so the result shows here instead of on their page. Without JS
+    none of this runs and the browser's own validation and a plain POST do
+    the job.
+
+    Bound per element so a second run (view transitions) can't stack a
+    duplicate listener on the same form.
+  */
+  const wireContactForm = () => {
+    const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+    if (!form || form.dataset.ready === 'true') return;
+    form.dataset.ready = 'true';
+    form.noValidate = true;
+
+    const note = form.querySelector<HTMLElement>('[data-form-note]');
+    const alertBox = form.querySelector<HTMLElement>('[data-form-error]');
+    const submit = form.querySelector<HTMLButtonElement>('[data-submit]');
+    const submitLabel = form.querySelector<HTMLElement>('[data-submit-label]');
+    const done = document.querySelector<HTMLElement>('[data-form-done]');
+    const doneEmail = done?.querySelector<HTMLElement>('[data-form-done-email]');
+    const fields = Array.from(form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[data-error-missing]'));
+    const loadedAt = Date.now();
+
+    const errorFor = (el: HTMLInputElement | HTMLTextAreaElement) =>
+      document.getElementById(el.getAttribute('aria-describedby') ?? '');
+
+    /* Returns the message to show, or '' when the field is fine. */
+    const problem = (el: HTMLInputElement | HTMLTextAreaElement) => {
+      if (!el.value.trim()) return el.dataset.errorMissing ?? '';
+      if (el.validity.typeMismatch || el.validity.patternMismatch) return el.dataset.errorInvalid ?? '';
+      return '';
+    };
+
+    const show = (el: HTMLInputElement | HTMLTextAreaElement, message: string) => {
+      const box = errorFor(el);
+      if (message) el.setAttribute('aria-invalid', 'true');
+      else el.removeAttribute('aria-invalid');
+      if (box) {
+        box.textContent = message;
+        box.hidden = !message;
+      }
+    };
+
+    /* Once a field has been flagged, clear it as soon as it's fixed rather
+       than waiting for the next submit. */
+    fields.forEach((el) => {
+      el.addEventListener('input', () => {
+        if (el.getAttribute('aria-invalid') === 'true' && !problem(el)) show(el, '');
+      });
+      el.addEventListener('blur', () => {
+        if (el.getAttribute('aria-invalid') === 'true') show(el, problem(el));
+      });
+    });
+
+    let sending = false;
+    const setSending = (on: boolean) => {
+      sending = on;
+      if (submit) {
+        submit.disabled = on;
+        submit.setAttribute('aria-busy', String(on));
+      }
+      if (submitLabel) submitLabel.textContent = on ? 'Sending…' : 'Send it';
+    };
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (sending) return;
+      if (alertBox) alertBox.hidden = true;
+      if (note) note.textContent = '';
+
+      let first: HTMLInputElement | HTMLTextAreaElement | undefined;
+      fields.forEach((el) => {
+        const message = problem(el);
+        show(el, message);
+        if (message && !first) first = el;
+      });
+      if (first) {
+        first.focus();
+        return;
+      }
+
+      if (Date.now() - loadedAt < 3000) {
+        if (note) note.textContent = 'Give that another moment, then send again.';
+        return;
+      }
+
+      setSending(true);
+      if (note) note.textContent = 'Sending your message.';
+      const data = Object.fromEntries(new FormData(form).entries());
+
+      try {
+        /* A request that never answers shouldn't leave the button on
+           "Sending…" for good: after 20 seconds it counts as failed. */
+        const res = await fetch(form.action, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(data),
+          signal: AbortSignal.timeout(20000),
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok || !json.success) throw new Error(json.message || `The form service answered ${res.status}.`);
+
+        if (doneEmail) doneEmail.textContent = String(data.email ?? '');
+        form.hidden = true;
+        if (done) {
+          done.hidden = false;
+          done.focus();
+        }
+      } catch (err) {
+        setSending(false);
+        if (note) note.textContent = '';
+        /* The service's own wording is for me, not the visitor. */
+        console.warn('Contact form:', err);
+        if (alertBox) {
+          alertBox.hidden = false;
+          alertBox.focus();
+        }
+      }
+    });
+  };
+
+  wireContactForm();
+  document.addEventListener('astro:page-load', wireContactForm);
+</script>

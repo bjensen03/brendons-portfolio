@@ -1,0 +1,57 @@
+---
+# CONFIRM BEFORE SHIPPING: the year, and that this was self-directed rather
+# than coursework. See the note on the Feit entry.
+
+title: Venue booking that settles the whole event in one pass
+client: Self-directed
+year: 2026
+
+disciplines: ['design']
+
+role: ['Product design', 'UI design', 'Booking flow']
+
+depth: concept
+
+outcome: >
+  An event-venue booking concept that takes date, slot, space type, guests and
+  payment in a single flow, with a running summary rather than a surprise at
+  checkout.
+
+summary: >
+  A concept booking product for event spaces. Venue booking is one of the few
+  consumer flows where the price genuinely depends on four things at once —
+  which date, which slot, which space and how many people — so a wizard that
+  hides the total until the end is guessing on the customer's behalf. This set
+  keeps a booking summary visible while those four are chosen.
+
+cover: ./images/ux-partypad/4.webp
+coverAlt: The PartyPad venue search, showing a calendar, filters and venue results.
+
+stack: ['Figma', 'Web']
+
+order: 15
+---
+
+import venue from './images/ux-partypad/4.webp';
+import slots from './images/ux-partypad/3.webp';
+import payment from './images/ux-partypad/5.webp';
+
+## The idea
+
+Four variables set the price of an event space: the date, the time slot, the
+type of space and the head count. Change any one and the total moves.
+
+Which is why the booking summary is on screen while they are being chosen
+rather than revealed at the end. A checkout that surprises someone with the
+real number after they have filled in their guest list is not a checkout, it is
+a negotiation they did not agree to.
+
+<Gallery
+  label="The screens"
+  size="document"
+  items={[
+    { src: venue, alt: 'Search for a venue and book your event, with filters and venue cards.', caption: 'Find a venue' },
+    { src: slots, alt: 'Booking calendar with date selection, time slots and pad type.', caption: 'Date, slot and space' },
+    { src: payment, alt: 'Payment options with user details, guest details and a running booking summary.', caption: 'Guests and payment — summary stays visible' },
+  ]}
+/>

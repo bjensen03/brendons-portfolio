@@ -1,0 +1,967 @@
+---
+import { Picture } from 'astro:assets';
+import ExternalLink from '../ExternalLink.astro';
+import { FILTERS, flatRows, projectCount, projectGroups, type ProjectRow } from './data';
+import { longestWordEm } from '../../lib/display-fit';
+
+/*
+  Projects. A different shape from the homepage's Selected Work on purpose:
+  that one is a sticky index and stage for four studies; this is the whole
+  body of work as one long typographic list.
+
+  Each project is a full-width row: number, name in display type, the one
+  line, role · stack. On a desktop pointer, hovering a row brings its
+  screenshot up beside the cursor (one floating frame, the rows dim around
+  the one you're on). Everywhere else — touch, tablets, phones, reduced
+  motion, no JS — each row shows its screenshot inline instead, so nothing
+  depends on hover.
+
+  The filter row is real buttons with aria-pressed. It only appears once the
+  script has run (no JS = the full list). Changing it collapses and expands
+  the rows with Flip (imported here; registered on the motion module's gsap).
+
+  Two rows are grouped entries rather than single projects: the earlier
+  client sites (a row of small screenshots, always shown) and the design
+  concepts (a gallery behind a disclosure button, open when there's no JS).
+  Each counts as as many projects as it holds, in the intro and in the
+  filter's live count.
+*/
+
+const groups = await projectGroups();
+const rows = flatRows(groups);
+const total = rows.reduce((sum, r) => sum + projectCount(r), 0);
+
+const widthsFor = (w: number) => [480, 720, 960, 1280].filter((x) => x <= w);
+const tagsOf = (r: ProjectRow) => r.tags.join(' ');
+/* A sites row with only two tiles spans the row at 1024+ (see .pset--sites
+   below), so its screenshots are drawn about twice as wide and need the
+   bigger files. */
+const pairRow = (r: ProjectRow) => r.set?.kind === 'sites' && r.set.items.length < 3;
+/* The first row's screenshot is the first thing on screen on phones and
+   tablets (the LCP), so it loads at once and first; every other one stays
+   lazy. */
+const firstShotId = groups.flatMap((g) => g.rows).find((r) => !r.set && r.shot)?.id;
+/* Drawn widths of a row's screenshot: the full column on phones (inside the
+   1.25rem margins), columns 2–6 of 6 on tablets, 8–12 of 12 at 1024+. */
+const THUMB_SIZES = '(min-width: 64rem) 38vw, (min-width: 48rem) calc(83.33vw - 70px), calc(100vw - 2.5rem)';
+---
+
+<section class="projects pt-block pb-section" aria-labelledby="projects-title" data-projects>
+  <div class="container-bleed">
+    <h1 id="projects-title" class="projects-title text-mega text-fg" data-split>Projects</h1>
+
+    <div class="mt-stack grid grid-cols-4 gap-x-(--grid-gutter) md:grid-cols-6 lg:grid-cols-12">
+      <p class="col-span-full max-w-measure text-lead text-fg-muted lg:col-span-6" data-reveal>
+        {`Client sites, web apps, freelance builds, our own travel brand and a few design concepts. ${total} projects, and each one that has a write-up links to it.`}
+      </p>
+    </div>
+
+    <div class="filters mt-block" data-filters>
+      <div class="flex flex-wrap gap-2" role="group" aria-label="Filter projects">
+        {
+          FILTERS.map((f, i) => (
+            <button
+              type="button"
+              class="filter-btn text-small"
+              aria-pressed={i === 0 ? 'true' : 'false'}
+              data-filter={f.id}
+            >
+              {f.label}
+            </button>
+          ))
+        }
+      </div>
+      <p class="sr-only" aria-live="polite" data-filter-status></p>
+    </div>
+  </div>
+
+  <div class="container-bleed" data-projects-list>
+    {
+      groups.map((g) => (
+        <section class="pgroup" aria-labelledby={`group-${g.id}`} data-pgroup>
+          <h2 id={`group-${g.id}`} class="pgroup__title text-heading text-fg" style={`--fit: ${longestWordEm(g.title)}`} data-split>
+            {g.title}
+          </h2>
+          <ol class="pgroup__rows" role="list">
+            {g.rows.map((r) => (
+              <li class="prow" data-row data-tags={tagsOf(r)} data-project-count={projectCount(r)} data-reveal>
+                {r.set ? (
+                  <div class:list={['prow__body', `prow__body--${r.set.kind}`]}>
+                    <span class="prow__num text-small tabular-nums">{r.number}</span>
+                    <h3 class="prow__name" style={`--fit: ${longestWordEm(r.name)}`}>{r.name}</h3>
+                    <div class="prow__text">
+                      <p class="text-body text-fg">{r.line}</p>
+                      <p class="mt-2 text-small text-fg-muted">{r.meta}</p>
+                      {r.set.kind === 'concepts' && (
+                        <button
+                          type="button"
+                          class="pset-toggle filter-btn text-small mt-4"
+                          aria-expanded="true"
+                          aria-controls={`set-${r.id}`}
+                          data-set-toggle
+                          hidden
+                        >
+                          <span>Concept screens ({r.set.items.length})</span>
+                          <span class="pset-toggle__icon" aria-hidden="true" />
+                        </button>
+                      )}
+                    </div>
+                    <ul
+                      id={`set-${r.id}`}
+                      class:list={['pset', `pset--${r.set.kind}`]}
+                      role="list"
+                      aria-label={r.name}
+                      data-set={r.set.kind}
+                    >
+                      {r.set.items.map((it) => (
+                        <li class="pset__item">
+                          <div class="pset__shot">
+                            <Picture
+                              src={it.shot.src}
+                              alt={it.shot.alt}
+                              formats={['avif', 'webp']}
+                              widths={pairRow(r) ? widthsFor(it.shot.src.width) : widthsFor(it.shot.src.width).slice(0, 2)}
+                              sizes={r.set!.kind === 'concepts' ? '(min-width: 64rem) 26vw, (min-width: 48rem) 40vw, 94vw' : pairRow(r) ? '(min-width: 64rem) 42vw, (min-width: 48rem) 28vw, 46vw' : '(min-width: 64rem) 20vw, (min-width: 48rem) 28vw, 46vw'}
+                              loading="lazy"
+                              pictureAttributes={{ class: 'block h-full w-full' }}
+                              class="h-full w-full object-cover object-top"
+                            />
+                          </div>
+                          <h4 class="pset__name text-body font-medium text-fg">{it.name}</h4>
+                          {it.line && <p class="text-small text-fg-muted">{it.line}</p>}
+                          {(it.status || it.href) && (
+                            <p class="pset__status text-small">
+                              {it.status && <span class="pset__badge">{it.status}</span>}
+                              {it.href && (
+                                <ExternalLink href={it.href} class="pset__link font-medium text-fg">
+                                  <span class="link-reveal">{it.linkLabel}</span>
+                                  {!it.href.startsWith('http') && <span class="link-arrow ml-1" aria-hidden="true">→</span>}
+                                  <span class="sr-only">: {it.name}</span>
+                                </ExternalLink>
+                              )}
+                            </p>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (() => {
+                  const Tag = r.href ? 'a' : 'div';
+                  return (
+                    <Tag
+                      href={r.href}
+                      class:list={['prow__body', r.href && 'group']}
+                      data-prow={r.id}
+                    >
+                      <span class="prow__num text-small tabular-nums">{r.number}</span>
+                      <h3 class="prow__name" style={`--fit: ${longestWordEm(r.name)}`}>{r.name}</h3>
+                      <div class="prow__text">
+                        <p class="text-body text-fg">{r.line}</p>
+                        <p class="mt-2 text-small text-fg-muted">{r.meta}</p>
+                        {r.year && <p class="text-small text-fg-muted">{r.year}</p>}
+                        {r.href && (
+                          <p class="mt-3 text-small font-medium text-fg">
+                            <span class="link-reveal">{r.href.startsWith('/work/') ? 'View case study' : 'Open the page'}</span>
+                            <span class="link-arrow ml-1" aria-hidden="true">→</span>
+                          </p>
+                        )}
+                      </div>
+                      <div class="prow__thumb">
+                        {r.shot ? (
+                          <Picture
+                            src={r.shot.src}
+                            alt={r.shot.alt}
+                            formats={['avif', 'webp']}
+                            widths={widthsFor(r.shot.src.width)}
+                            sizes={THUMB_SIZES}
+                            loading={r.id === firstShotId ? 'eager' : 'lazy'}
+                            fetchpriority={r.id === firstShotId ? 'high' : undefined}
+                            pictureAttributes={{ class: 'block h-full w-full' }}
+                            class="h-full w-full object-cover object-top"
+                          />
+                        ) : (
+                          <div class="shot-needed">
+                            <span class="text-small text-fg-muted">{r.shotNeeded}</span>
+                          </div>
+                        )}
+                      </div>
+                    </Tag>
+                  );
+                })()}
+
+                {r.children && (
+                  <ol class="prow__kids" role="list" aria-label={`${r.name} sites`}>
+                    {r.children.map((c) => (
+                      <li class="prow prow--child" data-row data-child data-tags={tagsOf(c)}>
+                        <a href={c.href} class="prow__body group" data-prow={c.id}>
+                          <span class="prow__num text-small tabular-nums">{c.number}</span>
+                          <h4 class="prow__name" style={`--fit: ${longestWordEm(c.name)}`}>{c.name}</h4>
+                          <div class="prow__text">
+                            <p class="text-body text-fg">{c.line}</p>
+                            <p class="mt-2 text-small text-fg-muted">{c.meta}</p>
+                            {c.year && <p class="text-small text-fg-muted">{c.year}</p>}
+                            <p class="mt-3 text-small font-medium text-fg">
+                              <span class="link-reveal">View case study</span>
+                              <span class="link-arrow ml-1" aria-hidden="true">→</span>
+                            </p>
+                          </div>
+                          <div class="prow__thumb">
+                            {c.shot ? (
+                              <Picture
+                                src={c.shot.src}
+                                alt={c.shot.alt}
+                                formats={['avif', 'webp']}
+                                widths={widthsFor(c.shot.src.width)}
+                                sizes={THUMB_SIZES}
+                                loading="lazy"
+                                pictureAttributes={{ class: 'block h-full w-full' }}
+                                class="h-full w-full object-cover object-top"
+                              />
+                            ) : (
+                              <div class="shot-needed">
+                                <span class="text-small text-fg-muted">{c.shotNeeded}</span>
+                              </div>
+                            )}
+                          </div>
+                        </a>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </li>
+            ))}
+          </ol>
+        </section>
+      ))
+    }
+  </div>
+
+  {/* The floating frame for the desktop hover preview. Decorative: every
+      row already carries its own image with alt text. */}
+  <div class="pcursor" aria-hidden="true" data-pcursor>
+    <div class="pcursor__frame" data-pcursor-frame>
+      {
+        rows.filter((r) => !r.set).map((r) => (
+          <div class="pcursor__item" data-pcursor-item={r.id}>
+            {r.shot ? (
+              <Picture
+                src={r.shot.src}
+                alt=""
+                formats={['avif', 'webp']}
+                widths={widthsFor(r.shot.src.width)}
+                sizes="34vw"
+                loading="lazy"
+                pictureAttributes={{ class: 'block h-full w-full' }}
+                class="h-full w-full object-cover object-top"
+              />
+            ) : (
+              <div class="shot-needed">
+                <span class="text-small text-fg-muted">{r.shotNeeded}</span>
+              </div>
+            )}
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  /* The filter bar only works with JS, so without it the bar isn't shown.
+     With JS on it takes its space from the first paint and stays invisible
+     until the script marks it ready, so showing it doesn't push the list
+     down (CLS). Not the hidden attribute: Tailwind's preflight hides
+     [hidden] with a layered !important that a component can't undo. */
+  .filters {
+    display: none;
+  }
+  :global(html.js) .filters {
+    display: block;
+    visibility: hidden;
+  }
+  :global(html.js) .filters[data-ready] {
+    visibility: visible;
+  }
+
+  /* "PROJECTS" (about 6.6em in Archivo at this width) runs margin to margin,
+     capped by the screen height and an absolute ceiling, like the home hero. */
+  .projects-title {
+    font-size: min(calc((100vw - 2 * var(--grid-margin)) / 6.65), 32svh, 24rem);
+    line-height: 0.86;
+  }
+
+  .filter-btn {
+    min-height: 2.75rem;
+    padding: 0 1.1rem;
+    border: 1px solid var(--color-edge-strong);
+    border-radius: var(--radius-control);
+    color: var(--color-fg);
+    transition:
+      background-color var(--duration-fast) var(--ease-out-soft),
+      border-color var(--duration-fast) var(--ease-out-soft),
+      color var(--duration-fast) var(--ease-out-soft);
+  }
+  .filter-btn:hover {
+    border-color: var(--color-fg-muted);
+  }
+  /* The pressed filter is a fill, so it takes the accent (graphite on tan),
+     the same treatment as the primary button. */
+  .filter-btn[aria-pressed='true'] {
+    background: var(--color-accent-fill);
+    border-color: var(--color-accent-fill);
+    color: var(--color-on-accent);
+  }
+
+  .pgroup {
+    margin-top: var(--spacing-section-sm);
+  }
+  .pgroup__title {
+    margin-bottom: var(--spacing-stack);
+  }
+  /* Below 1024, fitHeadings (mobile-motion.ts) sizes section headings so
+     the longest word runs the column, capped by the page title. Doing it
+     only in JS grew "CLIENT WORK" from 36px to 48px after load and pushed
+     the list down (CLS). This is the same sum, done in CSS from the
+     server-side word width (--fit), so the heading paints at its final size
+     and the script finds nothing to change. */
+  @media (max-width: 63.999rem) {
+    .pgroup__title {
+      --avail: calc(100vw - 2 * var(--grid-margin));
+      --title: min(calc(var(--avail) / 6.65), 32svh, 24rem);
+      --cap: max(36px, min(48px, var(--title)));
+      font-size: round(down, min(var(--cap), var(--avail) * 0.995 / var(--fit, 11.8)), 1px);
+    }
+  }
+  @media (min-width: 48rem) and (max-width: 63.999rem) {
+    .pgroup__title {
+      --cap: max(36px, min(72px, var(--title)));
+    }
+  }
+
+  /* ── Rows ── */
+  .prow__body {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+    row-gap: 1rem;
+    align-items: baseline;
+    padding-block: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+    border-top: 1px solid var(--color-edge);
+    --span: 1;
+  }
+  .pgroup__rows > .prow:last-child > .prow__body,
+  .pgroup__rows > .prow:last-child .prow__kids > .prow:last-child > .prow__body {
+    border-bottom: 1px solid var(--color-edge);
+  }
+  .pgroup__rows > .prow:last-child:has(.prow__kids) > .prow__body {
+    border-bottom: 0;
+  }
+
+  .prow__num {
+    grid-column: 1 / -1;
+    color: var(--color-fg-muted);
+  }
+  .prow__name {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-family: var(--font-display);
+    font-stretch: var(--display-stretch);
+    text-transform: var(--display-case);
+    font-weight: 850;
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+    /* MANUFACTURING (about 11.6em) is the longest unbreakable word; it has
+       to fit whatever share of the row the name gets. */
+    font-size: min(4.75rem, calc((100vw - 2 * var(--grid-margin)) * var(--span) / 11.8));
+    overflow-wrap: normal;
+    --lit: 1;
+    color: color-mix(in oklch, var(--color-fg) calc(54% + 46% * var(--lit)), transparent);
+    transition:
+      --lit var(--duration-base) var(--ease-out-soft),
+      translate var(--duration-base) var(--ease-out-soft);
+  }
+  .prow__text {
+    grid-column: 1 / -1;
+    min-width: 0;
+    max-width: var(--container-measure);
+    overflow-wrap: anywhere;
+  }
+  .prow__thumb {
+    grid-column: 1 / -1;
+    position: relative;
+    aspect-ratio: var(--aspect-shot);
+    overflow: hidden;
+    border-radius: var(--radius-media);
+    background: var(--color-surface-raised);
+  }
+
+  /* A nested study: indented under its parent, smaller name. */
+  .prow--child .prow__body {
+    padding-block: clamp(1.1rem, 0.8rem + 1vw, 1.75rem);
+  }
+  .prow--child .prow__name {
+    font-size: min(2.75rem, calc((100vw - 2 * var(--grid-margin)) * var(--span) / 11.8));
+  }
+
+  @media (min-width: 48rem) {
+    .prow__body {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+    .prow__num {
+      grid-column: 1 / 2;
+    }
+    .prow__name {
+      grid-column: 2 / -1;
+      --span: 0.8;
+    }
+    .prow__text,
+    .prow__thumb {
+      grid-column: 2 / -1;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .prow__body {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      row-gap: 1.5rem;
+    }
+    .prow__num {
+      grid-column: 1 / 2;
+    }
+    .prow__name {
+      grid-column: 2 / 8;
+      --span: 0.5;
+    }
+    .prow__text {
+      grid-column: 8 / -1;
+    }
+    .prow__thumb {
+      grid-column: 8 / -1;
+    }
+    .prow--child .prow__num {
+      grid-column: 2 / 3;
+    }
+    .prow--child .prow__name {
+      grid-column: 3 / 8;
+      --span: 0.42;
+    }
+  }
+
+  /* Hovering or focusing a row dims the others. Hover only where there is
+     a real hover: on a touch screen a tapped row keeps :hover, which left
+     every other name dimmed until the next tap. */
+  @media (hover: hover) {
+    [data-projects-list]:has(.prow__body:hover) .prow__name {
+      --lit: 0;
+    }
+    [data-projects-list] .prow__body:hover > .prow__name {
+      --lit: 1;
+      translate: 0.35rem 0;
+    }
+  }
+  [data-projects-list]:has(.prow__body:focus-visible) .prow__name {
+    --lit: 0;
+  }
+  [data-projects-list] .prow__body:focus-visible > .prow__name {
+    --lit: 1;
+    translate: 0.35rem 0;
+  }
+
+  /* Below 1024 the list's closing rule sat a short way above the footer's
+     own rule — two hairlines doing one job. The footer's stays. */
+  @media (max-width: 63.999rem) {
+    .pgroup:last-child .pgroup__rows > .prow:last-child > .prow__body,
+    .pgroup:last-child .pgroup__rows > .prow:last-child .prow__kids > .prow:last-child > .prow__body {
+      border-bottom: 0;
+    }
+  }
+
+  /* ── Phones ──────────────────────────────────────────────────────────────
+     Picture first, then the number, the name and the line — each project
+     opens on its screenshot, like the cards on the homepage. Names are
+     sized one by one so the longest word runs the full width (--fit is its
+     width in em, from lib/display-fit), instead of every name being set
+     small enough for MANUFACTURING. A pressed row sinks a touch. */
+  @media (max-width: 47.999rem) {
+    .prow__thumb {
+      order: -1;
+      margin-bottom: 0.5rem;
+    }
+    .prow__name {
+      font-size: min(2.75rem, calc((100vw - 2 * var(--grid-margin)) / (var(--fit, 11.8) * 1.04)));
+    }
+    .prow--child .prow__name {
+      font-size: min(2.25rem, calc((100vw - 2 * var(--grid-margin)) / (var(--fit, 11.8) * 1.04)));
+    }
+    a.prow__body {
+      transition: scale var(--duration-fast) var(--ease-out-soft);
+    }
+    a.prow__body:active {
+      scale: 0.985;
+    }
+  }
+
+  @property --lit {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 1;
+  }
+
+  /* The hover preview is on: rows drop their inline images. */
+  .projects[data-preview] .prow__thumb {
+    display: none;
+  }
+
+  .pcursor {
+    display: none;
+  }
+  .projects[data-preview] .pcursor {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 30;
+    pointer-events: none;
+  }
+  .pcursor__frame {
+    position: relative;
+    width: min(34vw, 38rem);
+    aspect-ratio: var(--aspect-shot);
+    overflow: hidden;
+    border-radius: var(--radius-media);
+    background: var(--color-surface-raised);
+    box-shadow: var(--shadow-frame);
+    opacity: 0;
+    scale: 0.85;
+  }
+  .pcursor__item {
+    position: absolute;
+    inset: 0;
+    visibility: hidden;
+  }
+  .pcursor__item.is-active {
+    visibility: visible;
+  }
+
+  /* ── Grouped entries ──────────────────────────────────────────────────────
+     The earlier client sites and the design concepts: one row each, with
+     small screenshots under the text instead of one big one. These stay
+     inline at every width (the hover preview is for single projects). */
+  .pset {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem var(--grid-gutter);
+    margin-top: 0.5rem;
+    align-items: start;
+  }
+  .pset--concepts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pset[hidden] {
+    display: none;
+  }
+  .pset__item {
+    min-width: 0;
+  }
+  .pset__shot {
+    aspect-ratio: var(--aspect-shot);
+    overflow: hidden;
+    border-radius: var(--radius-media);
+    background: var(--color-surface-raised);
+    margin-bottom: 0.75rem;
+  }
+  .pset--concepts .pset__shot {
+    aspect-ratio: 4 / 3;
+  }
+  .pset__name {
+    margin: 0;
+  }
+  .pset__status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.75rem;
+    margin-top: 0.4rem;
+    color: var(--color-fg-muted);
+  }
+  /* A status, when an item has one, is plain muted text in sentence case:
+     no small uppercase labels on this page. (Live is in the meta line.) */
+  .pset__badge {
+    color: var(--color-fg-muted);
+  }
+  .pset__link {
+    display: inline-flex;
+    align-items: baseline;
+    min-height: 1.5rem;
+  }
+
+  .pset-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .pset-toggle[hidden] {
+    display: none;
+  }
+  /* A plus that turns into a minus while the gallery is open. */
+  .pset-toggle__icon {
+    position: relative;
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+  .pset-toggle__icon::before,
+  .pset-toggle__icon::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 1.5px;
+    margin-top: -0.75px;
+    background: currentColor;
+    transition: rotate var(--duration-fast) var(--ease-out-soft);
+  }
+  .pset-toggle__icon::after {
+    rotate: 90deg;
+  }
+  .pset-toggle[aria-expanded='true'] .pset-toggle__icon::after {
+    rotate: 0deg;
+  }
+
+  @media (min-width: 48rem) {
+    .pset {
+      grid-column: 2 / -1;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .pset--concepts {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    .pset {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .pset--concepts {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    /* Two client sites left half of a four-column row empty. Two or fewer
+       share the row instead. */
+    .pset--sites:not(:has(> :nth-child(3))) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .shot-needed {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    padding: 1.5rem;
+    text-align: center;
+    background: var(--color-surface-raised);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .prow__name {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import { Flip } from 'gsap/Flip';
+  import { registerMotion, motion, duration, ease, prefersReducedMotion } from '../../scripts/motion';
+
+  /* Flip is only used here, so it's imported here rather than in the shared
+     motion module, and only /work/ downloads it. */
+  motion.gsap.registerPlugin(Flip);
+
+  /*
+    Filter. Runs with reduced motion too (it's a control, not decoration);
+    only the Flip is skipped then.
+  */
+  registerMotion(
+    () => {
+      const root = document.querySelector<HTMLElement>('[data-projects]');
+      const bar = root?.querySelector<HTMLElement>('[data-filters]');
+      if (!root || !bar) return;
+      const { gsap, ScrollTrigger } = motion;
+
+      const buttons = Array.from(bar.querySelectorAll<HTMLButtonElement>('[data-filter]'));
+      const status = bar.querySelector<HTMLElement>('[data-filter-status]');
+      const list = root.querySelector<HTMLElement>('[data-projects-list]');
+      if (!list) return;
+      const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-row]'));
+      const groups = Array.from(root.querySelectorAll<HTMLElement>('[data-pgroup]'));
+      bar.setAttribute('data-ready', '');
+
+      let tl: gsap.core.Timeline | null = null;
+
+      /* The concepts gallery starts closed once the script runs; without JS
+         it stays open and the button stays hidden.
+
+         Which galleries are open is kept on this history entry, so Back from
+         a concept page brings the page back the way it was left. The router
+         restores the scroll position before this runs, against the no-JS
+         markup (gallery open, filter bar hidden); closing the gallery after
+         that is what used to drop the page to wherever the shorter list
+         ended. A new visit to /work/ is a new entry, so it still starts
+         closed. */
+      const openSets = (): string[] => {
+        const saved = history.state?.openSets;
+        return Array.isArray(saved) ? saved : [];
+      };
+      const saveOpenSets = (ids: string[]) => {
+        /* Only entries the router already manages; never add state to one
+           the browser made on its own. */
+        if (history.state) history.replaceState({ ...history.state, openSets: ids }, '');
+      };
+      const saveFilter = (f: string) => {
+        if (history.state) history.replaceState({ ...history.state, filter: f }, '');
+      };
+      const toggles = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-set-toggle]'));
+      const onToggle = (event: Event) => {
+        const btn = event.currentTarget as HTMLButtonElement;
+        const id = btn.getAttribute('aria-controls') ?? '';
+        const panel = document.getElementById(id);
+        if (!panel) return;
+        const open = btn.getAttribute('aria-expanded') !== 'true';
+        settle();
+        btn.setAttribute('aria-expanded', String(open));
+        panel.hidden = !open;
+        const rest = openSets().filter((s) => s !== id);
+        saveOpenSets(open ? [...rest, id] : rest);
+        ScrollTrigger.refresh();
+      };
+      const restored = openSets();
+      toggles.forEach((btn) => {
+        const id = btn.getAttribute('aria-controls') ?? '';
+        const panel = document.getElementById(id);
+        if (!panel) return;
+        const open = restored.includes(id);
+        btn.hidden = false;
+        btn.setAttribute('aria-expanded', String(open));
+        panel.hidden = !open;
+        btn.addEventListener('click', onToggle);
+      });
+
+      /* Showing the filter bar, and the other setups that run after this
+         one (on phones a block above the list grows by about 100px), move
+         everything after the router has already scrolled, and the browser's
+         scroll anchoring then carries the page along with the shift. Once
+         every setup has run the layout is the one that was left, so the
+         saved position is put back on the next frame, before it paints.
+         Lenis has to be told too, or its next frame drags the page back. */
+      const savedY = history.state?.scrollY;
+      let restoreFrame = 0;
+      if (typeof savedY === 'number' && savedY > 0) {
+        restoreFrame = requestAnimationFrame(() => {
+          if (Math.abs(window.scrollY - savedY) <= 1) return;
+          window.scrollTo(window.scrollX, savedY);
+          motion.lenis?.resize();
+          motion.lenis?.scrollTo(savedY, { immediate: true, force: true });
+        });
+      }
+
+      const matches = (el: HTMLElement, f: string) => f === 'all' || (el.dataset.tags ?? '').split(' ').includes(f);
+
+      const apply = (f: string) => {
+        let shown = 0;
+        rows.forEach((row) => {
+          if (row.hasAttribute('data-child')) return;
+          const kids = Array.from(row.querySelectorAll<HTMLElement>('[data-child]'));
+          let anyKid = false;
+          kids.forEach((k) => {
+            const on = matches(k, f);
+            k.hidden = !on;
+            if (on) {
+              anyKid = true;
+              shown += 1;
+            }
+          });
+          const self = matches(row, f);
+          row.hidden = !(self || anyKid);
+          if (self) shown += Number(row.dataset.projectCount ?? 1);
+        });
+        groups.forEach((g) => {
+          g.hidden = !g.querySelector('[data-row]:not([hidden])');
+        });
+        if (status) status.textContent = `Showing ${shown} ${shown === 1 ? 'project' : 'projects'}.`;
+      };
+
+      const onClick = (event: Event) => {
+        const btn = (event.currentTarget as HTMLButtonElement);
+        if (btn.getAttribute('aria-pressed') === 'true') return;
+        buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+        const f = btn.dataset.filter ?? 'all';
+        saveFilter(f);
+
+        if (prefersReducedMotion()) {
+          apply(f);
+          ScrollTrigger.refresh();
+          return;
+        }
+
+        tl?.progress(1);
+        const targets = [...rows, ...groups];
+        const state = Flip.getState(targets);
+        /* Leaving rows go absolute, so without this the list would drop to
+           its new height at once and the footer would jump up over them.
+           The list eases between the two heights instead. */
+        const h0 = list.offsetHeight;
+        apply(f);
+        const h1 = list.offsetHeight;
+        rows.forEach((r) => r.classList.add('is-revealed'));
+        tl = Flip.from(state, {
+          targets,
+          duration: duration.base,
+          ease: ease.outStrata,
+          absolute: true,
+          nested: true,
+          prune: true,
+          onEnter: (els) => gsap.fromTo(els, { opacity: 0, y: 32 }, { opacity: 1, y: 0, duration: duration.base, ease: ease.outSoft, stagger: 0.04 }),
+          onLeave: (els) => gsap.to(els, { opacity: 0, duration: duration.fast, ease: ease.outSoft }),
+          onComplete: () => {
+            gsap.set(targets, { clearProps: 'opacity,transform' });
+            gsap.set(list, { clearProps: 'height,overflow' });
+            ScrollTrigger.refresh();
+          },
+        });
+        /* The height tween sits inside the Flip timeline, so the timeline's
+           onComplete runs after it and the inline height is always cleared.
+           A separate tween started in onStart could finish after onComplete
+           and leave the list frozen at h1, so opening the concepts later
+           ran the list under the footer. */
+        tl.fromTo(list, { height: h0, overflow: 'clip' }, { height: h1, duration: duration.base, ease: ease.outStrata }, 0);
+      };
+      /* Finish a running filter animation (which clears the list's inline
+         height) before a disclosure changes the list's height. */
+      const settle = () => {
+        tl?.progress(1);
+        gsap.set(list, { clearProps: 'height,overflow' });
+      };
+
+      /* The chosen filter rides on the history entry too, so Back to /work/
+         comes back filtered the way it was left. Applied at once, before
+         the saved scroll position is put back on the next frame. */
+      const savedFilter = history.state?.filter;
+      if (typeof savedFilter === 'string' && savedFilter !== 'all') {
+        const btn = buttons.find((b) => b.dataset.filter === savedFilter);
+        if (btn) {
+          buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+          apply(savedFilter);
+        }
+      }
+
+      buttons.forEach((b) => b.addEventListener('click', onClick));
+      return () => {
+        cancelAnimationFrame(restoreFrame);
+        tl?.kill();
+        gsap.killTweensOf(list);
+        gsap.set(list, { clearProps: 'height,overflow' });
+        buttons.forEach((b) => b.removeEventListener('click', onClick));
+        toggles.forEach((b) => b.removeEventListener('click', onToggle));
+      };
+    },
+    { reduced: true },
+  );
+
+  /*
+    Hover preview: desktop pointer, motion allowed. One frame follows the
+    cursor (quickTo, so it trails slightly) and swaps to the row under it.
+  */
+  registerMotion(() => {
+    const root = document.querySelector<HTMLElement>('[data-projects]');
+    const list = root?.querySelector<HTMLElement>('[data-projects-list]');
+    const frame = root?.querySelector<HTMLElement>('[data-pcursor-frame]');
+    const wrap = root?.querySelector<HTMLElement>('[data-pcursor]');
+    if (!root || !list || !frame || !wrap) return;
+
+    const mq = matchMedia('(hover: hover) and (pointer: fine) and (min-width: 64rem)');
+    const { gsap } = motion;
+    const items = new Map(
+      Array.from(root.querySelectorAll<HTMLElement>('[data-pcursor-item]')).map((el) => [el.dataset.pcursorItem, el]),
+    );
+
+    let on = false;
+    let active: HTMLElement | undefined;
+    let visible = false;
+    const qx = gsap.quickTo(wrap, 'x', { duration: duration.slow, ease: ease.outSoft });
+    const qy = gsap.quickTo(wrap, 'y', { duration: duration.slow, ease: ease.outSoft });
+
+    const place = (e: PointerEvent) => {
+      const w = frame.offsetWidth;
+      const h = frame.offsetHeight;
+      /* Right of the cursor, but never over the line and role · stack: the
+         frame stops at the text column (column 8) and slides left of the
+         cursor rather than cover it. */
+      const text = (e.target as Element).closest('[data-prow]')?.querySelector<HTMLElement>('.prow__text');
+      const limit = (text ? text.getBoundingClientRect().left : innerWidth) - 24;
+      let x = Math.min(e.clientX + 32, limit - w);
+      if (x < 16) x = 16;
+      const y = Math.min(Math.max(e.clientY - h * 0.6, 16), innerHeight - h - 16);
+      return { x, y };
+    };
+
+    const show = (id: string | undefined) => {
+      const next = id ? items.get(id) : undefined;
+      if (next === active) return;
+      active?.classList.remove('is-active');
+      active = next;
+      active?.classList.add('is-active');
+      if (active && !visible) {
+        visible = true;
+        gsap.to(frame, { opacity: 1, scale: 1, duration: duration.snap, ease: ease.snap, overwrite: 'auto' });
+      } else if (!active && visible) {
+        visible = false;
+        gsap.to(frame, { opacity: 0, scale: 0.85, duration: duration.fast, ease: ease.outSoft, overwrite: 'auto' });
+      } else if (active) {
+        gsap.fromTo(active, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: duration.snap, ease: ease.outStrata });
+      }
+    };
+
+    let first = true;
+    const move = (e: PointerEvent) => {
+      const { x, y } = place(e);
+      if (first) {
+        gsap.set(wrap, { x, y });
+        first = false;
+      }
+      qx(x);
+      qy(y);
+      const row = (e.target as Element).closest<HTMLElement>('[data-prow]');
+      show(row?.dataset.prow);
+    };
+    const leave = () => {
+      first = true;
+      show(undefined);
+    };
+
+    const enable = () => {
+      if (on || !mq.matches) return;
+      on = true;
+      root.setAttribute('data-preview', '');
+      list.addEventListener('pointermove', move);
+      list.addEventListener('pointerleave', leave);
+    };
+    const disable = () => {
+      if (!on) return;
+      on = false;
+      root.removeAttribute('data-preview');
+      list.removeEventListener('pointermove', move);
+      list.removeEventListener('pointerleave', leave);
+      leave();
+    };
+    const onChange = () => (mq.matches ? enable() : disable());
+
+    enable();
+    mq.addEventListener('change', onChange);
+    return () => {
+      mq.removeEventListener('change', onChange);
+      disable();
+      gsap.killTweensOf([wrap, frame]);
+    };
+  });
+</script>

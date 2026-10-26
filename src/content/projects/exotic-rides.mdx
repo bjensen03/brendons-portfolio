@@ -1,0 +1,57 @@
+---
+# CONFIRM BEFORE SHIPPING: the year, and that this was self-directed rather
+# than coursework. See the note on the Feit entry.
+#
+# Moved from a card to a concept: it's the sixth entry in
+# the Design concepts group on /work/ and has its own concept page. The words
+# are the ones this file already had; nothing about the process is added.
+#
+# images/exotic-rides/iphone-14-15-pro-settings.webp is NOT this project: it's
+# a phone settings screen (location management, message centre, devices) with
+# no ExoticRides branding. It's left out of the gallery.
+
+title: ExoticRides
+client: Self-directed
+year: 2026
+
+disciplines: ['design', 'development']
+
+role: ['UI design', 'Front-end build']
+
+depth: concept
+
+outcome: >
+  A luxury sports car marketplace concept — browsing, comparing and configuring
+  high-performance vehicles.
+
+summary: >
+  A self-directed concept for a luxury automotive marketplace, built to explore
+  how a high-consideration purchase should be presented: photography-led
+  browsing, side-by-side specification comparison, and an enquiry path suited to
+  buyers who research for months rather than checkout in minutes.
+
+cover: ./images/exotic-rides/exotic-rides-2.webp
+coverAlt: The ExoticRides collection page on a laptop, with the "Exclusive Cars Collection" header, category buttons, a filter panel and a grid of cars with prices.
+
+stack: ['HTML', 'CSS', 'JavaScript']
+
+# Self-directed, so no client sign-off is needed.
+clientApproved: true
+
+featured: false
+order: 16
+---
+
+import collection from './images/exotic-rides/group-1.webp';
+import model from './images/exotic-rides/group-2.webp';
+import order from './images/exotic-rides/group-3.webp';
+
+<Gallery
+  label="The screens"
+  size="document"
+  items={[
+    { src: collection, alt: 'The full collection page: an "Exclusive Cars Collection" header, category buttons, a filter panel for vehicle type, color, horsepower, engine type and origin, a grid of nine cars with prices, a "top picks" carousel and the footer.', caption: 'Collection' },
+    { src: model, alt: 'A model page for a red convertible: photo, rating, description, Customize and View details buttons, quantity and price, Buy now, then an "Explore similar" row of four cars.', caption: 'Model page' },
+    { src: order, alt: 'An order summary dialog over a model page, listing a custom dashboard and leather seats with prices, the total, a terms checkbox and Proceed to Payment.', caption: 'Order summary' },
+  ]}
+/>

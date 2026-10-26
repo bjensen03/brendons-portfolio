@@ -1,15 +1,715 @@
 ---
+import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
-import Section from '../../components/Section.astro';
+import ExternalLink from '../../components/ExternalLink.astro';
+import { textLink } from '../../components/home/data';
+import { RESUME } from '../../components/footer/links';
+import Testimonials from '../../components/home/Testimonials.astro';
+import { SPACE_EM, longestWordEm, wordEm } from '../../lib/display-fit';
 
-/* Placeholder route. Real content is Phase 4 — this exists so the nav
-   resolves and client-side transitions can be exercised against the shell. */
+import portrait from '../../assets/about/portrait.webp';
+import outA from '../../content/projects/images/twilight-trekkers/img-1444.webp';
+import outB from '../../content/projects/images/twilight-trekkers/img-2503-2.webp';
+import outC from '../../content/projects/images/twilight-trekkers/img-5019-1.webp';
+
+/*
+  About.
+
+  Built around one observation rather than a biography: three unrelated projects
+  turned on the same instinct, and that instinct is the most useful thing anyone
+  could know before hiring me. Everything else on the page supports it.
+
+  Nothing here is inferred, and the old marketing copy from the Twilight
+  Trekkers site ("traded a 9-to-5 for sunrise hikes" and similar) is
+  deliberately not used: it was written for a brand site, not about me.
+
+  Restyled to match the rest of the site. The previous version predated the
+  current type system and carried all of what it replaced: small-caps eyebrow
+  labels over every section, uppercase display headings, and disciplines in a
+  grid of bordered boxes. The labels felt tacky, and a
+  bordered-card grid is the single most generic layout available — the content
+  was strong enough that the packaging was the only thing letting it down.
+
+  Second pass (October): onto the current type system, the same one the
+  homepage, /work/ and the case studies use. Archivo display steps for the
+  page title and section headings, Geist at text-lead / text-body for
+  everything you read, copy held to max-w-measure on the 12-column grid
+  inside container-bleed. No mono labels and no tan type: tan only shows up
+  as fills (the rule over each discipline, the bar under "data.", the quote
+  bar on each diagnosis, the button).
+*/
+
+const DISCIPLINES = [
+  {
+    name: 'Development',
+    line: 'The part I get hired for.',
+    body: 'Custom WordPress themes on ACF rather than page builders, Astro for static sites, and whatever a project already runs on. I inherit a lot of other people’s code and I try to leave it better than the last person did.',
+  },
+  {
+    name: 'Automation',
+    line: 'The part almost nobody asks for and everybody needs.',
+    body: 'Form-driven approval workflows, lead routing, Zapier pipelines that survive contact with real submissions. Low-code where low-code works, and real code exactly where it stops working.',
+  },
+  {
+    name: 'Marketing',
+    line: 'Why the site exists in the first place.',
+    body: 'Most of my work is for marketing teams, so the brief usually arrives as a number rather than a page. My favorite version of this job is making a marketing team stop needing me for small things.',
+  },
+  {
+    name: 'Design',
+    line: 'Enough to take a handoff properly, or to do it myself.',
+    body: 'I work from Figma and can carry a design the last mile without losing what made it good. When there isn’t a designer, I’m the one who decides what it looks like.',
+  },
+];
+
+/* Each is a real diagnosis from a real project, kept to the shape that makes
+   the point: what it looked like, what it actually was. The full accounts are
+   in the case studies (each one's hard problem). Order: Rally, ALL IN,
+   PROLOOK. */
+const DIAGNOSES = [
+  {
+    project: 'Rally Trailer Manufacturing',
+    looked: 'Dealer portal changes that wouldn’t stay saved — trailers vanishing from a lot, lead statuses reverting to New — and I couldn’t reproduce it.',
+    was: 'The host’s LiteSpeed cache was serving logged-in users cached portal pages with old security tokens, so WordPress correctly rejected their saves with a 403. The save code was fine.',
+    tell: 'It worked every time for me. My admin session kept getting a freshly generated page; the people using the portal were getting cached ones.',
+  },
+  {
+    project: 'ALL IN Tournament',
+    looked: 'Right after I shipped a fix for the Shop link, opening Shop in a new tab or reloading it sent people back to the homepage. Clicking Shop from the homepage still worked.',
+    was: 'The Shop page checked a value that only the homepage set, and it lived in server state shared between visitors, so once anyone loaded the homepage the check passed. It now uses the flag the server loads for every request.',
+    tell: 'Every test passed on my machine. It only failed on a fresh production build that never opened the homepage first.',
+  },
+  {
+    project: 'PROLOOK',
+    looked: 'A fix that worked locally and refused to appear in production.',
+    was: 'Blade compiles templates to PHP and caches them by source path. The host was executing a stale compiled copy no cache tool could reach. Giving the section a new path forced a fresh compile.',
+    tell: 'The deployed file and the local file were identical, byte for byte. Correct source, wrong output.',
+  },
+];
+
+/*
+  Education and certifications.
+
+  Every field except the subject itself is optional, and anything missing is
+  simply not rendered. That is deliberate: these are the facts on a portfolio
+  that actually get verified, so an absent institution is fine and a guessed one
+  is not.
+
+  From my résumé (2026-10-25): B.S. in University Studies, Utah
+  Valley University, minors Digital Media and Criminal Justice; Web Designer
+  and Web Developer certificates from UVU, 2022; HubSpot and Meltwater, 2026.
+  Still open: the year on the Lincoln Academy award.
+
+  Digital Media leads the minors because it is the one that bears on the work.
+  Criminal Justice stays: an unusual route is only a liability if it looks like
+  it is being hidden.
+*/
+const DEGREES: Array<{
+  award?: string;
+  field: string;
+  school?: string;
+  year?: string;
+  minors?: string[];
+}> = [
+  {
+    award: 'B.S.',
+    field: 'University Studies',
+    school: 'Utah Valley University',
+    minors: ['Digital Media', 'Criminal Justice'],
+  },
+];
+
+const CERTS: Array<{ name: string; issuer?: string; detail?: string; year?: string; url?: string }> = [
+  { name: 'Web Designer', issuer: 'Utah Valley University', year: '2022' },
+  { name: 'Web Developer', issuer: 'Utah Valley University', detail: 'HTML, CSS, JavaScript', year: '2022' },
+  { name: 'Social Media Certified', issuer: 'HubSpot Academy', year: '2026' },
+  /* The no-break space keeps "Marketing 1" on one line. */
+  { name: 'Influencer Marketing\u00a01, Industry Specialist', issuer: 'Meltwater Academy', detail: 'Certificate of Achievement', year: '2026' },
+];
+
+/*
+  Kept separate from the certificates above on purpose. Those are coursework;
+  this is a client saying the work was good, which is a different kind of
+  evidence and the stronger of the two to anyone hiring.
+
+  The date is day and month only; the year isn't on record, and it isn't
+  guessed.
+*/
+const RECOGNITION: Array<{ name: string; issuer: string; date?: string }> = [
+  { name: 'Certificate of Excellence', issuer: 'Lincoln Academy', date: '18 May' },
+];
+
+/*
+  These belong here, which was not the first answer.
+
+  Judged as "web certificates" they are irrelevant and the instinct is to leave
+  them off. Judged against what this site actually is, they are the opposite:
+  the hero is a topographic field with a hiker walking it, the Twilight section
+  is canyoneering photography, and the whole identity rests on an outdoor life.
+  Without these that identity is decoration. With them it is training — and for
+  an outdoor company specifically, this is domain knowledge, not a hobby.
+
+  Kept out of the coursework list above because they are not that, and directly
+  after the Twilight section because that is what they are evidence for.
+*/
+const OUTDOOR: Array<{ name: string; issuer: string; year?: string }> = [
+  { name: 'Canyoneering 1 and 2', issuer: 'American Canyoneering Association' },
+  { name: 'Canyoneering Level 1 and 2', issuer: 'V7 Academy' },
+];
+
+const hasCredentials =
+  DEGREES.length > 0 || CERTS.length > 0 || RECOGNITION.length > 0 || OUTDOOR.length > 0;
+
+const OUT = [
+  { src: outA, alt: 'A slot canyon narrowing overhead in southern Utah.' },
+  { src: outB, alt: 'A lake below snow-covered peaks at first light.' },
+  { src: outC, alt: 'A hiker on a ridge above a desert valley.' },
+];
+
+/* The title is set in two lines from 768 up, sized so the longer line runs
+   margin to margin (its width in em, from the advance table). Phones drop
+   the break and size by the longest word instead. */
+const lineEm = (line: string) => {
+  const words = line.split(/\s+/).filter(Boolean);
+  return words.reduce((sum, w) => sum + wordEm(w), 0) + SPACE_EM * (words.length - 1);
+};
+const fitLines = (...lines: string[]) => Math.max(...lines.map(lineEm)).toFixed(3);
+const titleLineFit = fitLines('I go and read', 'the actual data.');
+const titleWordFit = longestWordEm('I go and read the actual data.');
 ---
 
-<Base title="About">
-  <Section width="measure">
-    <p class="text-2xs tracking-widest text-accent uppercase">Phase 4</p>
-    <h1 class="mt-6 font-display text-3xl tracking-tightest md:text-4xl" data-split>About</h1>
-    <p class="mt-6 text-lg text-fg-muted">The human page, with real canyon and drone media, is Phase 4.</p>
-  </Section>
+
+<Base
+  title="About"
+  description="Brendon Jensen — web developer, designer and marketer in Utah. Development, automation, marketing and design for businesses that need their site to actually work."
+>
+  <section class="ab-open" aria-labelledby="about-title">
+    <div class="container-bleed">
+      <h1
+        id="about-title"
+        class="ab-title text-mega text-fg"
+        data-split="lines"
+        style={`--line-fit: ${titleLineFit}; --word-fit: ${titleWordFit}`}
+      >
+        I go and read <br />the actual <em>data.</em>
+      </h1>
+
+      <div class="ab-grid ab-intro mt-block" data-reveal-group>
+        <div class="ab-intro__portrait" data-reveal>
+          <Image
+            src={portrait}
+            alt="Brendon Jensen standing in a field below Mt. Timpanogos in the fall."
+            widths={[400, 640, 900, 1128]}
+            sizes="(min-width: 64rem) 32vw, (min-width: 48rem) 30vw, 90vw"
+            loading="eager"
+          />
+        </div>
+        <p class="ab-intro__lead max-w-measure text-lead text-fg" data-reveal>
+          I'm Brendon Jensen, a web developer in Utah. I build the site and the
+          machine behind it — the theme, the forms, the automations that move a
+          submission somewhere useful, and the marketing pages a team can change
+          without asking anyone.
+        </p>
+        <p class="ab-intro__body max-w-measure text-body text-fg-muted" data-reveal>
+          Most of what I work on already exists and is already broken in some
+          specific way. That suits me. The interesting part of this job has never
+          been the greenfield build — it's working out why something that should
+          work doesn't.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {/* The centre of the page. Three unrelated stacks, one instinct. */}
+  <section class="ab-sec bg-surface-sunken" aria-labelledby="diag-title">
+    <div class="container-bleed">
+      <div class="ab-grid">
+        <h2 id="diag-title" class="ab-h2 ab-fit text-heading text-fg" data-split style={`--fit: ${longestWordEm('Not what it seemed.')}`}>Not what<br />it seemed.</h2>
+        <p class="ab-side max-w-measure text-lead text-fg-muted" data-reveal>
+          Three separate projects, three unrelated stacks, and the same shape every
+          time: the obvious explanation was wrong, and the real cause only showed up
+          once I stopped trusting it and went looking.
+        </p>
+      </div>
+
+      <ol class="ab-cases mt-block">
+        {
+          DIAGNOSES.map((item, i) => (
+            <li class="ab-case ab-grid" data-reveal>
+              <div class="ab-case__head">
+                <span class="text-small text-fg-muted tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+                <h3 class="text-title text-fg">{item.project}</h3>
+              </div>
+              <div class="ab-case__looked">
+                <h4 class="text-small text-fg-muted">What it looked like</h4>
+                <p class="mt-3 max-w-measure text-lead text-fg">{item.looked}</p>
+                <p class="ab-case__tell mt-stack max-w-measure text-body text-fg-muted">{item.tell}</p>
+              </div>
+              <div class="ab-case__was">
+                <h4 class="text-small text-fg-muted">What it actually was</h4>
+                <p class="mt-3 max-w-measure text-body text-fg">{item.was}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+
+      <div class="ab-grid mt-block">
+        <p class="ab-side max-w-measure text-lead text-fg" data-reveal>
+          None of those were solved by knowing a framework. They were solved by
+          refusing the first explanation and going to look at the evidence — the
+          network requests and response headers, a byte-for-byte diff, a fresh
+          production build that never opened the homepage. That's the part I'd want someone to
+          hire me for, and it's the part that transfers to a stack I haven't met yet.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="ab-sec" aria-labelledby="do-title">
+    <div class="container-bleed">
+      <h2 id="do-title" class="ab-fit text-heading text-fg" data-split style={`--fit: ${longestWordEm('What I do.')}`}>What I do.</h2>
+      <ul class="ab-do mt-block">
+        {
+          DISCIPLINES.map((item) => (
+            <li class="ab-do__row ab-grid" data-reveal>
+              <h3 class="ab-do__name ab-fit text-heading text-fg" style={`--fit: ${longestWordEm(item.name)}`}>
+                {item.name}
+              </h3>
+              <div class="ab-do__text">
+                <p class="max-w-measure text-lead text-fg">{item.line}</p>
+                <p class="mt-3 max-w-measure text-body text-fg-muted">{item.body}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="ab-sec bg-surface-sunken" aria-labelledby="out-title">
+    <div class="container-bleed">
+      <h2 id="out-title" class="ab-fit text-heading text-fg" data-split style={`--fit: ${longestWordEm('Half of The Twilight Trekkers.')}`}>Half of<br />The Twilight Trekkers.</h2>
+
+      <div class="ab-grid mt-block" data-reveal-group>
+        <p class="ab-open__lead max-w-measure text-lead text-fg" data-reveal>
+          My wife Kaylee and I started The Twilight Trekkers in 2021. It's an
+          outdoor photography and travel brand with 26k followers on Instagram.
+          She's our photographer. I write the blog, build and run the website and
+          its SEO, fly and edit the drone videos, shoot some of the photos and
+          videos, and do most of the route planning and logistics.
+        </p>
+        <div class="ab-open__body" data-reveal>
+          <p class="max-w-measure text-body text-fg-muted">
+            Half Dome, the Narrows, Ribbon Falls, the Grand Canyon, North Cascades,
+            Olympic, canyoneering in southern Utah. Shot on a Canon&nbsp;M200, a
+            DJI&nbsp;Mini&nbsp;3&nbsp;Pro, a GoPro and an Insta360.
+          </p>
+          <p class="mt-[1em] max-w-measure text-body text-fg-muted">
+            It isn't a side project I keep quiet about. It's where I learned SEO
+            properly, where I found out what a content model has to survive, and
+            where I get to be the client for once — which has made me a
+            considerably better one to work with.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <ul class="ab-frames mt-block" data-reveal data-lenis-prevent-horizontal>
+      {
+        OUT.map((shot) => (
+          <li>
+            <Image src={shot.src} alt={shot.alt} widths={[520, 900, 1300]} sizes="(min-width: 64rem) 32vw, 82vw" />
+          </li>
+        ))
+      }
+    </ul>
+
+    {/* Kaylee's LinkedIn recommendation. */}
+    <div class="container-bleed mt-block"><Testimonials variant="single" /></div>
+  </section>
+
+  {
+    hasCredentials && (
+      <section class="ab-sec" aria-labelledby="cred-title">
+        <div class="container-bleed ab-grid">
+          <h2 id="cred-title" class="ab-h2 ab-sticky ab-fit text-heading text-fg" data-split style={`--fit: ${longestWordEm('Education and certifications.')}`}>Education and<br />certifications.</h2>
+
+          <div class="ab-side">
+            <p class="mb-stack text-body" data-reveal>
+              <ExternalLink href={RESUME} newTab class={textLink}>Résumé (PDF)</ExternalLink>
+            </p>
+            {DEGREES.length > 0 && (
+              <ul class="ab-cred" data-reveal>
+                {DEGREES.map((d) => (
+                  <li>
+                    <div>
+                      <h3 class="text-lead font-semibold text-fg">{d.award ? `${d.award} in ${d.field}` : d.field}</h3>
+                      {d.minors && d.minors.length > 0 && (
+                        <p class="mt-1 text-body text-fg-muted">
+                          {d.minors.length > 1 ? 'Minors' : 'Minor'} in{' '}
+                          {d.minors.join(' and ')}
+                        </p>
+                      )}
+                    </div>
+                    {(d.school || d.year) && (
+                      <p class="text-body text-fg-muted">
+                        {d.school}
+                        {d.school && d.year ? ' · ' : ''}
+                        {d.year}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {CERTS.length > 0 && (
+              <div class="ab-cred__group" data-reveal>
+                <p class="text-small text-fg-muted">Certificates</p>
+                <ul class="ab-cred">
+                  {CERTS.map((c) => (
+                    <li>
+                      <div>
+                        <h3 class="text-lead font-semibold text-fg">
+                          {c.url ? <ExternalLink href={c.url} class={textLink}>{c.name}</ExternalLink> : c.name}
+                        </h3>
+                        {c.detail && <p class="mt-1 text-body text-fg-muted">{c.detail}</p>}
+                      </div>
+                      {(c.issuer || c.year) && (
+                        <p class="text-body text-fg-muted">
+                          {c.issuer}
+                          {c.issuer && c.year ? ' · ' : ''}
+                          {c.year}
+                        </p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {OUTDOOR.length > 0 && (
+              <div class="ab-cred__group" data-reveal>
+                <p class="text-small text-fg-muted">Canyoneering</p>
+                <ul class="ab-cred">
+                  {OUTDOOR.map((c) => (
+                    <li>
+                      <div>
+                        <h3 class="text-lead font-semibold text-fg">{c.name}</h3>
+                      </div>
+                      <p class="text-body text-fg-muted">
+                        {c.issuer}
+                        {c.year ? ` · ${c.year}` : ''}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {RECOGNITION.length > 0 && (
+              <div class="ab-cred__group" data-reveal>
+                <p class="text-small text-fg-muted">Recognition</p>
+                <ul class="ab-cred">
+                  {RECOGNITION.map((r) => (
+                    <li>
+                      <div>
+                        <h3 class="text-lead font-semibold text-fg">{r.name}</h3>
+                      </div>
+                      <p class="text-body text-fg-muted">
+                        {r.issuer}
+                        {r.date ? ` · ${r.date}` : ''}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {/* No closing contact band of its own: the site footer is the contact
+      block on every page (email, Copy email, profiles, and Contact for the
+      form), so a second one here ran straight into it. */}
 </Base>
+
+<style>
+  /* Rhythm, the same as the homepage: a full section of air round every
+     block, the page title starting a block under the bar like /work/. */
+  .ab-open {
+    padding-top: var(--spacing-block);
+    padding-bottom: var(--spacing-section);
+  }
+
+  .ab-sec {
+    padding-block: var(--spacing-section);
+  }
+
+  /* Display headings never break a word: at most the heading step, and
+     small enough that the longest word (--fit, its width in em) fits the
+     column. On phones fitHeadings (mobile-motion.ts) may then grow the h2s
+     back up to fill it. */
+  .ab-fit {
+    font-size: min(var(--text-heading), calc((100vw - 2 * var(--grid-margin)) / (var(--fit) * 1.04)));
+    overflow-wrap: normal;
+  }
+
+  /* The 12-column grid inside container-bleed (4 / 6 / 12). */
+  .ab-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+    row-gap: var(--spacing-stack);
+  }
+
+  .ab-grid > :global(*) {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  /* Page title. Phones: no forced break, the longest word ("ACTUAL") fills
+     the column, up to the case-study title's phone size. From 768 the two
+     lines come back and the longer one runs margin to margin. */
+  .ab-title {
+    font-size: min(4.5rem, calc((100vw - 2 * var(--grid-margin)) / (var(--word-fit) * 1.04)));
+    overflow-wrap: normal;
+  }
+
+  .ab-title br {
+    display: none;
+  }
+
+  /* Intro portrait. Phones: under the title, ahead of the copy. From 768
+     it sits to the right of the two opening paragraphs. */
+  .ab-intro__portrait {
+    max-width: 28rem;
+  }
+  .ab-intro__portrait img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: 50% 30%;
+    border-radius: var(--radius-media);
+    background: var(--color-surface-raised);
+  }
+  .ab-intro__lead {
+    margin-top: var(--spacing-stack);
+  }
+
+  @media (min-width: 48rem) {
+    .ab-intro__portrait {
+      max-width: none;
+      grid-column: 5 / -1;
+      grid-row: 1 / span 3;
+      align-self: start;
+    }
+    .ab-intro__lead {
+      margin-top: 0;
+      grid-column: 1 / span 4;
+      grid-row: 1;
+    }
+    .ab-intro__body {
+      grid-column: 1 / span 4;
+      grid-row: 2;
+    }
+  }
+  @media (min-width: 64rem) {
+    .ab-intro__portrait {
+      grid-column: 9 / -1;
+    }
+    .ab-intro__lead,
+    .ab-intro__body {
+      grid-column: 1 / span 6;
+    }
+  }
+
+  /* The accent as a fill: a bar under the last word, never its colour. */
+  .ab-title em {
+    font-style: normal;
+    padding-bottom: 0.04em;
+    background: linear-gradient(var(--color-accent-fill), var(--color-accent-fill)) 0 100% / 100% 0.09em no-repeat;
+  }
+
+  @media (min-width: 48rem) {
+    .ab-title {
+      font-size: min(var(--text-mega), calc((100vw - 2 * var(--grid-margin)) / (var(--line-fit) * 1.03)));
+    }
+    .ab-title br {
+      display: inline;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .ab-open__lead {
+      grid-column: 1 / span 6;
+    }
+    .ab-open__body {
+      grid-column: 8 / -1;
+    }
+    /* Heading left, its lead-in from column 7 — the case-study split. */
+    .ab-h2 {
+      grid-column: 1 / span 5;
+    }
+    .ab-side {
+      grid-column: 7 / -1;
+    }
+    .ab-sticky {
+      align-self: start;
+      position: sticky;
+      top: calc(var(--spacing-nav) + 1.5rem);
+    }
+  }
+
+  /* The three diagnoses: full-width ruled rows. Project, then what it
+     looked like, then what it was, side by side from 1024 so the contrast
+     between the two reads across the row. */
+  .ab-cases {
+    list-style: none;
+    padding: 0;
+    border-bottom: 1px solid var(--color-edge);
+  }
+
+  .ab-case {
+    padding-block: var(--spacing-block);
+    border-top: 1px solid var(--color-edge);
+  }
+
+  .ab-case__head {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+  }
+
+  /* The "tell" — the clue that cracked it — under a tan bar. */
+  .ab-case__tell {
+    padding-left: 1rem;
+    border-left: 3px solid var(--color-accent-fill);
+  }
+
+  @media (min-width: 48rem) {
+    .ab-case__looked {
+      grid-column: 1 / span 3;
+    }
+    .ab-case__was {
+      grid-column: 4 / -1;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .ab-case__head {
+      grid-column: 1 / span 3;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .ab-case__looked {
+      grid-column: 4 / span 5;
+    }
+    .ab-case__was {
+      grid-column: 9 / -1;
+    }
+  }
+
+  /* What I do: one discipline per row, the name in display type, a tan rule
+     over each (a fill). .ab-fit keeps "DEVELOPMENT" whole on a phone. */
+  .ab-do {
+    list-style: none;
+    padding: 0;
+  }
+
+  .ab-do__row {
+    position: relative;
+    padding-block: var(--spacing-stack) var(--spacing-block);
+  }
+
+  .ab-do__row::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background: var(--color-accent-fill);
+  }
+
+
+  @media (min-width: 64rem) {
+    .ab-do__name {
+      grid-column: 1 / span 6;
+    }
+    .ab-do__text {
+      grid-column: 7 / -1;
+    }
+  }
+
+  /* His own frames, edge to edge, swipeable. */
+  .ab-frames {
+    display: flex;
+    gap: var(--grid-gutter);
+    list-style: none;
+    padding-inline: var(--grid-margin);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--grid-margin);
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+
+  .ab-frames::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ab-frames li {
+    flex: 0 0 auto;
+    width: min(82vw, 30rem);
+    scroll-snap-align: start;
+  }
+
+  @media (min-width: 64rem) {
+    .ab-frames li {
+      width: calc((100vw - 2 * var(--grid-margin) - 2 * var(--grid-gutter)) / 3);
+    }
+  }
+
+  .ab-frames img {
+    display: block;
+    width: 100%;
+    height: clamp(20rem, 34vw, 34rem);
+    object-fit: cover;
+    border-radius: var(--radius-media);
+    background: var(--color-surface-raised);
+  }
+
+  /* Credentials: ruled rows, the award on the left, the institution on the
+     right. Quiet on purpose — this section exists to be checked. */
+  .ab-cred {
+    list-style: none;
+    padding: 0;
+    border-top: 1px solid var(--color-edge-strong);
+  }
+
+  .ab-cred li {
+    display: grid;
+    gap: 0.35rem var(--grid-gutter);
+    padding-block: 1.5rem;
+    border-bottom: 1px solid var(--color-edge);
+  }
+
+  @media (min-width: 48rem) {
+    .ab-cred li {
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      align-items: baseline;
+    }
+  }
+
+  .ab-cred__group {
+    margin-top: var(--spacing-block);
+  }
+
+  .ab-cred__group > p {
+    margin-bottom: 0.75rem;
+  }
+</style>

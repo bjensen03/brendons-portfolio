@@ -1,7 +1,6 @@
 # Case studies
 
-One `.mdx` file per project. Start from `docs/case-study-template.mdx`, which
-documents every field. The schema in `src/content.config.ts` is the authority —
+One `.mdx` file per project. The schema in `src/content.config.ts` is the authority —
 it will tell you exactly what's missing.
 
 Images go in `src/content/projects/images/` and are referenced relatively, so

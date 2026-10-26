@@ -1,0 +1,74 @@
+---
+# CONFIRM BEFORE SHIPPING: the year, and that this was self-directed rather
+# than coursework. See the note on the Feit entry.
+
+title: A trail app for Zion that answers the question before the hike
+client: Self-directed
+year: 2026
+
+disciplines: ['design']
+
+role: ['Product design', 'UI design', 'Content design']
+
+depth: concept
+
+outcome: >
+  A national-park trail app built around the details that decide whether you
+  can do a hike at all — permit, elevation, water, flash-flood risk — rather
+  than around photographs of it.
+
+summary: >
+  A concept app for Zion National Park. Trail apps tend to lead with imagery
+  and bury the facts that actually gate a hike: whether it needs a permit,
+  how much elevation it gains, whether the route is in water, and what the
+  flash-flood forecast is. Angels Landing needs a lottery permit and the
+  Narrows is a river walk that closes on flow rate — neither is a detail you
+  want to discover at the trailhead. This set puts that information on the
+  trail overview and gives the park's own rules and conditions a screen of
+  their own.
+
+cover: ./images/ux-zion/zion-explorer-1.webp
+coverAlt: Phone screens from the Zion Explorer concept, showing the welcome screen and a trail overview.
+
+stack: ['Figma', 'iOS']
+
+order: 12
+---
+
+import welcome from './images/ux-zion/zion-explorer.webp';
+import signup from './images/ux-zion/sign-up-iphone.webp';
+import signin from './images/ux-zion/sign-in-iphone.webp';
+import home from './images/ux-zion/hme-screen.webp';
+import angels from './images/ux-zion/angels-landing.webp';
+import narrows from './images/ux-zion/the-narrows.webp';
+import info from './images/ux-zion/infomation-page.webp';
+
+## The idea
+
+The useful thing an app can tell you about Angels Landing is not what it looks
+like. It is that you need a lottery permit, that it gains 1,500 feet, and that
+the chains section is the part people turn around on.
+
+So the trail overview leads with distance, difficulty, elevation gain, duration
+and permit status — the five facts that decide whether the hike is happening —
+and the photograph supports them rather than replacing them. The Narrows gets
+the same treatment for a different reason: it is a walk up a river, it closes on
+cubic-feet-per-second, and that number is the whole planning decision.
+
+The information screen exists because national parks publish rules that matter
+— shuttle timetables, weather and flash-flood warnings, visitor services — and
+most trail apps make you leave for the park's own site to find them.
+
+<Gallery
+  label="The screens"
+  size="narrow"
+  items={[
+    { src: welcome, alt: 'The Zion Explorer welcome screen — discover Zion beauty on the go.', caption: 'Welcome' },
+    { src: signup, alt: 'Create account, with first name, last name, email and password.', caption: 'Create account' },
+    { src: signin, alt: 'Sign in screen.', caption: 'Sign in' },
+    { src: home, alt: 'The explore feed, listing Zion trails with photographs.', caption: 'Explore' },
+    { src: angels, alt: 'Angels Landing overview with distance, difficulty, elevation gain, duration, permit requirement, a map and tips for hikers.', caption: 'Angels Landing — permit required' },
+    { src: narrows, alt: 'The Narrows trail overview with its map and conditions.', caption: 'The Narrows' },
+    { src: info, alt: 'The park information page covering rules, weather and flash-flood warning, and visitor services.', caption: 'Park rules and conditions' },
+  ]}
+/>

@@ -1,0 +1,32 @@
+---
+import Base from '../layouts/Base.astro';
+import { primaryButton, textLink } from '../components/home/data';
+
+/*
+  404. Hosts serve dist/404.html for any unknown URL. Same type and spacing
+  as the other top-level pages: the Archivo display heading, one lead line,
+  and a way back. Kept out of search results.
+*/
+---
+
+<Base title="Page not found" description="There's no page at this address." noindex>
+  <section class="nf" aria-labelledby="nf-title">
+    <div class="container-bleed">
+      <h1 id="nf-title" class="text-display text-balance text-fg" data-split="lines">Page not found</h1>
+      <p class="mt-stack max-w-measure text-lead text-fg-muted" data-reveal>
+        There&rsquo;s nothing at this address. It may have moved, or the link has a typo.
+      </p>
+      <p class="mt-block flex flex-wrap items-center gap-x-8 gap-y-4" data-reveal>
+        <a href="/" class={primaryButton}>Home</a>
+        <a href="/work/" class={textLink}>Projects</a>
+      </p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .nf {
+    padding-top: var(--spacing-block);
+    padding-bottom: var(--spacing-section);
+  }
+</style>

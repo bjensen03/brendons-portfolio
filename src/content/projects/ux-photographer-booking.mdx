@@ -1,0 +1,68 @@
+---
+# CONFIRM BEFORE SHIPPING: the year, and that this was self-directed rather
+# than coursework. See the note on the Feit entry.
+
+title: Booking a photographer without the back-and-forth
+client: Self-directed
+year: 2026
+
+disciplines: ['design']
+
+role: ['Product design', 'UI design', 'Marketplace UX']
+
+depth: concept
+
+outcome: >
+  A two-sided booking concept for event photographers, built so the date, the
+  rate and the portfolio are settled in one flow instead of across a week of
+  messages.
+
+summary: >
+  A concept marketplace for booking photographers and videographers. Hiring one
+  is usually a chain of messages — are you free, what do you charge, can I see
+  work like mine — and every link is a chance to lose the booking. This set
+  puts availability, portfolio and rate on the same screens, and gives the
+  photographer a schedule view of what has been booked against them.
+
+cover: ./images/ux-photographer/capture-memories-1.webp
+coverAlt: Phone screens from the photographer booking concept, showing the portfolio and booking views.
+
+stack: ['Figma', 'iOS']
+
+order: 14
+---
+
+import welcome from './images/ux-photographer/welcome.webp';
+import home from './images/ux-photographer/home-2.webp';
+import search from './images/ux-photographer/search-1.webp';
+import results from './images/ux-photographer/search-results.webp';
+import portfolio from './images/ux-photographer/product-details-1.webp';
+import booking from './images/ux-photographer/booking-details.webp';
+
+## The idea
+
+The failure mode when booking a photographer is not the software, it is the
+sequence: availability lives in one message, the rate in another, and the work
+somewhere else entirely. Any one of those going unanswered ends the booking.
+
+So availability, portfolio and rate sit together. A listing shows the work, the
+review count and the slots that are actually open, and the booking screen
+confirms date, time, photographer and contact in one card rather than as a
+conversation to be reconstructed later.
+
+The schedule view is the other half of the marketplace — the photographer's own
+day, with what has been booked against it — because a two-sided product that
+only designs one side is half a product.
+
+<Gallery
+  label="The screens"
+  size="narrow"
+  items={[
+    { src: welcome, alt: 'Find your perfect photographer and videographer — the welcome screen.', caption: 'Welcome' },
+    { src: search, alt: 'Search with recent searches and recommended photographers.', caption: 'Search' },
+    { src: results, alt: 'Search results listing photographers with rates and ratings.', caption: 'Results' },
+    { src: home, alt: 'A photographer schedule showing available slots across a day.', caption: 'Availability' },
+    { src: portfolio, alt: 'A photographer portfolio with booking details and featured work.', caption: 'Portfolio and rate' },
+    { src: booking, alt: 'Booking confirmation showing photographer, date, time and contact information.', caption: 'Booking confirmed' },
+  ]}
+/>

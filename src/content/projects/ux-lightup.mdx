@@ -1,0 +1,67 @@
+---
+# CONFIRM BEFORE SHIPPING: the year, and that this was self-directed rather
+# than coursework. See the note on the Feit entry.
+
+title: A lighting store where the filters match how fixtures are chosen
+client: Self-directed
+year: 2026
+
+disciplines: ['design']
+
+role: ['Product design', 'UI design', 'E-commerce UX']
+
+depth: concept
+
+outcome: >
+  A lighting e-commerce concept whose filtering is built on the attributes
+  people actually shop fixtures by — finish, material, fitting type — rather
+  than the generic price-and-rating pair most stores ship.
+
+summary: >
+  A concept storefront for light fittings. Lighting is a category where the
+  standard e-commerce filter set fails: someone replacing a chandelier is
+  matching a finish to the fixtures already in the room, and no amount of
+  price-and-rating filtering helps with that. The sort panel here filters on
+  type, finish, cost, material, design and rating, and the order-status screen
+  carries the delivery states people actually chase.
+
+cover: ./images/ux-lightup/light-up-1.webp
+coverAlt: Phone screens from the LightUp concept, showing the product listing and cart.
+
+stack: ['Figma', 'iOS']
+
+order: 13
+---
+
+import login from './images/ux-lightup/login.webp';
+import search from './images/ux-lightup/search.webp';
+import product from './images/ux-lightup/product-details.webp';
+import cart from './images/ux-lightup/cart.webp';
+import status from './images/ux-lightup/order-status.webp';
+
+## The idea
+
+Filtering is where most furnishing storefronts quietly give up. Price, rating,
+maybe a category — which is fine for a commodity and useless for a fixture that
+has to match three others already in the room.
+
+So the filter panel is the screen that got the attention: type, finish, cost
+range, material, design and rating, with finish presented as swatches rather
+than as a word list. A brushed-brass filter is a real constraint; a four-star
+filter is not.
+
+The order-status screen is a timeline — placed, processing, delivery, delivered
+— because the question after buying a chandelier is never *what did I order*, it
+is *where is it*.
+
+<Gallery
+  label="The screens"
+  size="narrow"
+  items={[
+    { src: login, alt: 'The LightUp sign-in screen with Facebook and Google options.', caption: 'Sign in' },
+    { src: search, alt: 'The sort and filter panel, with type, finish, cost range, material, design and rating.', caption: 'Filters — finish as swatches' },
+    { src: product, alt: 'Ceiling lights listing with LED bulbs and a crystal chandelier at $29.99.', caption: 'Browse' },
+    { src: cart, alt: 'Cart with a chandelier light fixture and table lamp set, totaling $229.98.', caption: 'Cart' },
+    { src: status, alt: 'Order 2294 status timeline — placed, processing, delivery, delivered.', caption: 'Order status' },
+  ]}
+/>
