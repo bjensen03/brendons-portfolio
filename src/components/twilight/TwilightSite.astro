@@ -1,0 +1,73 @@
+---
+import { Picture } from 'astro:assets';
+import { textLink } from '../home/data';
+import ExternalLink from '../ExternalLink.astro';
+import { CASE_STUDY, SITE_SHOT, SITE_URL, STACK } from './data';
+
+/*
+  The website, kept small on purpose: the brand and the
+  photography lead; the site as it is today gets one short mention and one
+  screenshot. Facts are from the case study: custom theme, no page
+  builder, ACF Pro behind every template, empty fields over placeholders.
+*/
+---
+
+<section class="py-section" aria-labelledby="tt-site">
+  <div class="container-bleed">
+    <div class="grid grid-cols-4 items-center gap-x-(--grid-gutter) gap-y-block md:grid-cols-6 lg:grid-cols-12">
+      <div class="col-span-full lg:col-span-5">
+        <h2 id="tt-site" class="text-heading text-fg" data-split>The website</h2>
+        <div class="mt-stack max-w-measure" data-reveal>
+          <p class="text-body text-fg">
+            I built the site and I run it: a custom WordPress theme with no page builder, ACF Pro behind every
+            template. It serves the people who follow along and the brands deciding whether to work with us, and it
+            shipped with empty fields instead of placeholder content, so nothing fake can render.
+          </p>
+          <p class="mt-5 text-small text-fg-muted">Built with {STACK.join(', ')}.</p>
+          <p class="mt-6 flex flex-wrap gap-x-8 gap-y-3 text-body">
+            <ExternalLink href={SITE_URL} class={textLink}>thetwilighttrekkers.com</ExternalLink>
+            <a href={CASE_STUDY} class={textLink}>Read the case study <span aria-hidden="true">→</span></a>
+          </p>
+        </div>
+      </div>
+
+      <ExternalLink
+        href={SITE_URL}
+        class="tt-shot col-span-full block md:col-span-5 lg:col-span-6 lg:col-start-7"
+        aria-label="Visit thetwilighttrekkers.com"
+        arrow={false}
+      >
+        <div class="tt-shot__mask" data-mask>
+          <Picture
+            src={SITE_SHOT.src}
+            alt={SITE_SHOT.alt}
+            formats={['avif', 'webp']}
+            widths={[720, 1280, 1800]}
+            sizes="(min-width: 64rem) 46vw, 92vw"
+            loading="lazy"
+            pictureAttributes={{ class: 'block h-full w-full' }}
+            class="tt-shot__img h-full w-full object-cover object-top"
+          />
+        </div>
+      </ExternalLink>
+    </div>
+  </div>
+</section>
+
+<style>
+  .tt-shot__mask {
+    aspect-ratio: var(--aspect-shot);
+    overflow: hidden;
+    border-radius: var(--radius-media);
+    background: var(--color-surface-raised);
+  }
+  .tt-shot__mask > :global(picture) {
+    height: 100%;
+  }
+  .tt-shot :global(.tt-shot__img) {
+    transition: scale var(--duration-slow) var(--ease-out-soft);
+  }
+  .tt-shot:hover :global(.tt-shot__img) {
+    scale: 1.02;
+  }
+</style>

@@ -1,0 +1,109 @@
+---
+import { Picture } from 'astro:assets';
+import { BRAND_HERO as HERO } from './data';
+
+/*
+  Full-bleed hero: one of their photographs, edge to edge, with the name at
+  the mega step over it. The photo drifts slower than the page (parallax
+  through the motion module) and a scrim of the band colour (graphite at
+  every --lum position) runs up from the bottom, so the type sits on
+  near-solid ground rather than on the picture.
+
+  Only the title carries data-tone="dark" (light type at every brightness),
+  not the section. The header takes the dark tone whenever a dark band
+  touches its bottom edge, and this hero starts right there, so a dark
+  section would flip the still-transparent bar to light type over the
+  page's own (light) ground at the top of the page.
+*/
+---
+
+<section class="tt-hero relative isolate overflow-hidden" aria-labelledby="tt-title">
+  <div class="tt-hero__media">
+    <div class="tt-hero__drift" data-parallax="140">
+      <Picture
+        src={HERO.src}
+        alt={HERO.alt}
+        formats={['avif', 'webp']}
+        fallbackFormat="webp"
+        widths={[640, 960, 1280, 1920, 2400]}
+        sizes="100vw"
+        loading="eager"
+        fetchpriority="high"
+        pictureAttributes={{ class: 'block h-full w-full' }}
+        class="h-full w-full object-cover"
+      />
+    </div>
+  </div>
+  <div class="tt-hero__scrim" aria-hidden="true"></div>
+
+  <div class="tt-hero__body container-bleed relative flex min-h-[calc(100svh-var(--spacing-nav))] flex-col justify-end pb-block">
+    <h1 id="tt-title" class="tt-title text-mega text-fg" data-tone="dark" data-split>
+      <span class="block">The</span>{' '}
+      <span class="block">Twilight</span>{' '}
+      <span class="block">Trekkers</span>
+    </h1>
+  </div>
+</section>
+
+<style>
+  /* The band colour under the photo, so the type is measured (and, while
+     the photo loads, seen) against graphite. */
+  .tt-hero {
+    background-color: var(--color-charcoal);
+  }
+  .tt-hero__media {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+  }
+  /* Taller than the frame so the drift never shows an edge. */
+  .tt-hero__drift {
+    position: absolute;
+    inset: -10% 0 -4% 0;
+  }
+  /* Hiker on a rocky overlook, landscape 3:2. The hiker stands about 41%
+     across and two thirds down; the peaks fill the band above. */
+  .tt-hero__drift :global(img) {
+    object-position: 41% 60%;
+  }
+  /* Phones and portrait tablets: a screen-tall frame of a landscape photo
+     is about a third of its width, centred on the hiker so he and the
+     summit behind him stay in. The frame stops short of the fold so the
+     first lines of the intro show under it. */
+  @media (max-width: 63.999rem) and (orientation: portrait) {
+    .tt-hero__body {
+      min-height: min(calc(100svh - var(--spacing-nav)), max(30rem, 74svh));
+    }
+    .tt-hero__drift :global(img) {
+      object-position: 44% 60%;
+    }
+  }
+  .tt-hero__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(
+        to top,
+        var(--color-charcoal) 0%,
+        color-mix(in oklch, var(--color-charcoal) 85%, transparent) 28%,
+        color-mix(in oklch, var(--color-charcoal) 45%, transparent) 60%,
+        color-mix(in oklch, var(--color-charcoal) 15%, transparent) 100%
+      );
+  }
+  /* TWILIGHT / TREKKERS, about 6.9em each, run margin to margin; three lines
+     plus air have to fit the fold, hence the svh cap. */
+  .tt-title {
+    background-color: transparent;
+    font-size: min(calc((100vw - 2 * var(--grid-margin)) / 6.9), 21svh, 22rem);
+    line-height: 0.86;
+  }
+  /* Wide screens: the hiker stands about 41% across, just above where the
+     name's top line sits at full size. Held to the left 42% of the content
+     so the name stays below and left of him. */
+  @media (min-width: 64rem) and (min-aspect-ratio: 1 / 1) {
+    .tt-title {
+      font-size: min(calc((100vw - 2 * var(--grid-margin)) * 0.42 / 6.9), 21svh, 22rem);
+    }
+  }
+</style>

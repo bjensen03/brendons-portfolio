@@ -1,0 +1,663 @@
+---
+import { Picture, getImage } from 'astro:assets';
+import PhoneFrame from '../study/PhoneFrame.astro';
+import { REEL, type Reel } from './reels';
+import { versionedPublic } from '../../lib/study-media';
+
+/*
+  A short reel clip, 9:16 like the phone it was shot for. Muted until the
+  visitor turns its sound on.
+
+  Two ways to sit on the page:
+    - bare (default): the clip fills its box with the media radius. The
+      parent sets the width; the slot keeps 9:16 unless `fill` is set, then
+      it takes the parent's height too.
+    - `framed`: the clip plays inside the study PhoneFrame (the same bezel
+      the case studies use), so it reads as a reel on a phone, not a photo.
+      The parent sets the phone's width with --phone-w (it can be 100%).
+
+  No clip yet (reel.video null): the poster still shows, and in dev only a
+  [PLACEHOLDER] marker sits on it so nobody mistakes it for the finished
+  thing. Production renders the still with no marker.
+
+  A reel can also carry `fullSrc`, the whole reel with sound
+  (public/video/twilight/full/). With a loop, Sound switches the slot to it;
+  with no loop (`video: null`), the poster and a play button wait for a tap.
+  The full file is never fetched before that tap.
+
+  With a clip: muted to start, looped, inline, preload none. The poster is an <img>
+  behind the video (not the poster attribute, which every browser fetches
+  at once). Its src is set by the script below once the reel is within
+  about a screen of the viewport: loading="lazy" alone wasn't enough, as
+  Chrome's lazy threshold (1250–2500px) fetched nearly every poster on a
+  page of reels at load. <noscript> keeps a plain lazy <img> without JS.
+
+  Playback (the script at the bottom): a reel wants to play while at least
+  half of it is on screen, it isn't paused by the visitor, and no ancestor
+  holds it (data-reel-hold + a 'reel:gate' event, used by the homepage
+  stage). Of the reels that want to play, only the two nearest the middle
+  of the screen do, page-wide; one the visitor just pressed Play on goes to
+  the front, and the furthest gives way. Reduced motion never autoplays,
+  but Play and Sound still work. The buttons are hidden without JS. Play
+  says Pause only while its reel is actually playing (WCAG 2.2.2); Sound is
+  a toggle (aria-pressed) labelled "Sound on" or "Sound off".
+*/
+
+interface Props {
+  reel?: Reel;
+  sizes: string;
+  fill?: boolean;
+  framed?: boolean;
+  class?: string;
+}
+
+const { reel = REEL, sizes, fill = false, framed = false, class: cls } = Astro.props;
+const posterUrl =
+  typeof reel.poster === 'string'
+    ? reel.poster
+    : reel.video || reel.fullSrc
+      ? (await getImage({ src: reel.poster, width: 750, format: 'webp' })).src
+      : null;
+const dev = import.meta.env.DEV;
+const pos = `object-position:${reel.focus}`;
+/* Versioned by content, so a re-encoded clip under the same name is never
+   served from an old cache (lib/study-media, versionedPublic). */
+const videoUrl = reel.video ? versionedPublic(reel.video) : null;
+/* The whole reel with sound. Not fetched until the visitor asks for sound
+   (a loop slot) or presses play (a reel with no loop). */
+const fullUrl = reel.fullSrc ? versionedPublic(reel.fullSrc) : null;
+/* No muted loop to preview with: the poster waits for a tap. */
+const fullOnly = !videoUrl && !!fullUrl;
+---
+
+{
+  framed ? (
+    <PhoneFrame ratio="9 / 16" class:list={['reel-phone', cls]}>
+      <figure class="reel reel--screen" data-reel>
+        {videoUrl || fullUrl ? (
+          <>
+            {posterUrl && (
+              <>
+                <img data-reel-src={posterUrl} alt="" class="reel__poster" style={pos} decoding="async" aria-hidden="true" />
+                <noscript>
+                  <img src={posterUrl} alt="" class="reel__poster" style={pos} loading="lazy" decoding="async" aria-hidden="true" />
+                </noscript>
+              </>
+            )}
+            <video
+              class="reel__media"
+              muted
+              loop={!fullOnly}
+              playsinline
+              preload="none"
+              aria-label={reel.alt}
+              style={pos}
+              data-reel-video
+              data-reel-loop={videoUrl ?? undefined}
+              data-reel-full={fullUrl ?? undefined}
+            >
+              {videoUrl && <source src={videoUrl} type="video/mp4" />}
+            </video>
+            {fullOnly && (
+              <button type="button" class="reel__start" data-reel-start hidden aria-label={`Play with sound: ${reel.alt}`}>
+                <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false"><path d="M8 5.5v13l11-6.5z" fill="currentColor" /></svg>
+              </button>
+            )}
+            <div class="reel__controls" data-reel-controls hidden>
+              <button type="button" class="reel__sound" data-reel-sound aria-pressed="false" aria-label="Sound off">
+                <svg class="reel__icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+                  <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor" />
+                  <g class="reel__waves" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
+                    <path d="M15.5 9.2a4 4 0 0 1 0 5.6" />
+                    <path d="M18 6.8a7.5 7.5 0 0 1 0 10.4" />
+                  </g>
+                  <g class="reel__mute" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
+                    <path d="M15.5 9.5l5 5M20.5 9.5l-5 5" />
+                  </g>
+                </svg>
+              </button>
+              <button type="button" class="reel__toggle" data-reel-toggle>
+                <span data-reel-label>Play</span>
+              </button>
+            </div>
+          </>
+        ) : typeof reel.poster === 'string' ? (
+          <>
+            <img data-reel-src={reel.poster} alt={reel.alt} class="reel__media" style={pos} />
+            <noscript>
+              <img src={reel.poster} alt={reel.alt} class="reel__media" style={pos} loading="lazy" />
+            </noscript>
+          </>
+        ) : (
+          <Picture
+            src={reel.poster}
+            alt={reel.alt}
+            formats={['avif', 'webp']}
+            widths={[360, 540, 750].filter((w) => w <= (reel.poster as ImageMetadata).width)}
+            sizes={sizes}
+            loading="lazy"
+            pictureAttributes={{ class: 'block h-full w-full' }}
+            class="reel__media"
+            style={pos}
+          />
+        )}
+        {!videoUrl && !fullUrl && dev && <figcaption class="reel__dev">[PLACEHOLDER — reel clip; dev only]</figcaption>}
+      </figure>
+    </PhoneFrame>
+  ) : (
+    <figure class:list={['reel', { 'reel--fill': fill }, cls]} data-reel>
+      {videoUrl || fullUrl ? (
+        <>
+          {posterUrl && (
+              <>
+                <img data-reel-src={posterUrl} alt="" class="reel__poster" style={pos} decoding="async" aria-hidden="true" />
+                <noscript>
+                  <img src={posterUrl} alt="" class="reel__poster" style={pos} loading="lazy" decoding="async" aria-hidden="true" />
+                </noscript>
+              </>
+            )}
+            <video
+              class="reel__media"
+              muted
+              loop={!fullOnly}
+              playsinline
+              preload="none"
+              aria-label={reel.alt}
+              style={pos}
+              data-reel-video
+              data-reel-loop={videoUrl ?? undefined}
+              data-reel-full={fullUrl ?? undefined}
+            >
+              {videoUrl && <source src={videoUrl} type="video/mp4" />}
+            </video>
+            {fullOnly && (
+              <button type="button" class="reel__start" data-reel-start hidden aria-label={`Play with sound: ${reel.alt}`}>
+                <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false"><path d="M8 5.5v13l11-6.5z" fill="currentColor" /></svg>
+              </button>
+            )}
+          <div class="reel__controls" data-reel-controls hidden>
+            <button type="button" class="reel__sound" data-reel-sound aria-pressed="false" aria-label="Sound off">
+              <svg class="reel__icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+                <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor" />
+                <g class="reel__waves" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
+                  <path d="M15.5 9.2a4 4 0 0 1 0 5.6" />
+                  <path d="M18 6.8a7.5 7.5 0 0 1 0 10.4" />
+                </g>
+                <g class="reel__mute" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
+                  <path d="M15.5 9.5l5 5M20.5 9.5l-5 5" />
+                </g>
+              </svg>
+            </button>
+            <button type="button" class="reel__toggle" data-reel-toggle>
+              <span data-reel-label>Play</span>
+            </button>
+          </div>
+        </>
+      ) : typeof reel.poster === 'string' ? (
+        <>
+            <img data-reel-src={reel.poster} alt={reel.alt} class="reel__media" style={pos} />
+            <noscript>
+              <img src={reel.poster} alt={reel.alt} class="reel__media" style={pos} loading="lazy" />
+            </noscript>
+          </>
+      ) : (
+        <Picture
+          src={reel.poster}
+          alt={reel.alt}
+          formats={['avif', 'webp']}
+          widths={[360, 540, 750, 960].filter((w) => w <= (reel.poster as ImageMetadata).width)}
+          sizes={sizes}
+          loading="lazy"
+          pictureAttributes={{ class: 'block h-full w-full' }}
+          class="reel__media"
+          style={pos}
+        />
+      )}
+      {!videoUrl && !fullUrl && dev && <figcaption class="reel__dev">[PLACEHOLDER — reel clip. Still for now; dev only]</figcaption>}
+    </figure>
+  )
+}
+
+<style>
+  .reel {
+    position: relative;
+    aspect-ratio: 9 / 16;
+    overflow: hidden;
+    border-radius: var(--radius-media);
+    background: var(--color-surface-raised);
+  }
+  .reel--fill {
+    aspect-ratio: auto;
+    height: 100%;
+  }
+  /* Inside the phone the screen already clips and rounds. */
+  .reel--screen {
+    position: absolute;
+    inset: 0;
+    aspect-ratio: auto;
+    border-radius: 0;
+  }
+  .reel :global(.reel__media) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  /* The still sits behind the video, which is transparent until it has a
+     frame to show. */
+  .reel__poster {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  /* Waiting for its src (script below): nothing to show yet, and no alt
+     text painted in its place. Without JS the <noscript> copy is used. */
+  img[data-reel-src] {
+    visibility: hidden;
+  }
+  :global(html:not(.js)) img[data-reel-src] {
+    display: none;
+  }
+  .reel video.reel__media {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Dev-only marker: a tan fill with graphite type (7.25:1), the one place
+     the accent is allowed to carry words. */
+  .reel__dev {
+    position: absolute;
+    left: 0.6rem;
+    right: 0.6rem;
+    bottom: 0.6rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: var(--radius-control);
+    background: var(--color-accent-fill);
+    color: var(--color-on-accent);
+    font-size: 0.8125rem;
+    line-height: 1.3;
+  }
+
+  /* Sound and pause / play, side by side in the bottom corner. Quiet on
+     purpose (graphite, not the tan accent) so a row of playing reels
+     doesn't turn into a row of buttons; each is still a 44px target.
+     White on graphite, 17:1. */
+  .reel__controls {
+    position: absolute;
+    z-index: 2;
+    right: 0.5rem;
+    bottom: 0.5rem;
+    display: flex;
+    gap: 0.375rem;
+  }
+  .reel__controls[hidden] {
+    display: none;
+  }
+  .reel__sound,
+  .reel__toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+    border-radius: var(--radius-control);
+    background: var(--color-charcoal);
+    color: var(--color-on-dark);
+    opacity: 0.92;
+  }
+  .reel__toggle {
+    padding: 0 0.85rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  .reel__sound:hover,
+  .reel__sound:focus-visible,
+  .reel__toggle:hover,
+  .reel__toggle:focus-visible {
+    opacity: 1;
+  }
+  /* A reel with no preview loop: a round play button on the poster. */
+  .reel__start {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    margin: auto;
+    display: grid;
+    place-items: center;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 999px;
+    background: var(--color-charcoal);
+    color: var(--color-on-dark);
+    opacity: 0.92;
+    transition: scale var(--duration-fast) var(--ease-out-soft);
+  }
+  .reel__start[hidden] {
+    display: none;
+  }
+  .reel__start:hover,
+  .reel__start:focus-visible {
+    opacity: 1;
+    scale: 1.06;
+  }
+  .reel__start svg {
+    margin-left: 3px;
+  }
+
+  /* Muted: the speaker with a cross. Sound on: the speaker with waves. */
+  .reel__sound .reel__waves,
+  .reel__sound[aria-pressed='true'] .reel__mute {
+    display: none;
+  }
+  .reel__sound[aria-pressed='true'] .reel__waves {
+    display: inline;
+  }
+</style>
+
+<script>
+  import { registerMotion, prefersReducedMotion } from '../../scripts/motion';
+
+  /*
+    One coordinator for every reel on the page. Each reel reports whether it
+    wants to play (half on screen, not paused by the visitor, not held); of
+    those, the two nearest the middle of the screen play and the rest wait.
+    A reel the visitor pressed Play on is ranked first (latest press wins),
+    so it plays and the furthest one stops. Recalculated on scroll (one rAF
+    per frame at most), resize, tab visibility and 'reel:gate'.
+
+    Sound: every reel starts muted (autoplay needs it). Turning sound on for
+    one mutes the rest, and that slot switches to the whole reel
+    (data-reel-full) from the start, with sound. It goes ahead of
+    everything, cap included, until it's paused, leaves the screen (or is
+    held), ends, or another reel gets sound; then it goes back to its muted
+    loop, which the autoplay picks up again. Back to the loop rather than
+    simply pausing, so the slot keeps previewing like its neighbours, the
+    large file stops buffering, and nothing sits frozen mid-reel. The
+    src swap, the unmute and the play() all happen inside the click
+    handler itself, so iOS counts the tap as the gesture that allows sound.
+
+    A reel with no loop (data-reel-full only) never autoplays and loads
+    nothing: it shows its poster and a play button, and a tap plays the
+    whole reel with sound. Stopping it unloads the file and shows the poster
+    again.
+
+    Registered with reduced: true so Play and Sound work with motion off; it
+    just never starts anything on its own then.
+  */
+  const MAX_PLAYING = 2;
+
+  type Reel = {
+    video: HTMLVideoElement;
+    button: HTMLButtonElement;
+    sound: HTMLButtonElement;
+    label: HTMLElement;
+    start: HTMLButtonElement | null;
+    /** The muted preview loop, if this slot has one. */
+    loop: string | null;
+    /** The whole reel with sound, if there is one. */
+    full: string | null;
+    /** Playing the full file right now (not the loop). */
+    onFull: boolean;
+    visible: boolean;
+    ratio: number;
+    userPaused: boolean;
+    pressedAt: number;
+  };
+
+  const reelVideo = () => {
+    const reels: Reel[] = [];
+    const ios: IntersectionObserver[] = [];
+    const offs: (() => void)[] = [];
+    let frame = 0;
+    let loud: Reel | null = null;
+
+    const held = (r: Reel) => !!r.video.closest('[data-reel-hold]');
+    const distance = (r: Reel) => {
+      const b = r.video.getBoundingClientRect();
+      return Math.hypot(b.left + b.width / 2 - innerWidth / 2, b.top + b.height / 2 - innerHeight / 2);
+    };
+    const setLabel = (r: Reel) => {
+      const playing = !r.video.paused && !r.video.ended;
+      r.label.textContent = playing ? 'Pause' : 'Play';
+      const on = loud === r && !r.video.muted;
+      r.sound.setAttribute('aria-pressed', String(on));
+      r.sound.setAttribute('aria-label', on ? 'Sound on' : 'Sound off');
+      /* A reel with no loop shows its big play button until it's playing. */
+      if (r.start) r.start.hidden = playing;
+    };
+
+    /* Back to the muted preview: the loop if the slot has one (the autoplay
+       below picks it up again), or the poster with nothing loaded. */
+    const toPreview = (r: Reel) => {
+      if (!r.onFull) return;
+      r.onFull = false;
+      r.video.pause();
+      if (r.loop) {
+        r.video.loop = true;
+        r.video.src = r.loop;
+      } else {
+        r.video.removeAttribute('src');
+        r.video.load();
+      }
+    };
+    const quiet = (r: Reel) => {
+      r.video.muted = true;
+      toPreview(r);
+      if (loud === r) loud = null;
+    };
+    /* The reel with sound loses it, and stops, once it can't be watched:
+       paused, held, the tab hidden, or scrolled to under a fifth on screen
+       (looser than the half that autoplay needs, so a tap on a reel that is
+       partly in view isn't undone at once). */
+    const dropLoud = () => {
+      if (!loud) return;
+      if (document.hidden || loud.ratio < 0.2 || held(loud) || loud.userPaused) {
+        const r = loud;
+        quiet(r);
+        r.userPaused = true;
+        r.pressedAt = 0;
+        r.video.pause();
+      }
+    };
+
+    const recalc = () => {
+      frame = 0;
+      dropLoud();
+      /* Only slots with a muted loop autoplay; a reel with no loop waits
+         for its play button. */
+      const wanting = document.hidden
+        ? []
+        : reels.filter((r) => r === loud || (r.loop && r.visible && !r.userPaused && !held(r)));
+      wanting.sort((a, b) => Number(b === loud) - Number(a === loud) || b.pressedAt - a.pressedAt || distance(a) - distance(b));
+      const play = new Set(wanting.slice(0, MAX_PLAYING));
+      reels.forEach((r) => {
+        if (play.has(r)) {
+          if (r.video.paused) r.video.play().catch(() => setLabel(r));
+        } else if (!r.video.paused) {
+          r.video.pause();
+        }
+        setLabel(r);
+      });
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(recalc);
+    };
+
+    document.querySelectorAll<HTMLElement>('[data-reel]').forEach((root) => {
+      const video = root.querySelector<HTMLVideoElement>('[data-reel-video]');
+      const controls = root.querySelector<HTMLElement>('[data-reel-controls]');
+      const button = root.querySelector<HTMLButtonElement>('[data-reel-toggle]');
+      const sound = root.querySelector<HTMLButtonElement>('[data-reel-sound]');
+      const label = root.querySelector<HTMLElement>('[data-reel-label]');
+      const start = root.querySelector<HTMLButtonElement>('[data-reel-start]');
+      if (!video || !controls || !button || !sound || !label) return;
+
+      const r: Reel = {
+        video,
+        button,
+        sound,
+        label,
+        start,
+        loop: video.dataset.reelLoop ?? null,
+        full: video.dataset.reelFull ?? null,
+        onFull: false,
+        visible: false,
+        ratio: 0,
+        userPaused: prefersReducedMotion(),
+        pressedAt: 0,
+      };
+      reels.push(r);
+      video.muted = true;
+      controls.hidden = false;
+      if (start) start.hidden = false;
+
+      const io = new IntersectionObserver(
+        ([entry]) => {
+          r.ratio = entry.isIntersecting ? entry.intersectionRatio : 0;
+          r.visible = r.ratio >= 0.5;
+          schedule();
+        },
+        { threshold: [0, 0.2, 0.5, 1] },
+      );
+      io.observe(video);
+      ios.push(io);
+
+      /* Sound on: everything else goes quiet, and this slot plays the whole
+         reel with sound from the start. All of it happens synchronously
+         inside the tap (src, unmute, play), so iOS counts the tap as the
+         gesture that allows sound. */
+      const playLoud = () => {
+        reels.forEach((other) => other !== r && quiet(other));
+        loud = r;
+        r.userPaused = false;
+        r.pressedAt = performance.now();
+        if (r.full && !r.onFull) {
+          r.onFull = true;
+          video.loop = false;
+          video.src = r.full;
+        }
+        video.muted = false;
+        video.play().catch(() => {
+          quiet(r);
+          setLabel(r);
+        });
+        recalc();
+      };
+
+      const toggle = () => {
+        const playing = !video.paused && !video.ended;
+        if (playing) {
+          r.userPaused = true;
+          r.pressedAt = 0;
+          recalc();
+          return;
+        }
+        /* A reel with no loop only ever plays in full, with sound. */
+        if (!r.loop) {
+          playLoud();
+          return;
+        }
+        r.userPaused = false;
+        r.pressedAt = performance.now();
+        recalc();
+      };
+      const toggleSound = () => {
+        if (loud === r && !video.muted) {
+          quiet(r);
+          setLabel(r);
+          schedule();
+          return;
+        }
+        playLoud();
+      };
+      /* The whole reel played to its end: back to the preview. */
+      const onEnded = () => {
+        if (!r.onFull) return;
+        quiet(r);
+        r.userPaused = !r.loop;
+        setLabel(r);
+        schedule();
+      };
+      const sync = () => setLabel(r);
+      button.addEventListener('click', toggle);
+      sound.addEventListener('click', toggleSound);
+      start?.addEventListener('click', playLoud);
+      video.addEventListener('playing', sync);
+      video.addEventListener('pause', sync);
+      video.addEventListener('volumechange', sync);
+      video.addEventListener('ended', onEnded);
+      offs.push(() => {
+        button.removeEventListener('click', toggle);
+        sound.removeEventListener('click', toggleSound);
+        start?.removeEventListener('click', playLoud);
+        video.removeEventListener('playing', sync);
+        video.removeEventListener('pause', sync);
+        video.removeEventListener('volumechange', sync);
+        video.removeEventListener('ended', onEnded);
+        video.pause();
+        video.muted = true;
+      });
+    });
+    if (!reels.length) return;
+
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    document.addEventListener('visibilitychange', schedule);
+    document.addEventListener('reel:gate', schedule);
+    /* Sideways rows (a swipe gallery) move reels without a page scroll. */
+    document.addEventListener('scroll', schedule, { passive: true, capture: true });
+    schedule();
+
+    return () => {
+      cancelAnimationFrame(frame);
+      ios.forEach((io) => io.disconnect());
+      offs.forEach((off) => off());
+      loud = null;
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+      document.removeEventListener('visibilitychange', schedule);
+      document.removeEventListener('reel:gate', schedule);
+      document.removeEventListener('scroll', schedule, { capture: true });
+    };
+  };
+
+  registerMotion(reelVideo, { reduced: true });
+
+  /*
+    Posters and stills (img[data-reel-src]) get their src when they come
+    within one screen of the viewport, above or below. A reel in a sideways
+    row past the row's edge is clipped by the row, so the observer can't see
+    it coming; the next two reels after one that loads are loaded with it,
+    which keeps a swipe from landing on a blank card.
+  */
+  const reelPosters = () => {
+    const imgs = Array.from(document.querySelectorAll<HTMLImageElement>('img[data-reel-src]'));
+    if (!imgs.length) return;
+    const load = (img: HTMLImageElement) => {
+      const src = img.dataset.reelSrc;
+      if (src) {
+        img.src = src;
+        img.removeAttribute('data-reel-src');
+      }
+      io.unobserve(img);
+    };
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const img = entry.target as HTMLImageElement;
+          const i = imgs.indexOf(img);
+          load(img);
+          imgs.slice(i + 1, i + 3).forEach(load);
+        });
+      },
+      { rootMargin: '100% 0px' },
+    );
+    imgs.forEach((img) => io.observe(img));
+    return () => io.disconnect();
+  };
+
+  registerMotion(reelPosters, { reduced: true });
+</script>

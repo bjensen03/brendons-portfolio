@@ -1,0 +1,223 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getEntry } from 'astro:content';
+import TwilightHero from '../../components/twilight/TwilightHero.astro';
+import TwilightSite from '../../components/twilight/TwilightSite.astro';
+import PhotoSet from '../../components/study/PhotoSet.astro';
+import ReelRow from '../../components/study/ReelRow.astro';
+import { REELS_FULL } from '../../components/media/reels';
+import ListRows from '../../components/study/ListRows.astro';
+import TwilightPhotoGallery from '../../components/twilight/TwilightPhotoGallery.astro';
+import { textLink } from '../../components/home/data';
+import ExternalLink from '../../components/ExternalLink.astro';
+import { Picture } from 'astro:assets';
+import { md } from '../../lib/markdown';
+import '../../styles/study.css';
+import {
+  BRAND_GROUP_LABELS,
+  BRANDS,
+  FEED_SHOT,
+  FOLLOWERS,
+  FOLLOWERS_AS_OF,
+  INSTAGRAM_HANDLE,
+  INSTAGRAM_URL,
+  ROLES,
+  SITE_URL,
+} from '../../components/twilight/data';
+
+/*
+  The Twilight Trekkers: Kaylee's and my travel and adventure brand.
+  Personal, but the same system as the rest of the site: graphite ground,
+  Archivo display, tan only as a fill.
+
+  Lead with the brand — the photography and drone work, the reels, the
+  26k audience, the brand collaborations and what I do for it — and keep the current website to one short section near the
+  end.
+
+  The photos and reels come from the case study's yaml
+  (src/content/studies/twilight-trekkers.yaml: photoSets.library and both
+  reelSets), so the two pages show the same library and a photo is swapped
+  in one place.
+*/
+
+const study = await getEntry('studies', 'twilight-trekkers');
+if (!study) throw new Error('twilight-trekkers study not found');
+const library = study.data.photoSets?.find((p) => p.id === 'library');
+if (!library) throw new Error('twilight-trekkers: no photoSets.library');
+/* All 19 reels at full length (REELS_FULL). The eight with a muted loop
+   lead and preview on their own, with the study's descriptions; the rest
+   show their poster and play in full, with sound, on a tap. */
+const loopItems = (study.data.reelSets ?? []).flatMap((r) => r.items);
+const reels = [
+  ...REELS_FULL.filter((f) => f.shortSrc)
+    .map((f) => ({ f, item: loopItems.find((i) => i.src === f.shortSrc) }))
+    .sort((a, b) => loopItems.indexOf(a.item!) - loopItems.indexOf(b.item!))
+    .map(({ f, item }) => ({ src: f.shortSrc, poster: item?.poster ?? f.poster, label: item?.label ?? `Reel: ${f.title}.`, fullSrc: f.fullSrc })),
+  ...REELS_FULL.filter((f) => !f.shortSrc).map((f) => ({ src: null, poster: f.poster, label: `Reel: ${f.title}.`, fullSrc: f.fullSrc })),
+];
+const libraryIntro = await md(library.intro);
+/* Its own intro: the study's says "short loops", which is true there (eight
+   loops) but not here, where all 19 play in full with sound on a tap. */
+const reelsIntro = '<p>Our Instagram reels, all 19. Tap one to watch it with sound. I fly the drone and make the drone videos.</p>';
+
+const follow = [
+  { label: 'Instagram', value: INSTAGRAM_HANDLE, href: INSTAGRAM_URL },
+  { label: 'Website', value: 'thetwilighttrekkers.com', href: SITE_URL },
+];
+---
+
+<Base
+  title="The Twilight Trekkers"
+  description="The Twilight Trekkers is Brendon and Kaylee Jensen's travel and adventure brand from Utah: photography, drone video and reels, 26k followers on Instagram, and 34 brands, stays and excursions they've worked with."
+  ogImage="/og/twilight-trekkers-page.jpg"
+>
+  <TwilightHero />
+
+  <section class="pt-section" aria-label="About The Twilight Trekkers">
+    <div class="container-bleed">
+      <div class="grid grid-cols-4 gap-x-(--grid-gutter) gap-y-block md:grid-cols-6 lg:grid-cols-12">
+        <div class="col-span-full lg:col-span-7">
+          <p class="tt-intro text-title text-fg" data-split="lines">
+            We’re Brendon and Kaylee, a husband-and-wife team in Utah. The Twilight Trekkers is our
+            travel and adventure brand: the videos and photos we make out on the trail.
+          </p>
+          <p class="mt-stack max-w-measure text-body text-fg-muted" data-reveal>
+            Documenting real adventures, hidden trails, and the moments that make it all worth it.
+          </p>
+          <p class="mt-5 max-w-measure text-body text-fg-muted" data-reveal>
+            We started it in 2021 as a way to document our trips. I built the brand from the ground
+            up, from the logo to the website.
+          </p>
+        </div>
+
+        <div class="col-span-full md:col-span-4 lg:col-span-4 lg:col-start-9 lg:self-end" data-reveal>
+          <p class="tt-count text-fg tabular-nums" data-count>{FOLLOWERS}</p>
+          <p class="mt-3 text-lead text-fg">
+            people follow along on <ExternalLink href={INSTAGRAM_URL} class={textLink} arrow={false}>Instagram</ExternalLink>.
+          </p>
+          <p class="mt-2 text-small text-fg-muted">As of {FOLLOWERS_AS_OF}.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* In the page's section rhythm (the rule above From the trail comes from
+      .cs-sec + .cs-sec), but with no padding of its own underneath: the
+      roles are short, and two section paddings in a row left a blank band. */}
+  <section class="cs-sec" style="padding-bottom: 0" aria-labelledby="tt-roles">
+    <div class="container-bleed">
+      <h2 id="tt-roles" class="text-heading text-fg md:text-display" data-split>What I do</h2>
+      <ul role="list" class="tt-roles mt-block grid grid-cols-4 gap-x-(--grid-gutter) md:grid-cols-6 lg:grid-cols-12" data-reveal-group>
+        {
+          ROLES.map((r) => (
+            <li class="col-span-full border-t border-edge pt-5 pb-8 md:col-span-3 lg:col-span-3" data-reveal>
+              <h3 class="text-title text-fg">{r.word}</h3>
+              <p class="mt-3 max-w-[22rem] text-body text-fg-muted">{r.line}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <PhotoSet
+    id="tt-library"
+    heading="From the trail"
+    introHtml={libraryIntro}
+    categories={library.categories}
+    headingClass="text-heading text-fg md:text-display"
+  />
+
+  <ReelRow
+    id="tt-reels"
+    heading="The reels"
+    introHtml={reelsIntro}
+    items={reels}
+    headingClass="text-heading text-fg md:text-display"
+  />
+
+  {/* Every photo in the library, once each, with a lightbox. */}
+  <TwilightPhotoGallery />
+
+  <ListRows
+    id="tt-brands"
+    heading="Brands we’ve worked with"
+    introHtml="<p>Every brand, stay and excursion we've worked with: 34 so far. The eleven on our Collaborations page each get a photo from the trip and a line from us on why we liked it.</p>"
+    items={BRANDS.map((b) => ({ name: b.name, body: b.line ?? '', group: BRAND_GROUP_LABELS[b.group] }))}
+    headingClass="text-heading text-fg md:text-display"
+  />
+
+  <TwilightSite />
+
+  <section data-tone="dark" class="py-section" aria-labelledby="tt-follow">
+    <div class="container-bleed">
+      <div class="grid grid-cols-4 items-center gap-x-(--grid-gutter) gap-y-block md:grid-cols-6 lg:grid-cols-12">
+        <div class="col-span-full lg:col-span-7">
+          <h2 id="tt-follow" class="text-display text-fg" data-split>Follow along</h2>
+          <p class="mt-stack max-w-measure text-body text-fg-muted" data-reveal>
+            We share the day-to-day adventures and the behind-the-scenes moments on Instagram.
+          </p>
+          <ul class="mt-block" role="list" data-reveal>
+            {
+              follow.map((row) => (
+                <li class="grid grid-cols-4 items-baseline gap-x-(--grid-gutter) gap-y-2 border-t border-edge py-5 last:border-b md:grid-cols-6 lg:grid-cols-7">
+                  <span class="col-span-full text-small text-fg-muted md:col-span-2 lg:col-span-2">{row.label}</span>
+                  <span class="col-span-full min-w-0 text-title md:col-span-4 lg:col-span-5">
+                    <ExternalLink href={row.href} class:list={[textLink, 'link-reveal--lg break-words']}>
+                      {row.value}
+                    </ExternalLink>
+                  </span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+
+        <ExternalLink
+          href={INSTAGRAM_URL}
+          class="tt-feed col-span-full md:col-span-4 md:col-start-2 lg:col-span-5 lg:col-start-8"
+          aria-label={`${INSTAGRAM_HANDLE} on Instagram`}
+          arrow={false}
+          data-reveal
+        >
+          <Picture
+            src={FEED_SHOT.src}
+            alt={FEED_SHOT.alt}
+            formats={['avif', 'webp']}
+            widths={[480, 704]}
+            fallbackFormat="webp"
+            sizes="(min-width: 64rem) 40vw, 90vw"
+            loading="lazy"
+            class="h-auto w-full"
+          />
+        </ExternalLink>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .tt-intro {
+    text-wrap: pretty;
+  }
+  .tt-feed :global(img) {
+    transition: scale var(--duration-slow) var(--ease-out-soft);
+  }
+  .tt-feed:hover :global(img) {
+    scale: 1.02;
+  }
+  .tt-count {
+    font-family: var(--font-display);
+    font-stretch: var(--display-stretch);
+    font-weight: 900;
+    line-height: 0.85;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    font-size: min(calc((100vw - 2 * var(--grid-margin)) / 3.2), 13rem);
+  }
+  @media (min-width: 64rem) {
+    .tt-count {
+      font-size: min(calc((100vw - 2 * var(--grid-margin)) * 4 / 12 / 2.4), 13rem);
+    }
+  }
+</style>

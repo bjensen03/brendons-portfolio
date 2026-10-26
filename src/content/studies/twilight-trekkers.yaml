@@ -1,0 +1,514 @@
+order: 6
+# Our own brand, so no client sign-off is needed.
+approved: true
+
+# A full study, at /work/twilight-trekkers/.
+#
+# Sources, and nothing else: the earlier write-up of this project, my old Webflow page (its "24K+" is
+# superseded by 26k, October 2026), and the live site (captured 2026-10-23, 1440 x 900 at 2x; the counts of
+# partners, sections and tabs below are read off those captures).
+kind: Custom WordPress theme · own brand
+name: The Twilight Trekkers
+label: The travel and adventure brand Kaylee and I run — the photography, the drone work, the reels, 34 brand partners, and the website behind it
+role: Creator, Designer and Developer
+company: The Twilight Trekkers
+timeline: '2026'
+team: Brendon and Kaylee
+stack: WordPress, PHP, ACF Pro, Rank Math, Formidable Forms, Mailchimp
+live: https://thetwilighttrekkers.com/
+
+# The card on /work/ (16:10, object-top): Reflection Canyon is 3:2, so the
+# crop only trims the bottom slickrock and the figure on the rim stays in
+# frame. Same
+# photo as the /twilight-trekkers/ hero.
+cover: twilight-trekkers/library/desert/reflection-canyon-01.webp
+coverAlt: Brendon standing at the rim of Reflection Canyon at sunset, the water winding far below under sunbeams.
+
+# Lead with the brand and the photography, and play the current website down
+# (it's due a rebuild). The hero is the top pick from the photo library,
+# cropped to its wide band (y 40-85%, arch lip + pool).
+heroMedia:
+  image:
+    src: twilight-trekkers/library/canyons/zion-subway-01.webp
+    alt: 'The Subway in Zion: a keyhole pool of green water under curving sandstone, a tiny hiker walking behind it.'
+  crop: { x: 0, y: 0.4, w: 1, h: 0.45 }
+  size: large
+
+inShort:
+  - The Twilight Trekkers is the travel and adventure brand my wife Kaylee and I run. ==I created the brand from the ground up==, and our Instagram has about 26k followers.
+  - I fly the drone and make the drone videos, and shoot some of the photos and video. Kaylee is our photographer, so most of the photos are hers.
+  - We've worked with ==34 brands, stays and excursions==, from Rush Creek Lodge outside Yosemite to Redtail Air over Canyonlands.
+  - I also write the blog posts, and I built and run the website, a custom WordPress theme.
+
+# Not in the layout since 2026-10-23 (the site played down): mockup:lake,
+# story:1, scroller, feature:followers, decisions, strip:pages. Their data
+# stays below so any of them can come back with one line here.
+layout:
+  - inShort
+  - situation
+  - role
+  - photos:library
+  - reels:reels
+  - feature:brand
+  - glance
+  - list:brands
+  - hardProblem
+  - story:0
+  - story:2
+  - result
+  - fullStack
+
+situation: |
+  Twilight Trekkers began as a passion project built to capture the beauty of outdoor adventure through photography, storytelling, and design.
+
+  It has grown to ==about 26k people following along on Instagram==, and to brand work with 34 brands, stays and excursions.
+
+  So the content has two audiences. A brand wants its trip, its stay or its gear shown well. The people who follow us want the places, the trail guides and the photos.
+
+  The reels, the photos and the posts have to ==work for the brands and keep our followers engaged== at the same time.
+
+myRole: |
+  This is the one project on my site where I was also the client.
+
+  We started The Twilight Trekkers in 2021. I created the brand from the ground up, developing its visual identity and growing a community of outdoor enthusiasts through authentic, creative content.
+
+  What I do for it:
+
+  - **The drone.** I ==fly the drone and make the drone videos==.
+  - **Photos and video.** I shoot some of the photos and videos for our travel page, @thetwilighttrekkers. Kaylee is our photographer, so most of the photos are hers.
+  - **The blog.** I write the blog posts.
+  - **The website.** I set the design direction, ==built the custom theme==, and I run it: SEO, image optimization, publishing and analytics.
+
+atAGlance:
+  - value: 26k
+    label: Instagram followers
+    note: As of October 2026.
+  - value: '34'
+    label: Brands, stays and excursions we've worked with
+    note: As of October 2026.
+
+features:
+  - id: brand
+    heading: The brand came first
+    body: |
+      Before there was a website, there was the brand.
+
+      I created it from the ground up, developing its visual identity, and ==every project combines our photography, videography, branding and storytelling== to inspire others to explore and connect with the outdoors.
+
+      The photo and drone footage goes to our Instagram, @thetwilighttrekkers. The website had to carry the same brand.
+    media:
+      - src: twilight-trekkers/logo.webp
+        alt: 'The Twilight Trekkers logo: two climbers silhouetted on a rock face inside a circle, against a peach sky over purple mountains, above the words THE TWILIGHT TREKKERS and ADVENTURE PHOTOGRAPHERS.'
+        caption: The logo.
+      - src: twilight-trekkers/library/us/antelope-canyon-couple-01.webp
+        alt: Brendon and Kaylee standing together in a glowing orange slot canyon.
+        caption: The two of us.
+  - id: followers
+    heading: For our followers
+    body: |
+      The journal is where followers land. Trail guides and stories share one feed, filtered by place with the tabs across the top.
+
+      A trail guide opens on a full-width photo, because ==the photographs are the loudest thing on every screen==.
+    media:
+      - src: twilight-trekkers/journal.webp
+        alt: 'The Latest Stories page: a pink header, category tabs for All, Grand Canyon, Sierra Nevada Mountain Range, Yosemite National Park and Zion National Park, then cards for Mount Whitney in One Day, Hiking Half Dome in One Day and Ribbon Falls Grand Canyon.'
+        caption: The journal, one feed with category tabs.
+      - src: twilight-trekkers/trail-guide.webp
+        alt: 'The top of the Mount Whitney in One Day trail guide: a wide photo of the two of us on a rocky trail beside a creek, then a Trail Guide tag and the date August 30, 2026.'
+        caption: A trail guide.
+
+# The photo library (src/content/projects/images/twilight-trekkers/library):
+# the Best tier is `big`, with each photo's focus point
+# for the phone crop. Coast has no Best pick; its two largest files lead.
+# A big row needs a combined aspect ratio of about 2 (PhotoSet.astro), so
+# the two-of-us row adds a third, non-Best photo.
+# The low-resolution Best picks (havasu-cascades,
+# mesa-arch-glow, teton-barn, salt-flat-reflection, mountain-lake-couple)
+# only appear in the smaller rows. The brand page (/twilight-trekkers/)
+# reads this same list, so a photo is swapped in one place.
+photoSets:
+  - id: library
+    heading: The photography
+    intro: |
+      Photos mostly by Kaylee, drone by me. I shoot some of the photos too. Pick a place.
+    categories:
+      - label: 'Canyons & slots'
+        items:
+          - src: twilight-trekkers/library/canyons/coyote-gulch-arch-01.webp
+            alt: 'A huge sandstone arch over a creek in Coyote Gulch, green trees below and a small figure in the water.'
+            big: true
+            focus: '60% 40%'
+          - src: twilight-trekkers/library/canyons/double-arch-slot-01.webp
+            alt: 'A double arch inside a deep red slot canyon, a tiny person below.'
+            big: true
+            focus: '50% 45%'
+          - src: twilight-trekkers/library/canyons/angels-landing-01.webp
+            alt: 'A hiker on the chained ridge of Angels Landing above Zion Canyon.'
+          - src: twilight-trekkers/library/canyons/slot-light-beam-01.webp
+            alt: 'A hiker lit by a shaft of light in a dark curved slot canyon over green water.'
+          - src: twilight-trekkers/library/canyons/zion-narrows-turquoise-01.webp
+            alt: 'A hiker in red wading turquoise water through a narrow canyon.'
+          - src: twilight-trekkers/library/canyons/arch-window-rappel-01.webp
+            alt: 'A climber rappelling out of a sandstone window over the desert.'
+          - src: twilight-trekkers/library/canyons/antelope-canyon-sky-01.webp
+            alt: 'Looking up through a glowing orange slot canyon to blue sky.'
+      - label: 'Desert'
+        items:
+          - src: twilight-trekkers/library/desert/reflection-canyon-01.webp
+            alt: 'Brendon at the rim of Reflection Canyon, water winding far below under sunbeams.'
+            big: true
+            focus: '64% 55%'
+          - src: twilight-trekkers/library/desert/delicate-arch-01.webp
+            alt: 'Delicate Arch against a pink and violet sunset sky, a tiny person at its base.'
+            big: true
+            focus: '48% 45%'
+          - src: twilight-trekkers/library/desert/mesa-arch-glow-01.webp
+            alt: 'Mesa Arch glowing orange at sunrise, framing towers and canyon below.'
+          - src: twilight-trekkers/library/desert/bryce-hoodoos-01.webp
+            alt: 'Glowing orange hoodoos and a balanced rock tower at sunrise.'
+          - src: twilight-trekkers/library/desert/horseshoe-bend-01.webp
+            alt: 'A sunburst over a deep river bend in a red canyon.'
+          - src: twilight-trekkers/library/desert/druid-arch-01.webp
+            alt: 'A tall slotted sandstone arch on a ridge, a tiny hiker below.'
+          - src: twilight-trekkers/library/desert/dune-ridge-01.webp
+            alt: 'A lone hiker on a sweeping sand dune ridge.'
+      - label: 'Water'
+        items:
+          - src: twilight-trekkers/library/water/havasu-falls-01.webp
+            alt: 'Havasu Falls pouring over red cliffs into a turquoise pool, two people on the shore.'
+            big: true
+            focus: '52% 62%'
+          - src: twilight-trekkers/library/water/kayak-falls-01.webp
+            alt: 'A kayaker paddling toward a wide waterfall.'
+            big: true
+            focus: '45% 50%'
+          - src: twilight-trekkers/library/water/havasu-cascades-01.webp
+            alt: 'Turquoise travertine pools and cascades, a woman in red on a ledge.'
+          - src: twilight-trekkers/library/water/mooney-falls-01.webp
+            alt: 'A tall waterfall into a turquoise pool, one person at the edge.'
+          - src: twilight-trekkers/library/water/yosemite-falls-01.webp
+            alt: 'A tall waterfall off a granite wall with Half Dome behind.'
+          - src: twilight-trekkers/library/water/calf-creek-falls-01.webp
+            alt: 'Two people wading at the foot of a tall ribbon waterfall on streaked canyon walls.'
+          - src: twilight-trekkers/library/water/vernal-fall-01.webp
+            alt: 'A big waterfall with a rainbow at its base.'
+      - label: 'Mountains'
+        items:
+          - src: twilight-trekkers/library/mountains/half-dome-light-01.webp
+            alt: 'Half Dome with light rays across the valley at sunrise.'
+            big: true
+            focus: '30% 35%'
+          - src: twilight-trekkers/library/mountains/sawtooth-lake-01.webp
+            alt: 'Jagged snowy peaks mirrored in a green alpine lake.'
+            big: true
+            focus: '50% 50%'
+          - src: twilight-trekkers/library/mountains/diablo-lake-01.webp
+            alt: 'A turquoise lake with islands between forested mountains.'
+          - src: twilight-trekkers/library/mountains/teton-barn-01.webp
+            alt: 'A weathered barn under pink-lit Teton peaks at sunrise.'
+          - src: twilight-trekkers/library/mountains/alpine-lake-granite-01.webp
+            alt: 'A hiker on a rock at a blue alpine lake under granite peaks.'
+          - src: twilight-trekkers/library/mountains/wildflower-peaks-01.webp
+            alt: 'Pink wildflowers below sharp sunlit peaks.'
+          - src: twilight-trekkers/library/mountains/storm-reflection-01.webp
+            alt: 'Dark storm clouds lit pink over jagged peaks, mirrored in a still lake.'
+      - label: 'Coast'
+        items:
+          - src: twilight-trekkers/library/coast/sea-stack-beach-reflection-01.webp
+            alt: 'Tree-topped sea stacks reflected on a wet sand beach at dusk.'
+            big: true
+            focus: '50% 50%'
+          - src: twilight-trekkers/library/coast/sea-arch-01.webp
+            alt: 'A sandstone sea arch over a calm ocean.'
+            big: true
+            focus: '50% 50%'
+          - src: twilight-trekkers/library/coast/sea-stacks-cove-01.webp
+            alt: 'Rocky sea stacks in a deep blue cove framed by trees.'
+          - src: twilight-trekkers/library/coast/lava-rock-coast-01.webp
+            alt: 'A man standing on black lava rocks by the ocean at dusk, palms behind.'
+          - src: twilight-trekkers/library/coast/tropical-beach-01.webp
+            alt: 'Waves on a sandy beach with green mountains behind.'
+          - src: twilight-trekkers/library/coast/turtle-beach-01.webp
+            alt: 'Sea turtles resting on a sandy beach by the surf.'
+      - label: 'Drone'
+        items:
+          - src: twilight-trekkers/library/aerial/painted-badlands-drone-01.webp
+            alt: 'Drone view of the Bentonite Hills: swirling purple, blue and orange clay with a tiny person lying in it.'
+            big: true
+            focus: '48% 55%'
+          - src: twilight-trekkers/library/aerial/painted-hills-drone-01.webp
+            alt: 'Drone view of striped red and white hills with two tiny people.'
+            big: true
+            focus: '50% 40%'
+          - src: twilight-trekkers/library/aerial/autumn-trail-drone-01.webp
+            alt: 'Drone view of a trail through red and orange autumn trees toward a peak.'
+          - src: twilight-trekkers/library/aerial/painted-swirl-drone-01.webp
+            alt: 'Drone view of concentric red, white and green rock swirls.'
+          - src: twilight-trekkers/library/aerial/autumn-canopy-drone-01.webp
+            alt: 'Drone view straight down onto red and orange autumn trees.'
+          - src: twilight-trekkers/library/aerial/salt-flat-drone-sunset-01.webp
+            alt: 'A drone silhouetted over a flat lake at sunset.'
+          - src: twilight-trekkers/library/aerial/scenic-flight-01.webp
+            alt: 'The view from a small plane''s wing over red canyons and blue ponds.'
+      - label: 'The two of us'
+        items:
+          - src: twilight-trekkers/library/us/antelope-canyon-couple-01.webp
+            alt: 'Brendon and Kaylee standing together in a glowing orange slot canyon.'
+            big: true
+            focus: '50% 58%'
+          - src: twilight-trekkers/library/us/curved-palm-beach-01.webp
+            alt: 'A curved palm over a beach, Brendon and Kaylee at the water.'
+            big: true
+            focus: '55% 75%'
+          - src: twilight-trekkers/library/us/alpine-lake-couple-01.webp
+            alt: 'Brendon and Kaylee kissing in front of a turquoise lake under a granite peak.'
+            big: true
+            focus: '50% 50%'
+          - src: twilight-trekkers/library/us/salt-flat-reflection-01.webp
+            alt: 'Brendon and Kaylee walking on a mirror-like salt flat at sunset.'
+          - src: twilight-trekkers/library/us/cliff-ledge-walk-01.webp
+            alt: 'Brendon and Kaylee walking a narrow red-rock ledge inside a cave mouth, a green canyon below.'
+          - src: twilight-trekkers/library/us/joshua-tree-couple-01.webp
+            alt: 'Brendon and Kaylee in silhouette under a Joshua tree at dusk.'
+          - src: twilight-trekkers/library/us/mountain-lake-couple-01.webp
+            alt: 'Brendon and Kaylee on a slope above a lake that mirrors a green peak.'
+          - src: twilight-trekkers/library/us/palm-silhouette-01.webp
+            alt: 'Brendon and Kaylee dancing in silhouette under tall palms on a beach.'
+          - src: twilight-trekkers/library/us/cabin-silhouette-01.webp
+            alt: 'Brendon and Kaylee dancing in silhouette in a cabin window at sunset.'
+          - src: twilight-trekkers/library/us/beach-hug-01.webp
+            alt: 'One of them lifting the other in a hug on a beach, waves behind.'
+
+# Every brand, stay and excursion we've worked with (34), grouped, with the
+# Collaborations page's lines for the eleven it shows. The list itself lives
+# in src/components/twilight/data.ts (BRANDS), shared with /twilight-trekkers/
+# and the homepage (src/lib/study-lists.ts).
+lists:
+  - id: brands
+    heading: Brands we've worked with
+    intro: |
+      We've worked with ==34 brands, stays and excursions==. Eleven of them are on our Collaborations page, each with a photo from the trip and a line from us on why we liked it. The page ends with two ways in for brands: email us, or request the media kit, which we send directly rather than put in the menu.
+    from: twilight-brands
+
+# The reels: 8 s loops cut from our Instagram reels, in
+# public/video/twilight/. The study shows `reels`; the brand page shows
+# both sets.
+reelSets:
+  - id: reels
+    heading: The reels
+    intro: |
+      Short loops from our Instagram reels. I fly the drone and make the drone videos.
+    items:
+      - src: /video/twilight/utah-fall-drone.mp4
+        poster: /video/twilight/utah-fall-drone.webp
+        label: 'Reel: drone footage over red and orange fall maples on a steep mountainside, ending on a rocky peak at dusk.'
+      - src: /video/twilight/canyon-alcove-water.mp4
+        poster: /video/twilight/canyon-alcove-water.webp
+        label: 'Reel: one slow shot of the Golden Cathedral in Neon Canyon, a towering sandstone alcove reflected in still water.'
+      - src: /video/twilight/north-cascades.mp4
+        poster: /video/twilight/north-cascades.webp
+        label: 'Reel: jagged peaks, a turquoise lake from above, a hiker on a ridge, a swim and an alpine lake.'
+      - src: /video/twilight/big-island.mp4
+        poster: /video/twilight/big-island.webp
+        label: 'Reel: a lava-tube trail bridge, a cloudy lava coast, snorkeling, a freedive and a sunset over black rocks.'
+  - id: more-reels
+    heading: More reels
+    items:
+      - src: /video/twilight/olympic-forest.mp4
+        poster: /video/twilight/olympic-forest.webp
+        label: 'Reel: a log bridge in a sunlit forest, a mossy waterfall, an elk herd and moss-draped rainforest.'
+      - src: /video/twilight/parks-montage.mp4
+        poster: /video/twilight/parks-montage.webp
+        label: 'Reel: fast cuts through the national parks — the Subway, Delicate Arch, a bison on the road, an alpine lake, giant sequoias and the Tetons.'
+      - src: /video/twilight/painted-hills-drone.mp4
+        poster: /video/twilight/painted-hills-drone.webp
+        label: 'Reel: drone footage over striped red and white painted hills, two tiny people on top.'
+      - src: /video/twilight/canyoneering-slot.mp4
+        poster: /video/twilight/canyoneering-slot.webp
+        label: 'Reel: a rappel into a narrow slot canyon, then two people in helmets stemming up a polished slot.'
+
+mockups:
+  - id: lake
+    src: twilight-trekkers/photo-lake.webp
+    alt: A turquoise alpine lake below jagged grey peaks, with a trail winding down through a green meadow.
+    caption: One of our photographs. The site is built to show these as big as the screen allows.
+    crop: { x: 0, y: 0.3, w: 1, h: 0.46 }
+
+story:
+  # The one "site today" section, kept short on purpose.
+  - heading: The site today
+    body: |
+      The website is a custom WordPress theme I designed and built, with no page builder. ACF Pro drives the content on every template, Rank Math handles SEO, a Formidable form takes brand partnerships and everyone else, and Mailchimp runs the Join the Trek newsletter.
+
+      It serves both audiences — the journal and trail guides for the people who follow along, the Collaborations page and the media kit for brands — and it shipped with empty fields instead of placeholder content, so ==nothing fake can render== on a brand built on real photos.
+
+      [See the site](https://thetwilighttrekkers.com/)
+  - heading: Shipping it
+    body: |
+      The rebuild ran from a written spec to a task-by-task plan to commits, one task at a time, each leaving the theme working.
+
+      The theme carries version 2.0.0, because this was a clean rebuild of templates that already existed, not a first attempt.
+
+      Handing someone an empty CMS and a login is how most rebuilds end, and it's why so many of them sit unfinished.
+
+      This one ==shipped with a launch plan== instead: every page prioritized, the whole thing time-boxed into five evening sessions of about an hour, and the actual copy — headlines, story paragraphs, the first journal post — written and ready to paste.
+
+      The content problem is the one that kills rebuilds, so it got planned like the code did.
+
+  - heading: The content model, in git
+    body: |
+      WordPress stores ACF field definitions in the database.
+
+      That means the shape of every page lives somewhere that can't be code-reviewed, can't be diffed, and doesn't travel with a deploy.
+
+      On a site where all nine templates are ACF-driven, that turns the database into ==an undeclared dependency of the theme==. A field renamed in production silently empties a section, and there is no commit anywhere that explains why.
+
+      All sixteen field groups are committed as JSON in the theme's `acf-json/` directory.
+
+      The content model is version-controlled alongside the templates that read it, so ==a change to page structure arrives as a reviewable diff== rather than as an undocumented edit made in an admin screen at some point in the past.
+
+scroller:
+  heading: Walk through the site
+  intro: |
+    Scroll to move down each page. The home page speaks to both audiences; Collaborations is for brands.
+  pages:
+    - id: home
+      label: The home page
+      url: thetwilighttrekkers.com
+      src: twilight-trekkers/fullpage/home.webp
+      alt: The full home page of thetwilighttrekkers.com, from the waterfall hero to the footer.
+      annotations:
+        - label: Our own photo, first
+          body: The page opens on one of our photographs, with who we are and what the site is in the headline.
+          x: 0.07
+          y: 0.06
+        - label: Who we are
+          body: A short introduction to the two of us, with a link to the About page.
+          x: 0.49
+          y: 0.245
+        - label: Our Work
+          body: Brand work, right on the home page — Rush Creek Lodge, 32Degrees, Mad Moose Rentals.
+          x: 0.07
+          y: 0.43
+        - label: A Few of Our Favorites
+          body: The places, gear and little things we can't stop talking about.
+          x: 0.07
+          y: 0.523
+        - label: From the Journal
+          body: The latest trail guides and stories, with a link to all of them.
+          x: 0.07
+          y: 0.623
+        - label: Brands We've Worked With
+          body: A row of partner logos.
+          x: 0.07
+          y: 0.755
+        - label: Follow Our Journey
+          body: The way back to Instagram.
+          x: 0.07
+          y: 0.818
+        - label: Join the Trek
+          body: The Mailchimp newsletter signup.
+          x: 0.28
+          y: 0.885
+    - id: collaborations
+      label: Collaborations
+      url: thetwilighttrekkers.com/collaborations
+      src: twilight-trekkers/fullpage/collaborations.webp
+      alt: The full Collaborations page, from "Let's Create Together" through eleven partner brands to "Ready To Work With Us?".
+      annotations:
+        - label: Let's Create Together
+          body: The page opens with who we partner with and a Get In Touch button.
+          x: 0.07
+          y: 0.024
+        - label: One partner at a time
+          body: Each brand gets a photo from the trip, its logo, and a line on why we liked it.
+          x: 0.49
+          y: 0.104
+        - label: Eleven brands
+          body: From lodges and outdoor gear to a scenic flight over Canyonlands and a guided canyoneering day.
+          x: 0.49
+          y: 0.398
+        - label: Ready To Work With Us?
+          body: Two ways in — email us, or request the media kit, which isn't in the menu.
+          x: 0.07
+          y: 0.905
+
+strips:
+  - id: pages
+    heading: More of the site
+    items:
+      - src: twilight-trekkers/about.webp
+        alt: 'The About page: "Our Story — Two adventures, one camera, endless horizons" over a photo of the two of us hugging in front of a mountain in autumn.'
+        label: About — our story
+      - src: twilight-trekkers/gear.webp
+        alt: 'The gear page: "Our Travel Photography Gear" on a pink header, then a Canyoneering Gear card for a Blue Water 9.2mm static rope.'
+        label: Gear reviews
+      - src: twilight-trekkers/contact-form.webp
+        alt: 'The Say Hello contact page: "Whether it''s an expedition, a brand partnership, or just saying hi", above a form for name, email, subject and message.'
+        label: Say Hello — the Formidable contact form
+
+keyDecisions:
+  - heading: Ship empty fields, not placeholder content
+    body: |
+      No stock images, no lorem ipsum, no "Your headline here" rendered to a live page. ==An unfilled section renders as nothing at all.==
+
+      That costs you a site that looks finished on day one.
+
+      It buys you a site that can never accidentally publish something fake — which for a brand whose entire value is that the photographs are real is not a small thing.
+  - heading: Keep the media kit out of the menu
+    body: |
+      The media kit is its own template, kept out of the navigation entirely.
+
+      It exists for exactly one audience, and brands get the link directly. Putting it in the menu would have ==advertised to the other audience that they're being marketed at==.
+  - heading: One feed, not three sections
+    body: |
+      Journal entries, photo essays and gear reviews could have been three sections.
+
+      Nobody would have navigated between them. They share ==one feed with category tabs== instead.
+  - heading: Let the photographs be the loudest thing
+    body: |
+      Light and editorial, not dark and heavy. Serif headings, a soft palette, plenty of white space.
+
+      On a photography site, ==the photographs being the loudest thing on every screen== is the only defensible hierarchy.
+
+hardProblem:
+  title: Content for brands and followers
+  punchline: What our followers engage with keeps changing. It took a lot of trial and error, and it still does.
+  problem: |
+    The hardest problem is making reels and content that work with brands, while staying on top of our followers.
+
+    That means ==knowing what our followers actually want to engage with==.
+  assumption: |
+    I figured that if our followers liked something, doing the same thing again would land the same way.
+  found: |
+    It doesn't. They like something, then we do the same thing and they don't.
+  fix: |
+    So we test a lot, to see ==what actually catches our followers' attention== and what brings in new ones.
+  verified: |
+    It's ongoing. There's no point where this is solved, so the testing never stops.
+
+result: |
+  This project established Twilight Trekkers as ==a recognizable outdoor brand== by combining photography, videography, and storytelling to inspire exploration and connect with a growing community of adventurers.
+
+  About 26k people follow along on Instagram, and we've worked with 34 brands, stays and excursions.
+
+  The website is live at thetwilighttrekkers.com, filled with our own photography rather than placeholders.
+
+  - [Visit thetwilighttrekkers.com](https://thetwilighttrekkers.com/)
+  - [Follow @thetwilighttrekkers on Instagram](https://www.instagram.com/thetwilighttrekkers/)
+  - [See the photos and the brand](/twilight-trekkers/)
+
+fullStack:
+  - group: Brand and media
+    items: [Photography, Drone footage, Drone video editing, Instagram reels, Lightroom, Blog writing]
+  - group: Front end
+    items: [PHP templates, CSS, JavaScript, Playfair Display, Inter]
+  - group: CMS
+    items: [WordPress, Custom theme, ACF Pro, ACF local JSON]
+  - group: SEO, forms and email
+    items: [Rank Math, Formidable Forms, Mailchimp]
+
+next:
+  href: /work/quickstrike/
+  name: QuickStrike
+  line: Rebuilding a dealer-focused marketing site inside an older production environment.

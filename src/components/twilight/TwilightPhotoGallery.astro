@@ -1,0 +1,575 @@
+---
+import { Image, getImage } from 'astro:assets';
+import { GALLERY_GROUPS, GALLERY_PHOTOS, type GalleryPhoto } from './gallery-data';
+import { longestWordEm } from '../../lib/display-fit';
+
+/*
+  Every photo, once (/twilight-trekkers/, "The gallery"). 136 photographs
+  from the library in seven groups, each opening in a lightbox.
+
+  Layout, per group:
+    - The big tiles (Best picks with a large enough source, see
+      gallery-data.ts) lead, side by side at one height (a justified row:
+      each grows in proportion to its aspect ratio from a zero basis, so
+      they share a height and fill the width exactly). When they're too few
+      to fill a row at a sensible height (combined ratio under BIG_ROW_AR),
+      the group's label sits in the row beside them instead of above, so
+      the row is full rather than over-tall.
+    - The rest, in justified rows fixed at build time, split so every row
+      is about REST_ROW_AR heights wide: no short last row, no gaps.
+  Phones and tablets: the big tiles stack at full width and the rest
+  become two (three on tablets) columns at their own proportions.
+
+  Nothing is cropped: every tile has its photo's aspect ratio (so no
+  layout shift either). Tiles are 400/800px webp (big ones up to 1200,
+  never past the source), lazy and async. The lightbox image (1000/1600)
+  is only requested when a photo is opened.
+*/
+
+const BIG_ROW_AR = 2.6;
+const REST_ROW_AR = 5.5;
+
+const FILES = import.meta.glob<ImageMetadata>(
+  '../../content/projects/images/twilight-trekkers/library/*/*.webp',
+  { eager: true, import: 'default' },
+);
+const imageFor = (f: string): ImageMetadata => {
+  const img = FILES[`../../content/projects/images/twilight-trekkers/library/${f}`];
+  if (!img) throw new Error(`Gallery photo not found: ${f}`);
+  return img;
+};
+
+/* Contiguous split into k rows with ratio sums as even as possible. Greedy
+   on cumulative ratio, which is exact enough here and linear. */
+const splitRows = <T extends { ar: number }>(items: T[]): T[][] => {
+  if (!items.length) return [];
+  const total = items.reduce((s, i) => s + i.ar, 0);
+  const k = Math.max(1, Math.round(total / REST_ROW_AR));
+  const rows: T[][] = [];
+  let acc = 0;
+  let row: T[] = [];
+  for (const it of items) {
+    const mid = acc + it.ar / 2;
+    const target = ((rows.length + 1) * total) / k;
+    if (row.length && mid > target && rows.length < k - 1) {
+      rows.push(row);
+      row = [];
+    }
+    row.push(it);
+    acc += it.ar;
+  }
+  rows.push(row);
+  return rows;
+};
+
+type Tile = GalleryPhoto & { ar: number; img: ImageMetadata; full: string; fullSm: string; index: number; group: string };
+
+let index = 0;
+const groups = await Promise.all(
+  GALLERY_GROUPS.map(async (g) => {
+    const photos = GALLERY_PHOTOS.filter((p) => p.f.startsWith(`${g.id}/`));
+    const tiles: Tile[] = [];
+    for (const p of photos) {
+      const img = imageFor(p.f);
+      const [lg, sm] = await Promise.all([
+        getImage({ src: img, width: Math.min(1600, img.width), format: 'webp' }),
+        getImage({ src: img, width: Math.min(1000, img.width), format: 'webp' }),
+      ]);
+      tiles.push({ ...p, ar: p.w / p.h, img, full: lg.src, fullSm: sm.src, index: 0, group: g.label });
+    }
+    const big = tiles.filter((t) => t.big);
+    /* Phones: portrait big tiles go two to a row; a portrait left without a
+       partner is shown full width, cropped to 4:5 on its focus point. */
+    const portraits = big.filter((t) => t.ar < 1);
+    const solo = portraits.length % 2 === 1 ? portraits[portraits.length - 1] : undefined;
+    const rest = tiles.filter((t) => !t.big);
+    const bigAr = big.reduce((s, t) => s + t.ar, 0);
+    return { ...g, count: tiles.length, big, bigAr, solo, labelInRow: big.length > 0 && bigAr < BIG_ROW_AR, rows: splitRows(rest) };
+  }),
+);
+/* Lightbox order = reading order: each group's big tiles, then its rows. */
+for (const g of groups) for (const t of [...g.big, ...g.rows.flat()]) t.index = index++;
+const total = index;
+
+const widths = (t: Tile, big: boolean) => [400, 800, ...(big ? [1200] : [])].filter((w) => w <= t.img.width);
+---
+
+<section class="cs-sec tg" aria-labelledby="tg-title" data-tg>
+  <div class="container-bleed">
+    <h2 id="tg-title" class="text-heading text-fg md:text-display" data-split>The gallery</h2>
+    <p class="mt-stack max-w-measure text-body text-fg-muted" data-reveal>
+      Every photo in our library, once each: {total}, grouped by the kind of place. Tap one to see it larger.
+    </p>
+
+    {
+      groups.map((g) => (
+        <div class="tg-group" role="group" aria-labelledby={`tg-${g.id}`}>
+          {!g.labelInRow && (
+            <h3 id={`tg-${g.id}`} class="tg-label" data-reveal>
+              <span class="text-title text-fg">{g.label}</span>
+              <span class="tg-count text-body text-fg-muted">{g.count} photos</span>
+            </h3>
+          )}
+
+          {g.big.length > 0 && (
+            <div class:list={['tg-big', g.labelInRow && 'tg-big--label']}>
+              {g.labelInRow && (
+                <h3
+                  id={`tg-${g.id}`}
+                  class="tg-label tg-label--row"
+                  style={`--grow: ${Math.max(0.9, BIG_ROW_AR - g.bigAr).toFixed(3)}; --fit: ${longestWordEm(g.label)}`}
+                  data-reveal
+                >
+                  <span class="text-heading text-fg">{g.label}</span>
+                  <span class="tg-count text-body text-fg-muted">{g.count} photos</span>
+                </h3>
+              )}
+              {g.big.map((t) => (
+                <button
+                  type="button"
+                  class:list={['tg-tile', t.ar >= 1 && 'tg-tile--wide', t === g.solo && 'tg-tile--solo']}
+                  style={`--ar: ${t.ar.toFixed(4)}; --focus: ${t.focus ?? '50% 50%'}; aspect-ratio: ${t.w} / ${t.h}`}
+                  aria-haspopup="dialog"
+                  data-tg-tile={t.index}
+                  data-full={t.full}
+                  data-full-sm={t.fullSm}
+                  data-w={t.w}
+                  data-h={t.h}
+                  data-group={t.group}
+                >
+                  <Image
+                    src={t.img}
+                    alt={t.alt}
+                    widths={widths(t, true)}
+                    sizes="(min-width: 64rem) 45vw, 92vw"
+                    format="webp"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div class="tg-rest">
+            {g.rows.map((row) => (
+              <div class="tg-row">
+                {row.map((t) => (
+                  <button
+                    type="button"
+                    class="tg-tile"
+                    style={`--ar: ${t.ar.toFixed(4)}; aspect-ratio: ${t.w} / ${t.h}`}
+                    aria-haspopup="dialog"
+                    data-tg-tile={t.index}
+                    data-full={t.full}
+                    data-full-sm={t.fullSm}
+                    data-w={t.w}
+                    data-h={t.h}
+                    data-group={t.group}
+                  >
+                    <Image
+                      src={t.img}
+                      alt={t.alt}
+                      widths={widths(t, false)}
+                      sizes="(min-width: 64rem) 22vw, (min-width: 48rem) 31vw, 46vw"
+                      format="webp"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </button>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+
+  {/* The lightbox. A native modal dialog: focus stays inside while it's
+      open, Esc closes it, and the page behind is inert. */}
+  <dialog class="tg-lb" data-tone="dark" aria-label="Photo viewer" data-tg-lb data-lenis-prevent>
+    <div class="tg-lb__stage" data-tg-stage>
+      <img class="tg-lb__img" alt="" decoding="async" data-tg-img />
+    </div>
+    <div class="tg-lb__bar">
+      <p class="tg-lb__caption">
+        <span class="block text-body text-fg" data-tg-alt></span>
+        <span class="mt-1 block text-small text-fg-muted">
+          <span data-tg-group></span> · <span class="tabular-nums" data-tg-count></span> of {total}
+        </span>
+      </p>
+      <div class="tg-lb__nav">
+        <button type="button" class="tg-lb__btn" data-tg-prev>
+          <span aria-hidden="true">←</span> Previous
+        </button>
+        <button type="button" class="tg-lb__btn" data-tg-next>
+          Next <span aria-hidden="true">→</span>
+        </button>
+        <button type="button" class="tg-lb__btn tg-lb__close" data-tg-close>Close</button>
+      </div>
+    </div>
+  </dialog>
+</section>
+
+<style>
+  .tg-group {
+    margin-top: var(--spacing-block);
+  }
+  .tg-label {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.75rem;
+    row-gap: 0.25rem;
+    margin-bottom: 1rem;
+    font: inherit;
+  }
+
+  /* Tiles: the photo at its own proportions, nothing cropped. */
+  .tg-tile {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    border-radius: var(--radius-control);
+    background: var(--color-surface-raised);
+    cursor: zoom-in;
+  }
+  .tg-tile :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: scale var(--duration-slow) var(--ease-out-soft);
+  }
+  @media (hover: hover) {
+    .tg-tile:hover :global(img) {
+      scale: 1.03;
+    }
+  }
+  .tg-tile:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  /* ── Phones and tablets ─────────────────────────────────────────────── */
+  .tg-big {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.375rem;
+    margin-bottom: 0.375rem;
+  }
+  .tg-big .tg-tile {
+    width: 100%;
+  }
+  .tg-big .tg-tile--wide,
+  .tg-big .tg-tile--solo,
+  .tg-big .tg-label {
+    grid-column: 1 / -1;
+  }
+  @media (max-width: 63.999rem) {
+    .tg-big .tg-tile--solo {
+      aspect-ratio: 4 / 5 !important;
+    }
+    .tg-big .tg-tile--solo :global(img) {
+      object-position: var(--focus);
+    }
+  }
+  .tg-label--row {
+    display: flex;
+    margin-bottom: 0.625rem;
+  }
+  .tg-label--row .text-heading {
+    font-family: var(--font-body);
+    font-stretch: normal;
+    text-transform: none;
+    font-size: var(--text-title);
+    font-weight: var(--text-title--font-weight);
+    letter-spacing: var(--text-title--letter-spacing);
+    line-height: var(--text-title--line-height);
+  }
+  .tg-rest {
+    columns: 2;
+    column-gap: 0.375rem;
+  }
+  @media (min-width: 48rem) {
+    .tg-rest {
+      columns: 3;
+    }
+  }
+  .tg-row {
+    display: contents;
+  }
+  .tg-rest .tg-tile {
+    width: 100%;
+    margin-bottom: 0.375rem;
+    break-inside: avoid;
+  }
+
+  /* ── Desktop: justified rows ──────────────────────────────────────────── */
+  @media (min-width: 64rem) {
+    .tg-big {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .tg-big .tg-tile {
+      flex: var(--ar) 1 0;
+      width: auto;
+      min-width: 0;
+    }
+    /* The label as part of the row: it takes what the photos leave, and
+       sits at the top of that column. It is a size container, and the
+       name is sized so its longest word (--fit, in em, from
+       lib/display-fit) always fits the column's width: the heading step
+       when there's room, smaller when the column is narrow (a small
+       laptop or a half-width window). Words wrap; nothing is clipped or
+       runs under the photos. */
+    .tg-label--row {
+      flex: var(--grow) 1 0;
+      min-width: 14rem;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+      margin: 0;
+      padding-right: var(--grid-gutter);
+      container-type: inline-size;
+    }
+    .tg-label--row .text-heading {
+      display: block;
+      max-width: 100%;
+      overflow-wrap: break-word;
+      font-family: var(--font-display);
+      font-stretch: var(--display-stretch);
+      text-transform: var(--display-case);
+      font-size: min(var(--text-heading), calc(100cqi / (var(--fit) * 1.06)));
+      font-weight: var(--text-heading--font-weight);
+      letter-spacing: var(--text-heading--letter-spacing);
+      line-height: var(--text-heading--line-height);
+    }
+    .tg-label--row .tg-count {
+      margin-top: 0.75rem;
+    }
+    .tg-rest {
+      columns: auto;
+    }
+    .tg-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .tg-rest .tg-tile {
+      flex: var(--ar) 1 0;
+      width: auto;
+      min-width: 0;
+      margin: 0;
+    }
+  }
+
+  /* ── Lightbox ───────────────────────────────────────────────────────── */
+  .tg-lb {
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    /* A dark band at every brightness (data-tone="dark"). */
+    background: var(--color-surface);
+    color: var(--color-fg);
+    overscroll-behavior: contain;
+  }
+  .tg-lb[open] {
+    display: grid;
+    grid-template-rows: 1fr auto;
+  }
+  .tg-lb::backdrop {
+    background: rgb(0 0 0 / 0.6);
+  }
+  .tg-lb__stage {
+    position: relative;
+    min-height: 0;
+    touch-action: pan-y;
+  }
+  /* Centred in the space above the bar, as large as fits, never cropped. */
+  .tg-lb__img {
+    position: absolute;
+    inset: 1rem var(--grid-margin) 0;
+    margin: auto;
+    max-width: calc(100% - 2 * var(--grid-margin));
+    max-height: calc(100% - 1rem);
+    width: auto;
+    height: auto;
+    border-radius: var(--radius-control);
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  .tg-lb__bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    padding: 1rem var(--grid-margin) max(1rem, env(safe-area-inset-bottom));
+  }
+  .tg-lb__caption {
+    flex: 1 1 18rem;
+    max-width: 60ch;
+  }
+  .tg-lb__nav {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .tg-lb__btn {
+    min-height: 2.75rem;
+    padding: 0 1rem;
+    border: 1px solid var(--color-edge-strong);
+    border-radius: var(--radius-control);
+    color: var(--color-fg);
+    font-size: var(--text-small);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .tg-lb__btn:hover {
+    background: var(--color-surface-raised);
+  }
+  .tg-lb__btn:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+  .tg-lb__close {
+    background: var(--color-accent-fill);
+    border-color: var(--color-accent-fill);
+    color: var(--color-on-accent);
+  }
+  .tg-lb__close:hover {
+    background: var(--color-accent-fill);
+    filter: brightness(1.06);
+  }
+  @media (max-width: 47.999rem) {
+    .tg-lb__nav {
+      width: 100%;
+    }
+    .tg-lb__nav .tg-lb__btn {
+      flex: 1;
+      padding: 0 0.5rem;
+    }
+  }
+</style>
+
+<script>
+  import { registerMotion, motion } from '../../scripts/motion';
+
+  /* The lightbox. Registered with reduced: true: it isn't motion. */
+  const gallery = () => {
+    const root = document.querySelector<HTMLElement>('[data-tg]');
+    const lb = root?.querySelector<HTMLDialogElement>('[data-tg-lb]');
+    if (!root || !lb) return;
+    const tiles = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-tg-tile]')).sort(
+      (a, b) => Number(a.dataset.tgTile) - Number(b.dataset.tgTile),
+    );
+    const img = lb.querySelector<HTMLImageElement>('[data-tg-img]')!;
+    const altEl = lb.querySelector<HTMLElement>('[data-tg-alt]')!;
+    const groupEl = lb.querySelector<HTMLElement>('[data-tg-group]')!;
+    const countEl = lb.querySelector<HTMLElement>('[data-tg-count]')!;
+    const stage = lb.querySelector<HTMLElement>('[data-tg-stage]')!;
+    let current = 0;
+    let opener: HTMLButtonElement | null = null;
+
+    const show = (i: number) => {
+      current = (i + tiles.length) % tiles.length;
+      const t = tiles[current];
+      const thumb = t.querySelector('img');
+      img.width = Number(t.dataset.w);
+      img.height = Number(t.dataset.h);
+      img.alt = thumb?.alt ?? '';
+      img.sizes = '100vw';
+      img.srcset = `${t.dataset.fullSm} 1000w, ${t.dataset.full} 1600w`;
+      img.src = t.dataset.full ?? '';
+      altEl.textContent = thumb?.alt ?? '';
+      groupEl.textContent = t.dataset.group ?? '';
+      countEl.textContent = String(current + 1);
+    };
+
+    const open = (t: HTMLButtonElement) => {
+      opener = t;
+      show(Number(t.dataset.tgTile));
+      motion.lenis?.stop();
+      lb.showModal();
+      lb.querySelector<HTMLButtonElement>('[data-tg-next]')?.focus();
+    };
+    const onClose = () => {
+      motion.lenis?.start();
+      /* Back to the tile of the photo you were looking at. */
+      (tiles[current] ?? opener)?.focus();
+    };
+
+    const onTile = (e: Event) => open(e.currentTarget as HTMLButtonElement);
+    const prev = () => show(current - 1);
+    const next = () => show(current + 1);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prev();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        next();
+      }
+    };
+    /* A tap on the dark area around the photo closes it. */
+    const onStageClick = (e: MouseEvent) => {
+      if (e.target === stage) lb.close();
+    };
+
+    /* Swipe on phones: a mostly sideways drag of 40px or more. */
+    let sx = 0;
+    let sy = 0;
+    let tracking = false;
+    const down = (e: PointerEvent) => {
+      if (e.pointerType === 'mouse') return;
+      tracking = true;
+      sx = e.clientX;
+      sy = e.clientY;
+    };
+    const up = (e: PointerEvent) => {
+      if (!tracking) return;
+      tracking = false;
+      const dx = e.clientX - sx;
+      const dy = e.clientY - sy;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) (dx < 0 ? next : prev)();
+    };
+
+    const prevBtn = lb.querySelector('[data-tg-prev]')!;
+    const nextBtn = lb.querySelector('[data-tg-next]')!;
+    const closeBtn = lb.querySelector('[data-tg-close]')!;
+    const close = () => lb.close();
+
+    tiles.forEach((t) => t.addEventListener('click', onTile));
+    prevBtn.addEventListener('click', prev);
+    nextBtn.addEventListener('click', next);
+    closeBtn.addEventListener('click', close);
+    lb.addEventListener('keydown', onKey);
+    lb.addEventListener('close', onClose);
+    stage.addEventListener('click', onStageClick);
+    stage.addEventListener('pointerdown', down);
+    stage.addEventListener('pointerup', up);
+    stage.addEventListener('pointercancel', () => (tracking = false));
+
+    return () => {
+      tiles.forEach((t) => t.removeEventListener('click', onTile));
+      prevBtn.removeEventListener('click', prev);
+      nextBtn.removeEventListener('click', next);
+      closeBtn.removeEventListener('click', close);
+      lb.removeEventListener('keydown', onKey);
+      lb.removeEventListener('close', onClose);
+      stage.removeEventListener('click', onStageClick);
+      stage.removeEventListener('pointerdown', down);
+      stage.removeEventListener('pointerup', up);
+      if (lb.open) lb.close();
+    };
+  };
+
+  registerMotion(gallery, { reduced: true });
+</script>
