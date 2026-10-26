@@ -1,0 +1,32 @@
+---
+/*
+  A plain browser window: three dots, an address bar, and a 16:10 view the
+  slot fills. Neutral greys from the current --lum scope, the site's one
+  frame shadow, no colour. Pass `tall` to let the view take its content's
+  height instead of the fixed ratio.
+*/
+
+interface Props {
+  url?: string;
+  class?: string;
+  viewClass?: string;
+  tall?: boolean;
+  /** View aspect ratio, e.g. "2880 / 1350" to match a set of captures. */
+  ratio?: string;
+  /** Extra attributes for the view element (data hooks, a11y). */
+  viewAttrs?: Record<string, string | number>;
+}
+
+const { url, class: cls, viewClass, tall = false, ratio, viewAttrs = {} } = Astro.props;
+const viewStyle = tall ? 'aspect-ratio: auto' : ratio ? `aspect-ratio: ${ratio}` : undefined;
+---
+
+<div class:list={['cs-browser', cls]}>
+  <div class="cs-browser__bar" aria-hidden="true">
+    <span class="cs-browser__dots"><span></span><span></span><span></span></span>
+    {url && <span class="cs-browser__url">{url}</span>}
+  </div>
+  <div class:list={['cs-browser__view', viewClass]} style={viewStyle} {...viewAttrs}>
+    <slot />
+  </div>
+</div>

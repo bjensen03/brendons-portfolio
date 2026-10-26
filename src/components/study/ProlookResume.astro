@@ -1,0 +1,246 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Section from '../Section.astro';
+import { md } from '../../lib/markdown';
+import ExternalLink from '../ExternalLink.astro';
+
+/*
+  PROLOOK, before approval.
+
+  What /work/prolook/ shows until its studies are approved. It reads from
+  those studies and uses only what a resume would carry: each site's name, what
+  kind of codebase it is, its headline, the role, the stack and where it lives.
+  No at-a-glance figures, no decisions, no hard problems — the parts that
+  describe the client's work in detail stay in the drafts until there is a yes.
+
+  Built from the studies rather than written separately, so the day PROLOOK
+  approves, the full studies replace this without anything having to be
+  reconciled.
+*/
+
+const head = await getEntry('studies', 'prolook');
+const sites = (await getCollection('studies'))
+  .filter((s) => s.id === 'prolook' || s.data.parent === 'prolook')
+  .sort((a, b) => a.data.order - b.data.order);
+
+/* The opening line of the role section — who I am at PROLOOK, in my words. */
+const roleLine = head ? await md(head.data.myRole.split('\n\n')[0]) : '';
+
+const stackOf = (s: (typeof sites)[number]) =>
+  s.data.stack
+    ? s.data.stack.split(',').map((x) => x.trim())
+    : s.data.fullStack.flatMap((g) => g.items).slice(0, 8);
+---
+
+<Base
+  ogImage="/og/prolook.jpg"
+  title="PROLOOK Sports"
+  description={`${sites.length} sites at PROLOOK Sports — ${sites.map((s) => s.data.name).join(', ')}.`}
+>
+  <Section size="compact">
+    <p class="pl-eyebrow">{head?.data.company} · {head?.data.timeline}</p>
+    <h1 class="pl-title">{sites.length} sites.<br />One company.</h1>
+    <div class="pl-lede" set:html={roleLine} />
+  </Section>
+
+  <Section surface="sunken">
+    <ol class="pl-list">
+      {
+        sites.map((s, i) => (
+          <li class="pl-item">
+            <div class="pl-item__head">
+              <span class="pl-num">{String(i + 1).padStart(2, '0')}</span>
+              <div>
+                <h2 class="pl-name">{s.data.name}</h2>
+                {s.data.kind && <p class="pl-kind">{s.data.kind}</p>}
+              </div>
+            </div>
+
+            <div class="pl-item__body">
+              <p class="pl-label">{s.data.label}</p>
+              <dl class="pl-meta">
+                <div>
+                  <dt>Role</dt>
+                  <dd>{s.data.role}</dd>
+                </div>
+                <div>
+                  <dt>Timeline</dt>
+                  <dd>{s.data.timeline}</dd>
+                </div>
+                {s.data.live && (
+                  <div>
+                    <dt>Live</dt>
+                    <dd>
+                      <ExternalLink href={s.data.live}>{s.data.live.replace(/^https?:\/\//, '')}</ExternalLink>
+                    </dd>
+                  </div>
+                )}
+              </dl>
+              <ul class="pl-stack">
+                {stackOf(s).map((tool) => (
+                  <li>{tool}</li>
+                ))}
+              </ul>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </Section>
+
+  <Section>
+    <p class="pl-note">
+      The full write-ups for these — what I owned, the decisions, and the hardest
+      problem on each — are waiting on PROLOOK’s sign-off rather than on me.{' '}
+      <a href="/contact/">Ask me about any of it directly</a> in the meantime.
+    </p>
+  </Section>
+</Base>
+
+<style>
+  .pl-eyebrow {
+    font-family: var(--font-body);
+    font-size: var(--text-small);
+    color: var(--color-fg-muted);
+  }
+
+  .pl-title {
+    margin-top: 1.5rem;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2.6rem, 7vw, 5.25rem);
+    line-height: 0.94;
+    letter-spacing: var(--tracking-tightest);
+    color: var(--color-fg-bright);
+  }
+
+  .pl-lede {
+    margin-top: 2rem;
+    max-width: 58ch;
+  }
+
+  .pl-lede :global(p) {
+    font-family: var(--font-body);
+    font-size: var(--text-lead);
+    color: var(--color-fg);
+  }
+
+  .pl-list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .pl-item + .pl-item {
+    padding-top: clamp(2.5rem, 5vw, 4rem);
+    border-top: 1px solid var(--color-edge);
+  }
+
+  .pl-item__head {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+  }
+
+  .pl-num {
+    font-family: var(--font-mono);
+    font-size: var(--text-small);
+    color: var(--color-focus);
+  }
+
+  .pl-name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(1.6rem, 3.2vw, 2.375rem);
+    line-height: 1.04;
+    letter-spacing: var(--tracking-tightest);
+    color: var(--color-fg-bright);
+  }
+
+  .pl-kind {
+    margin-top: 0.35rem;
+    font-family: var(--font-body);
+    font-size: var(--text-small);
+    color: var(--color-fg-muted);
+  }
+
+  .pl-item__body {
+    margin-top: 1.5rem;
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  @media (min-width: 64rem) {
+    .pl-item__body {
+      padding-left: 3.25rem;
+      max-width: 64rem;
+    }
+  }
+
+  .pl-label {
+    max-width: 44ch;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.15rem, 2vw, 1.45rem);
+    line-height: 1.25;
+    letter-spacing: var(--tracking-tighter);
+    color: var(--color-fg-bright);
+  }
+
+  .pl-meta {
+    display: grid;
+    gap: 0.75rem 2.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  }
+
+  .pl-meta dt {
+    font-family: var(--font-body);
+    font-size: var(--text-small);
+    color: var(--color-fg-faint);
+  }
+
+  .pl-meta dd {
+    margin-top: 0.2rem;
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    color: var(--color-fg);
+  }
+
+  .pl-meta a {
+    color: var(--color-focus);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .pl-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+  }
+
+  .pl-stack li {
+    border: 1px solid var(--color-edge);
+    border-radius: 999px;
+    padding: 0.25rem 0.7rem;
+    font-family: var(--font-body);
+    font-size: var(--text-label);
+    color: var(--color-fg-muted);
+  }
+
+  .pl-note {
+    max-width: 62ch;
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    color: var(--color-fg-muted);
+  }
+
+  .pl-note a {
+    color: var(--color-focus);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+</style>

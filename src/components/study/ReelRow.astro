@@ -1,0 +1,108 @@
+---
+import ReelSlot from '../media/ReelSlot.astro';
+import { REELS_FULL } from '../media/reels';
+
+/*
+  Short vertical loops (reels:<id> on a study, and the Twilight Trekkers
+  brand page). Bare, no phone frame, and drawn at the size of the photos
+  around them: up to four across on desktop at one width, never taller than
+  the screen; phones get a swipe row with the next reel peeking in.
+
+  Playback is ReelSlot's: muted, preload none, plays only while on screen,
+  never under reduced motion, a pause button on each, and no more than two
+  playing on the page at once. Sound switches a loop to the whole reel; a
+  reel with no loop shows its poster and a play button.
+*/
+
+interface Props {
+  id: string;
+  heading: string;
+  introHtml?: string;
+  /* `src` is the muted loop (null for a reel with no loop); `fullSrc` the
+     whole reel with sound. A loop with a full-length version in REELS_FULL
+     gets it without being listed here. */
+  items: Array<{ src: string | null; poster: string; label: string; fullSrc?: string }>;
+  headingClass?: string;
+}
+
+const { id, heading, introHtml, items, headingClass = 'cs-h2' } = Astro.props;
+const base = `rr-${id}`;
+const reels = items.map((r) => ({
+  poster: r.poster,
+  alt: r.label,
+  focus: '50% 50%',
+  video: r.src,
+  fullSrc: r.fullSrc ?? REELS_FULL.find((f) => f.shortSrc && f.shortSrc === r.src)?.fullSrc,
+}));
+/* Four across for a short row; a long set (the brand page's 19) goes five
+   across on desktop so it isn't five screens of reels. */
+const cols = reels.length > 8 ? 5 : Math.min(reels.length, 4);
+---
+
+<section class="cs-sec rr" aria-labelledby={`${base}-title`}>
+  <div class="container-bleed">
+    <h2 id={`${base}-title`} class={headingClass} data-split>{heading}</h2>
+    {introHtml && <div class="cs-prose cs-intro" set:html={introHtml} data-reveal />}
+
+    <ul class="rr-list" data-lenis-prevent-horizontal role="list" style={`--n: ${cols}`} data-reveal-group>
+      {
+        reels.map((reel) => (
+          <li class="rr-item" data-reveal>
+            <ReelSlot reel={reel} sizes="(min-width: 48rem) 24vw, 72vw" />
+          </li>
+        ))
+      }
+      <li class="rr-spacer" aria-hidden="true" />
+    </ul>
+  </div>
+</section>
+
+<style>
+  .rr-list {
+    list-style: none;
+    padding: 0;
+    margin-top: var(--spacing-block);
+    display: grid;
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    gap: var(--grid-gutter);
+    /* Never taller than the screen: four 9:16 reels plus their gaps. */
+    max-width: min(100%, calc((100svh - 9rem) * 9 / 16 * var(--n) + (var(--n) - 1) * var(--grid-gutter)));
+  }
+  .rr-spacer {
+    display: none;
+  }
+
+  @media (max-width: 63.999rem) and (min-width: 48rem) {
+    .rr-list {
+      grid-template-columns: repeat(min(var(--n), 3), minmax(0, 1fr));
+      max-width: none;
+    }
+  }
+
+  @media (max-width: 47.999rem) {
+    .rr-list {
+      display: flex;
+      max-width: none;
+      gap: 0.75rem;
+      margin-inline: calc(-1 * var(--grid-margin));
+      padding-inline: var(--grid-margin);
+      overflow-x: auto;
+      overflow-y: hidden;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--grid-margin);
+      scrollbar-width: none;
+    }
+    .rr-list::-webkit-scrollbar {
+      display: none;
+    }
+    .rr-item {
+      flex: 0 0 min(72vw, calc(66svh * 9 / 16));
+      scroll-snap-align: start;
+    }
+    .rr-spacer {
+      display: block;
+      flex: 0 0 calc(var(--grid-margin) - 0.75rem);
+    }
+  }
+</style>

@@ -1,0 +1,33 @@
+---
+import { getEntry } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import CaseStudy from '../../../components/study/CaseStudy.astro';
+import ProlookResume from '../../../components/study/ProlookResume.astro';
+import { showDrafts } from '../../../lib/drafts';
+
+/*
+  PROLOOK.
+
+  Two versions of this page, chosen at build time. Once the study is approved
+  — or while drafts are being shown — it is the full case study, with the three
+  nested studies listed at the end. Until then it is the roles-and-stacks page,
+  which carries only what a resume would and is safe to publish today.
+
+  Same URL either way, so nothing linking here has to change on the day
+  permission arrives.
+*/
+
+const study = await getEntry('studies', 'prolook');
+const full = study && (study.data.approved || showDrafts());
+
+---
+
+{
+  full && study ? (
+    <Base title={`${study.data.name} — case study`} description={study.data.label} ogImage="/og/prolook.jpg">
+      <CaseStudy study={study} />
+    </Base>
+  ) : (
+    <ProlookResume />
+  )
+}

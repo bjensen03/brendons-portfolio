@@ -1,0 +1,21 @@
+---
+/*
+  One of a case study's two views (Quick overview / Full case study), the
+  tabpanel ViewSwitch controls. Without an id it renders its children bare,
+  so a study without an overview gets no wrapper at all.
+*/
+interface Props {
+  id?: 'overview' | 'full';
+}
+const { id } = Astro.props;
+---
+
+{
+  id ? (
+    <div id={`cs-${id}`} class="cs-view" role="tabpanel" aria-labelledby={`vw-tab-${id}`} tabindex="-1" data-cs-view={id}>
+      <slot />
+    </div>
+  ) : (
+    <slot />
+  )
+}

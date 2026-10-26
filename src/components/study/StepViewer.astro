@@ -1,0 +1,497 @@
+---
+import BrowserFrame from './BrowserFrame.astro';
+import PhoneFrame from './PhoneFrame.astro';
+import StudyImage from './StudyImage.astro';
+import StudyVideo from './StudyVideo.astro';
+import { showPlaceholders } from '../../lib/placeholders';
+import type { CollectionEntry } from 'astro:content';
+
+/*
+  Step viewer — click through a flow or a set of screens.
+
+  A real tab interface (WAI-ARIA tabs: arrow keys move between tabs, Home /
+  End jump, Tab moves into the panel), plus previous / next buttons. Steps
+  can be grouped ("Before", "Now") and the group names sit over their tabs.
+  Each panel is the screenshot in a browser window, the step's title and
+  note beside it, and optionally a magnified crop for UI too small to read
+  at window size, or a phone-width capture that replaces the desktop one on
+  small screens.
+
+  Panels share one grid cell, so switching never changes the section's
+  height. study-motion.ts (stepViewers) wires it — that runs with reduced
+  motion too (instant swaps). Without JS the tab row is hidden and every
+  step is shown in order.
+
+  Any step's image can be swapped or dropped in the yaml alone.
+*/
+
+type Data = CollectionEntry<'studies'>['data'];
+type Viewer = NonNullable<Data['viewers']>[number];
+
+interface Props {
+  viewer: Viewer;
+  introHtml?: string;
+  stepHtml: string[];
+}
+
+const { viewer, introHtml, stepHtml } = Astro.props;
+const base = `sv-${viewer.id}`;
+const RATIO = '2880 / 1350';
+
+/* Consecutive steps with the same group form one labelled cluster. */
+const clusters: Array<{ group?: string; steps: number[] }> = [];
+viewer.steps.forEach((s, i) => {
+  const last = clusters[clusters.length - 1];
+  if (last && last.group === s.group) last.steps.push(i);
+  else clusters.push({ group: s.group, steps: [i] });
+});
+const total = viewer.steps.length;
+/* `device: phone` — captures made at phone width, shown in a phone frame
+   beside the text (the Meal Planner). Same tabs, swipe and wiring. */
+const phone = viewer.device === 'phone';
+---
+
+<section class:list={['cs-sec sv', phone && 'sv--phone']} aria-labelledby={`${base}-title`} data-viewer>
+  <div class="container-bleed">
+    <h2 id={`${base}-title`} class="cs-h2" data-split>{viewer.heading}</h2>
+    {introHtml && <div class="cs-prose cs-intro" set:html={introHtml} data-reveal />}
+  </div>
+
+  {
+    viewer.lead && (
+      <div class="sv-lead" data-mask>
+        <div data-study-zoom>
+          <StudyImage src={viewer.lead.src} alt={viewer.lead.alt} crop={viewer.lead.crop} sizes="100vw" />
+        </div>
+      </div>
+    )
+  }
+
+  <div class="container-bleed sv-body">
+    <div class="sv-tabs" role="tablist" aria-label={viewer.heading} data-viewer-tabs>
+      {
+        clusters.map((c) => (
+          <div class="sv-cluster">
+            {c.group && (
+              <p class="sv-cluster__label text-small text-fg-muted" aria-hidden="true">
+                {c.group}
+              </p>
+            )}
+            <div class="sv-cluster__tabs">
+              {c.steps.map((i) => (
+                <button
+                  type="button"
+                  role="tab"
+                  id={`${base}-tab-${i}`}
+                  aria-controls={`${base}-panel-${i}`}
+                  aria-selected={i === 0 ? 'true' : 'false'}
+                  tabindex={i === 0 ? 0 : -1}
+                  class="sv-tab text-small"
+                  data-viewer-tab={i}
+                >
+                  {viewer.steps[i].group && <span class="sr-only">{viewer.steps[i].group}: </span>}
+                  {viewer.steps[i].tab}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="sv-panels" data-lenis-prevent-horizontal>
+      {
+        viewer.steps.map((step, i) => (
+          <div
+            class:list={['sv-panel', i === 0 && 'is-active']}
+            role="tabpanel"
+            id={`${base}-panel-${i}`}
+            aria-labelledby={`${base}-tab-${i}`}
+            data-viewer-panel={i}
+          >
+            <div class="sv-media">
+              {phone ? (
+                <PhoneFrame class="sv-phone" matte={viewer.matte}>
+                  {step.src ? (
+                    <StudyImage src={step.src} alt={step.alt ?? ''} crop={step.crop} fit={step.crop ? 'crop' : 'top'} sizes="(min-width: 64rem) 22rem, 80vw" />
+                  ) : (
+                    showPlaceholders && <div class="cs-need">[NEED — a screenshot for “{step.tab}”]</div>
+                  )}
+                </PhoneFrame>
+              ) : (
+              <BrowserFrame url={step.url} ratio={RATIO} class:list={['sv-frame', step.narrow && 'has-narrow']}>
+                {step.video ? (
+                  <StudyVideo video={step.video} />
+                ) : step.src ? (
+                  <StudyImage src={step.src} alt={step.alt ?? ''} sizes="(min-width: 64rem) 62vw, 100vw" fit="top" class="sv-pic" />
+                ) : (
+                  showPlaceholders && <div class="cs-need">[NEED — a screenshot or video for “{step.tab}”]</div>
+                )}
+              </BrowserFrame>
+              )}
+              {!phone && step.narrow && (
+                <div class="sv-narrow">
+                  <StudyImage src={step.narrow} alt={step.alt ?? ''} sizes="90vw" />
+                </div>
+              )}
+            </div>
+
+            <div class="sv-text">
+              <p class="text-small text-fg-muted">
+                {step.group && <span>{step.group} · </span>}
+                Step {i + 1} of {total}
+              </p>
+              <h3 class="mt-2 text-title text-fg">{step.title}</h3>
+              <div class="cs-prose mt-4" set:html={stepHtml[i]} />
+              {step.detail && step.src && (
+                <figure class="sv-detail">
+                  <StudyImage src={step.src} alt="" crop={step.detail} sizes="(min-width: 64rem) 28vw, 80vw" />
+                  <figcaption class="mt-2 text-small text-fg-muted">Close up</figcaption>
+                </figure>
+              )}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="sv-nav" data-viewer-nav>
+      <button type="button" class="sv-step text-small" data-viewer-prev>
+        <span aria-hidden="true">←</span> Previous
+      </button>
+      <span class="sv-dots" aria-hidden="true">
+        {viewer.steps.map((_, i) => <span class:list={['sv-dot', i === 0 && 'is-on']} data-viewer-dot={i}></span>)}
+      </span>
+      <p class="text-small text-fg-muted" aria-live="polite" data-viewer-status>Step 1 of {total}</p>
+      <button type="button" class="sv-step text-small" data-viewer-next>
+        Next <span aria-hidden="true">→</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<style>
+  .sv-lead {
+    margin-top: var(--spacing-block);
+    overflow: hidden;
+  }
+
+  .sv-body {
+    margin-top: var(--spacing-block);
+  }
+
+  /* Tabs only exist with JS; without it every step is listed. */
+  .sv-tabs,
+  .sv-nav {
+    display: none;
+  }
+
+  :global(html.js) .sv-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--color-edge);
+  }
+
+  :global(html.js) .sv-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: var(--spacing-stack);
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--color-edge);
+  }
+
+  .sv-cluster__label {
+    margin-bottom: 0.4rem;
+  }
+
+  .sv-cluster__tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.5rem;
+  }
+
+  .sv-tab {
+    position: relative;
+    padding: 0.4rem 0;
+    font-weight: 500;
+    color: var(--color-fg-muted);
+    cursor: pointer;
+    transition: color var(--duration-fast) var(--ease-out-soft);
+  }
+
+  .sv-tab::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.1rem;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--color-accent-fill);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform var(--duration-base) var(--ease-out-soft);
+  }
+
+  .sv-tab:hover,
+  .sv-tab[aria-selected='true'] {
+    color: var(--color-fg);
+  }
+
+  .sv-tab[aria-selected='true']::after {
+    transform: scaleX(1);
+  }
+
+  .sv-step {
+    min-height: 2.75rem;
+    padding-inline: 0.25rem;
+    font-weight: 500;
+    color: var(--color-fg);
+    cursor: pointer;
+  }
+
+  .sv-step:disabled {
+    color: var(--color-fg-muted);
+    cursor: default;
+  }
+
+  .sv-panels {
+    display: grid;
+    gap: var(--spacing-block);
+  }
+
+  :global(html.js) .sv-panels {
+    margin-top: var(--spacing-stack);
+    gap: 0;
+  }
+
+  .sv-panel {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+    row-gap: var(--spacing-stack);
+    align-items: start;
+  }
+
+  :global(html.js) .sv-panel {
+    grid-area: 1 / 1;
+    visibility: hidden;
+    opacity: 0;
+    transition:
+      opacity var(--duration-base) var(--ease-out-soft),
+      visibility 0s linear var(--duration-base);
+  }
+
+  :global(html.js) .sv-panel.is-active {
+    visibility: visible;
+    opacity: 1;
+    transition:
+      opacity var(--duration-base) var(--ease-out-soft),
+      visibility 0s;
+  }
+
+  .sv-media,
+  .sv-text {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  :global(.sv-pic) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .sv-narrow {
+    display: none;
+  }
+
+  /* Phones: the phone-width capture replaces the desktop window. */
+  @media (max-width: 47.999rem) {
+    .sv-media :global(.has-narrow) {
+      display: none;
+    }
+    .sv-narrow {
+      display: block;
+      max-width: 22rem;
+      overflow: hidden;
+      border: 1px solid var(--color-edge);
+      border-radius: var(--radius-frame);
+    }
+  }
+
+  .sv-detail {
+    margin-top: var(--spacing-stack);
+    max-width: 26rem;
+  }
+
+  .sv-detail :global(.cs-crop) {
+    border: 1px solid var(--color-edge);
+    border-radius: var(--radius-media);
+  }
+
+  @media (min-width: 64rem) {
+    .sv-media {
+      grid-column: 1 / span 8;
+    }
+    .sv-text {
+      grid-column: 9 / -1;
+      padding-right: max(0px, calc(4rem - var(--grid-margin)));
+    }
+  }
+
+  /* Phone frames: the phone centred in the media column, never taller than
+     the screen (the tab row and the nav share it); on desktop a narrower
+     media column with the text beside it, centred on the phone. */
+  .sv--phone :global(.sv-phone) {
+    --phone-w: min(76vw, 20rem, (100svh - 12rem) * 840 / 1840 + 1rem);
+    margin-inline: auto;
+  }
+
+  @media (min-width: 64rem) {
+    .sv--phone .sv-panel {
+      align-items: center;
+    }
+    .sv--phone .sv-media {
+      grid-column: 1 / span 5;
+    }
+    .sv--phone .sv-text {
+      grid-column: 7 / -1;
+    }
+    .sv--phone :global(.sv-phone) {
+      --phone-w: min(22rem, (100svh - 15rem) * 840 / 1840 + 1rem);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sv-tab,
+    .sv-tab::after {
+      transition: none;
+    }
+  }
+
+  .sv-dots {
+    display: none;
+  }
+
+  /*
+    ── Phones and tablets ─────────────────────────────────────────────────
+    The steps sit side by side on one snapping track: swipe between them,
+    or tap the screenshot to go to the next one. The tabs become a single
+    scrolling row of 44px chips, and under the track a row of dots shows
+    where you are beside Previous / Next. The track takes the height of the
+    step on screen, so a short step doesn't leave a long empty gap before
+    the buttons (stepSwipe, mobile-motion.ts). Desktop keeps the stacked
+    crossfade above; without JS every step is listed.
+  */
+  @media (max-width: 63.999rem) {
+    /* The tabs wrap onto as many lines as they need. One scrolling row cut
+       the last label at the edge ("Division leve…", "Portion…") and a fade
+       wasn't enough of a cue; every label is now in view,
+       each a 44px target, groups kept together with their name on a rule
+       that spans exactly their own tabs. */
+    :global(html.js) .sv-tabs {
+      position: relative;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.75rem;
+    }
+    :global(html.js) .sv-cluster {
+      min-width: 0;
+    }
+    :global(html.js) .sv-cluster__label {
+      margin-bottom: 0.15rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--color-edge-strong);
+    }
+    :global(html.js) .sv-cluster__tabs {
+      flex-wrap: wrap;
+      gap: 0 1.25rem;
+    }
+    :global(html.js) .sv-tab {
+      min-width: 2.75rem;
+      min-height: 2.75rem;
+      white-space: nowrap;
+    }
+
+    :global(html.js) .sv-panels {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--grid-gutter);
+      overflow-x: auto;
+      overflow-y: hidden;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      transition: height var(--duration-base) var(--ease-out-soft);
+    }
+    :global(html.js) .sv-panels::-webkit-scrollbar {
+      display: none;
+    }
+    :global(html.js) .sv-panel {
+      flex: 0 0 100%;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      visibility: visible;
+      opacity: 1;
+      transition: opacity var(--duration-base) var(--ease-out-soft);
+    }
+    /* The neighbours dim as they slide out. */
+    :global(html.js) .sv-panel:not(.is-active) {
+      opacity: 0.45;
+    }
+    :global(html.js) .sv-media {
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    :global(html.js) .sv-media:active {
+      scale: 0.99;
+    }
+
+    :global(html.js) .sv-nav {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+    }
+    :global(html.js) .sv-nav [data-viewer-status] {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+    .sv-dots {
+      display: flex;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+    .sv-dot {
+      width: 0.5rem;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--color-fg-muted);
+      transition:
+        width var(--duration-base) var(--ease-out-soft),
+        background-color var(--duration-base) var(--ease-out-soft);
+    }
+    .sv-dot.is-on {
+      width: 1.5rem;
+      background: var(--color-accent-fill);
+    }
+    .sv-step {
+      min-width: 2.75rem;
+    }
+  }
+
+  @media (max-width: 63.999rem) and (prefers-reduced-motion: reduce) {
+    :global(html.js) .sv-panels,
+    :global(html.js) .sv-panel,
+    .sv-dot {
+      transition: none;
+    }
+  }
+</style>

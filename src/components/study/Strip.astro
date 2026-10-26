@@ -1,0 +1,196 @@
+---
+import StudyImage from './StudyImage.astro';
+import { tryStudyImage } from '../../lib/study-media';
+
+/*
+  A compact strip of secondary work — catalogs, emails, automations — at the
+  images' own proportions. Justified rows: every item grows in proportion to
+  its aspect ratio, so a row of mixed portrait and landscape pieces lines up
+  top and bottom with no cropping and no tiles. Screenshots only; the labels
+  say what each piece is and nothing more.
+
+  Phones: one swipeable row at a readable height instead of thumbnails —
+  each piece at its own proportions, the next peeking in (stripSwipe in
+  mobile-motion.ts nudges it once so the swipe is obvious). A strip of
+  mostly wide captures stacks instead, each one panning in its own frame.
+*/
+
+interface Props {
+  id: string;
+  heading: string;
+  introHtml?: string;
+  items: Array<{ src: string; alt: string; label: string; phone?: 'pan' | 'fit' }>;
+}
+
+const { id, heading, introHtml, items } = Astro.props;
+const sized = await Promise.all(
+  items.map(async (item) => {
+    const img = await tryStudyImage(item.src);
+    return { ...item, ar: img ? img.width / img.height : 1 };
+  }),
+);
+/* Phones: a strip that's mostly wide captures (nav bars, banners, full-width
+   page grabs with labels baked in) is stacked, not swiped — see the styles. */
+const wide = (ar: number) => ar > 2.2;
+const pans = (item: { ar: number; phone?: 'pan' | 'fit' }) => stack && wide(item.ar) && item.phone !== 'fit';
+const stack = sized.filter((i) => wide(i.ar)).length * 2 >= sized.length;
+---
+
+<section class="cs-sec st" aria-labelledby={`strip-${id}-title`}>
+  <div class="container-bleed">
+    <h2 id={`strip-${id}-title`} class="cs-h2" data-split>{heading}</h2>
+    {introHtml && <div class="cs-prose cs-intro" set:html={introHtml} data-reveal />}
+
+    <ul class:list={['st-list', stack && 'st-list--stack']} data-reveal-group data-st-track={stack ? undefined : ''} data-lenis-prevent-horizontal>
+      {
+        sized.map((item) => (
+          <li
+            class:list={['st-item', pans(item) && (item.ar > 4 ? 'st-item--band' : 'st-item--wide')]}
+            style={`--ar: ${item.ar.toFixed(4)}`}
+            data-reveal
+          >
+            <div class="st-frame" data-st-track={pans(item) ? '' : undefined} data-lenis-prevent-horizontal>
+              {/* A wide capture (a nav bar, a banner) fills a whole row, so it
+                  needs a full-width source or it comes out soft. */}
+              <StudyImage
+                src={item.src}
+                alt={item.alt}
+                sizes={
+                  !wide(item.ar)
+                    ? '(min-width: 64rem) 30vw, (max-width: 47.999rem) 80vw, 50vw'
+                    : pans(item)
+                      ? `(min-width: 64rem) 92vw, (max-width: 47.999rem) ${Math.round(item.ar * (item.ar > 4 ? 136 : 240))}px, 100vw`
+                      : '(min-width: 64rem) 92vw, 100vw'
+                }
+              />
+            </div>
+            <p class="mt-2 text-small text-fg-muted">{item.label}</p>
+          </li>
+        ))
+      }
+      {/* Keeps the last row from stretching to full width. */}
+      <li class="st-spacer" aria-hidden="true"></li>
+    </ul>
+  </div>
+</section>
+
+<style>
+  .st-list {
+    --row: clamp(9rem, 6rem + 10vw, 17rem);
+    margin-top: var(--spacing-block);
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.75rem var(--grid-gutter);
+  }
+
+  .st-item {
+    flex: var(--ar) 1 calc(var(--ar) * var(--row));
+    min-width: 0;
+  }
+
+  .st-spacer {
+    flex: 10 1 0;
+  }
+
+  .st-frame {
+    overflow: hidden;
+    border-radius: var(--radius-media);
+    background: var(--color-surface-raised);
+    aspect-ratio: var(--ar);
+  }
+
+  .st-frame :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (max-width: 47.999rem) {
+    .st-list {
+      --row: 8rem;
+    }
+    :global(html.js) .st-list {
+      --h: min(46svh, 24rem);
+      position: relative;
+      flex-wrap: nowrap;
+      align-items: flex-start;
+      gap: 0.875rem;
+      margin-inline: calc(-1 * var(--grid-margin));
+      padding-inline: var(--grid-margin);
+      overflow-x: auto;
+      overflow-y: hidden;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--grid-margin);
+      scrollbar-width: none;
+    }
+    :global(html.js) .st-list::-webkit-scrollbar {
+      display: none;
+    }
+    :global(html.js) .st-item {
+      flex: none;
+      /* Never wider than the screen's column, whatever the proportions. */
+      width: min(calc(var(--ar) * var(--h)), calc(100vw - 2 * var(--grid-margin) - 2rem));
+      scroll-snap-align: start;
+    }
+    :global(html.js) .st-spacer {
+      flex: 0 0 calc(var(--grid-margin) - 0.875rem);
+    }
+
+    /* Mostly-wide strips (ALL IN's build history). Capped at the column, a
+       nav bar came out 30px tall and its baked-in labels a few pixels high;
+       in a swipe row beside full-height pieces it left a block of nothing
+       under it. Stacked instead, before above after, each wide capture at a
+       height where its text reads, panned sideways inside its own frame. */
+    .st-list--stack,
+    :global(html.js) .st-list--stack {
+      flex-direction: column;
+      flex-wrap: nowrap;
+      align-items: stretch;
+      gap: 1.5rem;
+      margin-inline: 0;
+      padding-inline: 0;
+      overflow: visible;
+      scroll-snap-type: none;
+    }
+    .st-list--stack .st-item,
+    :global(html.js) .st-list--stack .st-item {
+      flex: none;
+      width: auto;
+    }
+    .st-list--stack .st-spacer {
+      display: none;
+    }
+    /* A page grab or banner (up to 4:1) at 240px tall, opened on its
+       middle (stripSwipe, mobile-motion.ts); a thin band (a nav bar) at
+       136, opened on its left edge, where its label is. */
+    .st-item--wide {
+      --pan-h: 15rem;
+    }
+    .st-item--band {
+      --pan-h: 8.5rem;
+    }
+    .st-item--wide .st-frame,
+    .st-item--band .st-frame {
+      aspect-ratio: auto;
+      height: var(--pan-h);
+      overflow-x: auto;
+      overflow-y: hidden;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+    }
+    .st-item--wide .st-frame::-webkit-scrollbar,
+    .st-item--band .st-frame::-webkit-scrollbar {
+      display: none;
+    }
+    .st-item--wide .st-frame :global(img),
+    .st-item--band .st-frame :global(img) {
+      width: calc(var(--ar) * var(--pan-h));
+      max-width: none;
+      height: 100%;
+    }
+  }
+</style>

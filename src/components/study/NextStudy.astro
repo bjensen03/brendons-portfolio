@@ -1,0 +1,112 @@
+---
+import { longestWordEm } from '../../lib/display-fit';
+
+/*
+  Next project. The whole block is one link: the name at the mega step
+  rising into place line by line, the one-line description under it. On
+  hover or focus a tan bar sweeps across under the name and the arrow
+  leans forward — the accent as a fill, never as the name's colour.
+*/
+
+interface Props {
+  href: string;
+  name: string;
+  line: string;
+}
+
+const { href, name, line } = Astro.props;
+---
+
+<nav class="nx" aria-label="Next case study">
+  <a href={href} class="nx-link group container-bleed">
+    <span class="text-small text-fg-muted">Next project</span>
+    <span class="nx-name text-mega" data-split="lines" style={`--fit: ${longestWordEm(name)}`}>{name}</span>
+    <span class="nx-bar" aria-hidden="true"></span>
+    <span class="nx-line">
+      <span class="text-lead text-fg">{line}</span>
+      <span class="link-arrow nx-arrow text-lead text-fg" aria-hidden="true">→</span>
+    </span>
+  </a>
+</nav>
+
+<style>
+  .nx {
+    border-top: 1px solid var(--color-edge);
+  }
+
+  .nx-link {
+    display: grid;
+    gap: 1rem;
+    padding-block: var(--spacing-section);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .nx-name {
+    display: block;
+    /* The longest word has to fit the width: "MANUFACTURING" (about 12.4em)
+       ran off the right edge at 1440 with a fixed 9.2. */
+    font-size: min(var(--text-mega), calc((100vw - 2 * var(--grid-margin)) / max(9.2, var(--fit, 9.2) * 1.04)));
+    color: var(--color-fg);
+    overflow-wrap: normal;
+  }
+
+  .nx-bar {
+    display: block;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--color-accent-fill);
+    transform: scaleX(0.08);
+    transform-origin: 0 50%;
+    transition: transform var(--duration-slow) var(--ease-out-strata);
+  }
+
+  .nx-link:hover .nx-bar,
+  .nx-link:focus-visible .nx-bar {
+    transform: scaleX(1);
+  }
+
+  .nx-line {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1.5rem;
+    max-width: 60rem;
+  }
+
+  /* Phones and tablets: the name as big as its longest word allows (lib/display-fit). */
+  @media (max-width: 63.999rem) {
+    .nx-name {
+      font-size: min(4.5rem, calc((100vw - 2 * var(--grid-margin)) / (var(--fit, 9.2) * 1.04)));
+    }
+  }
+
+  /* No hover on touch: the tan bar sweeps across as the block scrolls up
+     into view instead, and the arrow leans once it's there. */
+  @supports (animation-timeline: view()) {
+    @media (hover: none) and (prefers-reduced-motion: no-preference) {
+      .nx-bar {
+        animation: nx-sweep linear both;
+        animation-timeline: view();
+        animation-range: entry 40% cover 55%;
+      }
+    }
+  }
+  @keyframes nx-sweep {
+    from {
+      transform: scaleX(0.08);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+  .nx-link:active .nx-name {
+    opacity: 0.8;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nx-bar {
+      transition: none;
+    }
+  }
+</style>

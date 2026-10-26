@@ -1,0 +1,31 @@
+---
+import { getEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import CaseStudy from '../../components/study/CaseStudy.astro';
+import { topLevelStudies } from '../../lib/studies';
+
+/*
+  A case study on the build sheet, at /work/<id>/.
+
+  These replace the older MDX pages one at a time. When a study exists here for
+  an id, the project route skips that id — see src/lib/studies.ts.
+
+  A standalone family member (ALL IN) builds here too, and keeps the
+  breadcrumb back to its family's page.
+*/
+
+export async function getStaticPaths() {
+  return (await topLevelStudies()).map((study) => ({ params: { study: study.id }, props: { study } }));
+}
+
+const { study } = Astro.props;
+const parent = study.data.parent ? await getEntry('studies', study.data.parent) : undefined;
+---
+
+<Base title={`${study.data.name} — case study`} description={study.data.label} ogImage={`/og/${study.id}.jpg`}>
+  <CaseStudy
+    study={study}
+    parentHref={study.data.parent ? `/work/${study.data.parent}/` : undefined}
+    parentName={parent?.data.name}
+  />
+</Base>

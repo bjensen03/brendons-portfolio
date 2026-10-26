@@ -1,0 +1,437 @@
+---
+import { Picture } from 'astro:assets';
+import { tryStudyImage, widthsFor } from '../../lib/study-media';
+import { showPlaceholders } from '../../lib/placeholders';
+
+/*
+  Photographs sorted into categories (photos:<id> on a study, and the
+  Twilight Trekkers brand page). Photos, not screenshots, so nothing is
+  framed or labelled: each category leads with its `big` picks at their own
+  proportions, side by side at one height (a justified row, no cropping),
+  then the rest in smaller justified rows.
+
+  Every row runs the full width at every screen size (no empty
+  space). The rows are fixed here at build time from the photos' aspect
+  ratios: each item grows in proportion to its ratio from a zero basis, so
+  a row always fills its width exactly and its photos share one height.
+  The rest are split into as many rows as keep each one about
+  REST_ROW_AR "heights" wide — a short last row can't happen because the
+  split balances the rows instead of filling them in order. Give a
+  category's big picks a combined ratio of about 2 or more, or the big row
+  runs taller than the screen.
+
+  `tabs` (default): one category at a time behind a tab row — keeps a case
+  study from turning into a photo book. Real tabs (arrow keys, Home/End).
+  Without JS every category is listed. `tabs={false}`: the categories run
+  one after another, each under its own label.
+
+  Phones: the big picks stack at the full column width, cropped to 4:5 on
+  their `focus` point (the library's object-position for a tall crop); the
+  rest become a swipe row at one height.
+
+  Low-resolution files should never be marked `big`.
+*/
+
+type Item = { src: string; alt: string; focus?: string; big?: boolean };
+
+interface Props {
+  id: string;
+  heading: string;
+  introHtml?: string;
+  tabs?: boolean;
+  categories: Array<{ label: string; items: Item[] }>;
+  /** The h2 as a display-size heading (brand page) instead of the study step. */
+  headingClass?: string;
+}
+
+const { id, heading, introHtml, tabs = true, categories, headingClass = 'cs-h2' } = Astro.props;
+const base = `ps-${id}`;
+
+/* Target width of a rest row, in multiples of its height: about 4.5 keeps
+   the rest clearly smaller than the big row (2–3). */
+const REST_ROW_AR = 4.5;
+
+/* Contiguous split of the rest into k rows whose ratio sums are as even as
+   possible (k from the total), by trying every split — a handful of photos
+   per category, so this is tiny. */
+const splitRows = <T extends { ar: number }>(items: T[]): T[][] => {
+  if (!items.length) return [];
+  const total = items.reduce((s, i) => s + i.ar, 0);
+  const k = Math.min(items.length, Math.max(1, Math.round(total / REST_ROW_AR)));
+  const goal = total / k;
+  let best: { cost: number; rows: T[][] } | undefined;
+  const walk = (start: number, left: number, rows: T[][]) => {
+    if (left === 1) {
+      const all = [...rows, items.slice(start)];
+      const cost = all.reduce((c, r) => c + (r.reduce((s, i) => s + i.ar, 0) - goal) ** 2, 0);
+      if (!best || cost < best.cost) best = { cost, rows: all };
+      return;
+    }
+    for (let end = start + 1; end <= items.length - (left - 1); end++) {
+      walk(end, left - 1, [...rows, items.slice(start, end)]);
+    }
+  };
+  walk(0, k, []);
+  return best!.rows;
+};
+
+const cats = await Promise.all(
+  categories.map(async (c, ci) => {
+    const items = await Promise.all(
+      c.items.map(async (it) => {
+        const img = await tryStudyImage(it.src);
+        return { ...it, img, ar: img ? img.width / img.height : 1.5 };
+      }),
+    );
+    const big = items.filter((i) => i.big);
+    const rest = items.filter((i) => !i.big);
+    return { label: c.label, big, rows: splitRows(rest), key: `${base}-${ci}`, bigRow: big.reduce((s, i) => s + i.ar, 0) };
+  }),
+);
+const tabbed = tabs && cats.length > 1;
+---
+
+<section class:list={['cs-sec ps', tabbed && 'ps--tabs']} aria-labelledby={`${base}-title`} data-ps={tabbed ? '' : undefined}>
+  <div class="container-bleed">
+    <h2 id={`${base}-title`} class={headingClass} data-split>{heading}</h2>
+    {introHtml && <div class="cs-prose cs-intro" set:html={introHtml} data-reveal />}
+
+    {
+      tabbed && (
+        <div class="ps-tabs" role="tablist" aria-label={heading} data-ps-tabs data-reveal>
+          {cats.map((c, i) => (
+            <button
+              type="button"
+              role="tab"
+              id={`${c.key}-tab`}
+              class="ps-tab text-small"
+              aria-selected={i === 0 ? 'true' : 'false'}
+              aria-controls={`${c.key}-panel`}
+              tabindex={i === 0 ? 0 : -1}
+              data-ps-tab
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+      )
+    }
+
+    <div class="ps-cats" data-reveal={tabbed ? '' : undefined}>
+      {
+        cats.map((c, i) => (
+          <div
+            class="ps-cat"
+            id={`${c.key}-panel`}
+            role={tabbed ? 'tabpanel' : undefined}
+            aria-labelledby={tabbed ? `${c.key}-tab` : `${c.key}-label`}
+            tabindex={tabbed ? 0 : undefined}
+            data-ps-panel={tabbed ? '' : undefined}
+            data-active={tabbed && i === 0 ? '' : undefined}
+            data-reveal={tabbed ? undefined : ''}
+          >
+            <h3 id={`${c.key}-label`} class:list={['ps-label text-lead text-fg', tabbed && 'ps-label--tabbed']}>
+              {c.label}
+            </h3>
+
+            {c.big.length > 0 && (
+              <ul class="ps-big" role="list">
+                {c.big.map((p) => (
+                  <li class="ps-item" style={`--ar: ${p.ar.toFixed(4)}; --focus: ${p.focus ?? '50% 50%'}`}>
+                    <div class="ps-frame">
+                      {p.img ? (
+                        <Picture
+                          src={p.img}
+                          alt={p.alt}
+                          formats={['avif']}
+                          fallbackFormat="webp"
+                          widths={widthsFor(p.img.width, [480, 720, 960, 1280, 1600, 1920, 2400])}
+                          sizes={`(min-width: 48rem) ${Math.min(94, Math.round((p.ar / c.bigRow) * 94))}vw, 92vw`}
+                          loading="lazy"
+                          pictureAttributes={{ class: 'contents' }}
+                          class="ps-img"
+                        />
+                      ) : (
+                        showPlaceholders && <span class="ps-need">[NEED — {p.src}]</span>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {c.rows.length > 0 && (
+              <div class="ps-rest" data-ps-strip data-lenis-prevent-horizontal>
+                {c.rows.map((row) => {
+                  const rowAr = row.reduce((sum, i) => sum + i.ar, 0);
+                  return (
+                    <ul class="ps-row" role="list">
+                      {row.map((p) => (
+                        <li class="ps-item" style={`--ar: ${p.ar.toFixed(4)}`}>
+                          <div class="ps-frame">
+                            {p.img ? (
+                              <Picture
+                                src={p.img}
+                                alt={p.alt}
+                                formats={['avif']}
+                                fallbackFormat="webp"
+                                widths={widthsFor(p.img.width, [360, 540, 720, 960, 1280])}
+                                sizes={`(min-width: 48rem) ${Math.min(94, Math.round((p.ar / rowAr) * 94))}vw, 62vw`}
+                                loading="lazy"
+                                pictureAttributes={{ class: 'contents' }}
+                                class="ps-img"
+                              />
+                            ) : (
+                              showPlaceholders && <span class="ps-need">[NEED — {p.src}]</span>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  );
+                })}
+                <span class="ps-spacer" aria-hidden="true" />
+              </div>
+            )}
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<script>
+  import { registerMotion } from '../../scripts/motion';
+
+  /* Category tabs. Plain show/hide (no animation), so it has the same job
+     with motion off. */
+  const photoTabs = () => {
+    const cleanups: (() => void)[] = [];
+    document.querySelectorAll<HTMLElement>('[data-ps]').forEach((root) => {
+      const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-ps-tab]')];
+      const panels = [...root.querySelectorAll<HTMLElement>('[data-ps-panel]')];
+      if (!tabs.length) return;
+      const select = (i: number, focus = false) => {
+        tabs.forEach((t, j) => {
+          t.setAttribute('aria-selected', String(i === j));
+          t.tabIndex = i === j ? 0 : -1;
+        });
+        panels.forEach((p, j) => p.toggleAttribute('data-active', i === j));
+        if (focus) tabs[i].focus();
+      };
+      const onClick = (e: Event) => {
+        const i = tabs.indexOf(e.currentTarget as HTMLButtonElement);
+        if (i >= 0) select(i);
+      };
+      const onKey = (e: KeyboardEvent) => {
+        const i = tabs.indexOf(document.activeElement as HTMLButtonElement);
+        if (i < 0) return;
+        const n = tabs.length;
+        const next =
+          e.key === 'ArrowRight' ? (i + 1) % n
+          : e.key === 'ArrowLeft' ? (i - 1 + n) % n
+          : e.key === 'Home' ? 0
+          : e.key === 'End' ? n - 1
+          : -1;
+        if (next < 0) return;
+        e.preventDefault();
+        select(next, true);
+      };
+      tabs.forEach((t) => t.addEventListener('click', onClick));
+      root.addEventListener('keydown', onKey);
+      cleanups.push(() => {
+        tabs.forEach((t) => t.removeEventListener('click', onClick));
+        root.removeEventListener('keydown', onKey);
+      });
+    });
+    return () => cleanups.forEach((c) => c());
+  };
+
+  registerMotion(photoTabs, { reduced: true });
+</script>
+
+<style>
+  .ps-tabs {
+    display: none;
+  }
+  :global(html.js) .ps-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 2rem;
+    margin-top: var(--spacing-stack);
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-edge);
+  }
+  .ps-tab {
+    position: relative;
+    min-height: 2.75rem;
+    padding: 0.4rem 0;
+    font-weight: 500;
+    color: var(--color-fg-muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color var(--duration-fast) var(--ease-out-soft);
+  }
+  .ps-tab::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.15rem;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--color-accent-fill);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform var(--duration-base) var(--ease-out-soft);
+  }
+  .ps-tab:hover,
+  .ps-tab[aria-selected='true'] {
+    color: var(--color-fg);
+  }
+  .ps-tab[aria-selected='true']::after {
+    transform: scaleX(1);
+  }
+
+  .ps-cats {
+    margin-top: var(--spacing-block);
+  }
+  /* Under the tab row the photos start straight away: the tabs already
+     close the intro off with their rule. */
+  :global(html.js) .ps-tabs + .ps-cats {
+    margin-top: var(--spacing-stack);
+  }
+  .ps-cat + .ps-cat {
+    margin-top: var(--spacing-section-sm, 5rem);
+  }
+  /* With tabs, only the selected category shows; the tab says its name. */
+  :global(html.js) .ps--tabs .ps-cat {
+    display: none;
+    margin-top: 0;
+  }
+  :global(html.js) .ps--tabs .ps-cat[data-active] {
+    display: block;
+  }
+  :global(html.js) .ps-label--tabbed {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .ps-cat:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 0.5rem;
+    border-radius: var(--radius-media);
+  }
+
+  .ps-label {
+    margin-bottom: 1.25rem;
+    font-weight: 600;
+  }
+
+  .ps-big,
+  .ps-row {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    gap: var(--grid-gutter);
+  }
+
+  /* Every row: widths in proportion to each photo from a zero basis, so the
+     row fills its width exactly and the photos share one height. */
+  .ps-item {
+    flex: var(--ar) 1 0;
+    min-width: 0;
+  }
+
+  .ps-rest {
+    display: flex;
+    flex-direction: column;
+    gap: var(--grid-gutter);
+    margin-top: var(--grid-gutter);
+  }
+  .ps-spacer {
+    display: none;
+  }
+
+  .ps-frame {
+    overflow: hidden;
+    aspect-ratio: var(--ar);
+    border-radius: var(--radius-media);
+    background: var(--color-surface-raised);
+  }
+  .ps-frame :global(.ps-img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .ps-need {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    padding: 1rem;
+    font-size: var(--text-small);
+    color: var(--color-fg-muted);
+  }
+
+  /* ── Phones ─────────────────────────────────────────────────────────── */
+  @media (max-width: 47.999rem) {
+    .ps-big {
+      flex-direction: column;
+      gap: 0.875rem;
+    }
+    .ps-big .ps-item {
+      flex: none;
+    }
+    .ps-big .ps-frame {
+      aspect-ratio: 4 / 5;
+      max-height: 72svh;
+      width: 100%;
+    }
+    .ps-big .ps-frame :global(.ps-img) {
+      object-position: var(--focus);
+    }
+
+    /* The rows dissolve into one swipe row. */
+    .ps-row {
+      display: contents;
+    }
+    .ps-rest {
+      --h: min(40svh, 17rem);
+      flex-direction: row;
+      flex-wrap: nowrap;
+      gap: 0.75rem;
+      margin-top: 0.875rem;
+      margin-inline: calc(-1 * var(--grid-margin));
+      padding-inline: var(--grid-margin);
+      overflow-x: auto;
+      overflow-y: hidden;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--grid-margin);
+      scrollbar-width: none;
+    }
+    .ps-rest::-webkit-scrollbar {
+      display: none;
+    }
+    .ps-rest .ps-item {
+      flex: none;
+      width: min(calc(var(--ar) * var(--h)), calc(100vw - 2 * var(--grid-margin) - 2.5rem));
+      max-width: none;
+      scroll-snap-align: start;
+    }
+    /* One height for the whole row; a wide photo capped at the column
+       crops a little at its sides rather than coming out shorter. */
+    .ps-rest .ps-frame {
+      aspect-ratio: auto;
+      height: var(--h);
+    }
+    .ps-spacer {
+      display: block;
+      flex: 0 0 calc(var(--grid-margin) - 0.75rem);
+    }
+  }
+</style>

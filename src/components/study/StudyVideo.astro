@@ -1,0 +1,80 @@
+---
+import { cropStyle, publicFileExists } from '../../lib/study-media';
+import type { Crop } from '../../lib/study-media';
+import { showPlaceholders } from '../../lib/placeholders';
+
+/*
+  A muted screen recording or mockup clip. Loops by default; `once: true`
+  plays it a single time and holds the last frame (a camera move that ends
+  on a settled shot shouldn't snap back to its first frame every few seconds).
+
+  No autoplay attribute: study-motion.ts plays it while at least a third of
+  it is on screen and pauses it the moment it leaves, so nothing decodes
+  offscreen. Under reduced motion it never starts on its own — the poster
+  shows and the button plays it. The button is always there (WCAG 2.2.2:
+  anything that moves for more than five seconds needs a pause).
+
+  preload is "none" everywhere except the hero, which asks for metadata so
+  its first frame is ready by the time the mask opens.
+
+  A missing file renders as an obvious [NEED …] panel, not a broken player.
+*/
+
+interface Props {
+  video: {
+    src: string;
+    poster?: string;
+    label: string;
+    matte?: string;
+    crop?: Crop;
+    width?: number;
+    height?: number;
+    once?: boolean;
+  };
+  hero?: boolean;
+  class?: string;
+}
+
+const { video, hero = false, class: cls } = Astro.props;
+const exists = publicFileExists(video.src);
+const poster = video.poster && publicFileExists(video.poster) ? video.poster : undefined;
+const style = [cropStyle(video.crop, video.width ?? 1600, video.height ?? 900), video.matte && `--matte: ${video.matte}`]
+  .filter(Boolean)
+  .join('; ');
+---
+
+{
+  /* The hero clip's poster is the page's LCP. A poster attribute can't
+     take fetchpriority, so it's preloaded at high priority instead. */
+  hero && exists && poster && <link rel="preload" as="image" href={poster} fetchpriority="high" />
+}
+{
+  exists ? (
+    <figure class:list={['cs-video', cls]} style={style} data-study-video data-once={video.once ? '' : undefined}>
+      <div class="cs-crop">
+        <video
+          class="cs-crop__media"
+          muted
+          loop={!video.once}
+          playsinline
+          preload={hero ? 'metadata' : 'none'}
+          poster={poster}
+          aria-label={video.label}
+          data-study-video-el
+        >
+          <source src={video.src} type="video/mp4" />
+        </video>
+      </div>
+      <button type="button" class="cs-video__toggle" aria-pressed="false" data-study-video-toggle>
+        <span class="cs-video__icon" aria-hidden="true"></span>
+        <span class="sr-only" data-study-video-label>Play video</span>
+      </button>
+    </figure>
+  ) : (
+    showPlaceholders && (
+      <div class:list={['cs-need', cls]} style={style}>
+        <span>[NEED — {video.src}]</span>
+      </div>
+    )
+  )
+}

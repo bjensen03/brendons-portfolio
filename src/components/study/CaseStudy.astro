@@ -1,0 +1,932 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import { md, mdInline } from '../../lib/markdown';
+import { isPlaceholder, showPlaceholders } from '../../lib/placeholders';
+import { showDrafts } from '../../lib/drafts';
+import { workRouteExists, studyHref } from '../../lib/studies';
+import { loadStudyImage } from '../../lib/study-images';
+import '../../styles/study.css';
+import StudyHero from './StudyHero.astro';
+import StudySection from './StudySection.astro';
+import InShort from './InShort.astro';
+import Glance from './Glance.astro';
+import Decisions from './Decisions.astro';
+import Eras from './Eras.astro';
+import Mockup from './Mockup.astro';
+import PageScroller from './PageScroller.astro';
+import StepViewer from './StepViewer.astro';
+import HardProblem from './HardProblem.astro';
+import Strip from './Strip.astro';
+import Feature from './Feature.astro';
+import PhotoSet from './PhotoSet.astro';
+import ReelRow from './ReelRow.astro';
+import ListRows from './ListRows.astro';
+import { LIST_SOURCES } from '../../lib/study-lists';
+import NextStudy from './NextStudy.astro';
+import ViewSwitch from './ViewSwitch.astro';
+import StudyOverview from './StudyOverview.astro';
+import Namespaced from './Namespaced.astro';
+import ViewPanel from './ViewPanel.astro';
+
+/*
+  One case study — the template (see the README).
+
+  Hero first and next project last, always. Between them, the page renders
+  the sections named in the study's `layout`, in that order. Without a
+  `layout` it uses the default order: the ten sections of the build sheet
+  with story sections placed by their `placement`, and any visual blocks the
+  study defines (eras, page scroller, step viewers, mockups, strips) just
+  before the hard problem.
+
+  Each section is its own component; this file only decides which ones and
+  in what order. A key the study's data can't satisfy (say `viewer:portal`
+  with no such viewer) fails the build with the key named.
+
+  A study that belongs to a family — PROLOOK and ALL IN, nested under it —
+  gets a switcher directly under the hero.
+*/
+
+interface Props {
+  study: CollectionEntry<'studies'>;
+  parentHref?: string;
+  parentName?: string;
+}
+
+const { study, parentHref, parentName } = Astro.props;
+const d = study.data;
+
+/* The family: the root study plus everything nested under it, in order. */
+const root = d.parent ?? study.id;
+const family = (await getCollection('studies'))
+  .filter((s) => (s.id === root || s.data.parent === root) && (s.data.approved || showDrafts()))
+  .sort((a, b) => a.data.order - b.data.order);
+const hrefFor = (s: CollectionEntry<'studies'>) => (s.id === root ? `/work/${root}/` : studyHref(s));
+
+/* ── Render the markdown once, up front ───────────────────────────────── */
+const html = {
+  inShort: await Promise.all((d.inShort ?? []).map((line) => mdInline(line))),
+  situation: await md(d.situation),
+  myRole: await md(d.myRole),
+  decisions: await Promise.all((d.keyDecisions ?? []).map((k) => md(k.body))),
+  story: await Promise.all(d.story.map((s) => md(s.body))),
+  punchline: await md(d.hardProblem?.punchline),
+  beats: await Promise.all(
+    (['problem', 'assumption', 'found', 'fix', 'verified'] as const).map((k) => md(d.hardProblem?.[k])),
+  ),
+  result: await md(d.result),
+  differently: await md(d.differently),
+  erasIntro: await md(d.eras?.intro),
+  eras: await Promise.all((d.eras?.items ?? []).map((e) => md(e.body))),
+  scrollerIntro: await md(d.scroller?.intro),
+  viewers: await Promise.all(
+    (d.viewers ?? []).map(async (v) => ({
+      intro: await md(v.intro),
+      steps: await Promise.all(v.steps.map((s) => md(s.body))),
+    })),
+  ),
+  strips: await Promise.all((d.strips ?? []).map((s) => md(s.intro))),
+  photoSets: await Promise.all((d.photoSets ?? []).map((s) => md(s.intro))),
+  reelSets: await Promise.all((d.reelSets ?? []).map((s) => md(s.intro))),
+  lists: await Promise.all((d.lists ?? []).map((s) => md(s.intro))),
+};
+
+const BEAT_LABELS = ['Problem', 'First assumption', 'What I found', 'Fix', 'How I verified it'];
+const BEAT_KEYS = ['problem', 'assumption', 'found', 'fix', 'verified'];
+
+/* Legacy blocks still used by QuickStrike. */
+const beforeAfter = d.beforeAfter
+  ? { ...d.beforeAfter, beforeImg: await loadStudyImage(d.beforeAfter.before), afterImg: await loadStudyImage(d.beforeAfter.after) }
+  : undefined;
+
+const gallery = d.gallery
+  ? {
+      ...d.gallery,
+      desktop: await Promise.all(
+        d.gallery.desktop.map(async (g) => {
+          const img = await loadStudyImage(g.src);
+          return { ...g, img, tall: img.height > img.width * 1.1 };
+        }),
+      ),
+      mobile: await Promise.all(d.gallery.mobile.map(async (g) => ({ ...g, img: await loadStudyImage(g.src) }))),
+      introHtml: await md(d.gallery.intro),
+    }
+  : undefined;
+
+/* ── The order ───────────────────────────────────────────────────────── */
+const storyKeys = (where: string) =>
+  d.story.flatMap((s, i) => (s.placement === where ? [`story:${i}`] : []));
+
+const defaultLayout = [
+  ...(d.inShort ? ['inShort'] : []),
+  ...(beforeAfter ? ['beforeAfter'] : []),
+  'situation',
+  ...storyKeys('afterSituation'),
+  'role',
+  'glance',
+  ...storyKeys('beforeDecisions'),
+  ...(d.keyDecisions ? ['decisions'] : []),
+  ...storyKeys('afterDecisions'),
+  ...(gallery ? ['gallery'] : []),
+  ...(d.eras ? ['eras'] : []),
+  ...(d.mockups ?? []).map((m) => `mockup:${m.id}`),
+  ...(d.scroller ? ['scroller'] : []),
+  ...(d.viewers ?? []).map((v) => `viewer:${v.id}`),
+  ...(d.strips ?? []).map((s) => `strip:${s.id}`),
+  ...(d.features ?? []).map((f) => `feature:${f.id}`),
+  ...(d.photoSets ?? []).map((p) => `photos:${p.id}`),
+  ...(d.reelSets ?? []).map((r) => `reels:${r.id}`),
+  ...(d.lists ?? []).map((l) => `list:${l.id}`),
+  ...(d.hardProblem ? ['hardProblem'] : []),
+  'result',
+  ...(d.differently ? ['differently'] : []),
+  'fullStack',
+];
+
+const fullLayout = d.layout ?? defaultLayout;
+
+/* In short leading the layout belongs to the hero: it sits between the facts
+   and the hero media, so the summary is read before the big visual. */
+const inShortInHero = fullLayout[0] === 'inShort';
+const layout = inShortInHero ? fullLayout.slice(1) : fullLayout;
+if (inShortInHero && !d.inShort) {
+  throw new Error(`[case study] ${study.id}: layout key "inShort" — the study has no inShort`);
+}
+
+type Block =
+  | { kind: 'section'; key: string; heading: string; html: string; id: string }
+  | { kind: 'inShort' }
+  | { kind: 'result' }
+  | { kind: 'glance' }
+  | { kind: 'decisions' }
+  | { kind: 'hardProblem' }
+  | { kind: 'fullStack' }
+  | { kind: 'beforeAfter' }
+  | { kind: 'gallery' }
+  | { kind: 'eras' }
+  | { kind: 'scroller' }
+  | { kind: 'mockup'; mockup: NonNullable<typeof d.mockups>[number] }
+  | { kind: 'viewer'; index: number }
+  | { kind: 'strip'; index: number }
+  | { kind: 'feature'; index: number }
+  | { kind: 'photos'; index: number }
+  | { kind: 'reels'; index: number }
+  | { kind: 'list'; index: number };
+
+const fail = (key: string, why: string): never => {
+  throw new Error(`[case study] ${study.id}: layout key "${key}" — ${why}`);
+};
+
+const toBlock = (key: string): Block => {
+  const [type, id] = key.split(':');
+  switch (type) {
+    case 'inShort':
+      return d.inShort ? { kind: 'inShort' } : fail(key, 'the study has no inShort');
+    case 'situation':
+      return { kind: 'section', key, heading: 'The situation', html: html.situation, id: 'situation' };
+    case 'role':
+      return { kind: 'section', key, heading: 'My role', html: html.myRole, id: 'role' };
+    case 'differently':
+      return d.differently
+        ? { kind: 'section', key, heading: "What I'd do differently", html: html.differently, id: 'differently' }
+        : fail(key, 'the study has no differently');
+    case 'result':
+      return { kind: 'result' };
+    case 'glance':
+      return { kind: 'glance' };
+    case 'decisions':
+      return d.keyDecisions ? { kind: 'decisions' } : fail(key, 'the study has no keyDecisions');
+    case 'hardProblem':
+      return d.hardProblem ? { kind: 'hardProblem' } : fail(key, 'the study has no hardProblem');
+    case 'fullStack':
+      return { kind: 'fullStack' };
+    case 'beforeAfter':
+      return beforeAfter ? { kind: 'beforeAfter' } : fail(key, 'the study has no beforeAfter');
+    case 'gallery':
+      return gallery ? { kind: 'gallery' } : fail(key, 'the study has no gallery');
+    case 'eras':
+      return d.eras ? { kind: 'eras' } : fail(key, 'the study has no eras');
+    case 'scroller':
+      return d.scroller ? { kind: 'scroller' } : fail(key, 'the study has no scroller');
+    case 'story': {
+      const i = Number(id);
+      const s = d.story[i];
+      if (!s) fail(key, `there is no story[${i}]`);
+      return { kind: 'section', key, heading: s.heading, html: html.story[i], id: `story-${i}` };
+    }
+    case 'mockup': {
+      const m = d.mockups?.find((x) => x.id === id);
+      return m ? { kind: 'mockup', mockup: m } : fail(key, `no mockup with id "${id}"`);
+    }
+    case 'viewer': {
+      const i = (d.viewers ?? []).findIndex((x) => x.id === id);
+      return i >= 0 ? { kind: 'viewer', index: i } : fail(key, `no viewer with id "${id}"`);
+    }
+    case 'strip': {
+      const i = (d.strips ?? []).findIndex((x) => x.id === id);
+      return i >= 0 ? { kind: 'strip', index: i } : fail(key, `no strip with id "${id}"`);
+    }
+    case 'feature': {
+      const i = (d.features ?? []).findIndex((x) => x.id === id);
+      return i >= 0 ? { kind: 'feature', index: i } : fail(key, `no feature with id "${id}"`);
+    }
+    case 'photos': {
+      const i = (d.photoSets ?? []).findIndex((x) => x.id === id);
+      return i >= 0 ? { kind: 'photos', index: i } : fail(key, `no photo set with id "${id}"`);
+    }
+    case 'reels': {
+      const i = (d.reelSets ?? []).findIndex((x) => x.id === id);
+      return i >= 0 ? { kind: 'reels', index: i } : fail(key, `no reel set with id "${id}"`);
+    }
+    case 'list': {
+      const i = (d.lists ?? []).findIndex((x) => x.id === id);
+      return i >= 0 ? { kind: 'list', index: i } : fail(key, `no list with id "${id}"`);
+    }
+    default:
+      return fail(key, 'unknown key');
+  }
+};
+
+const blocks: Block[] = layout
+  .map(toBlock)
+  /* A section whose prose was only a [NEED …] note is empty in a build
+     (src/lib/placeholders.ts) — leave it out rather than print a bare heading. */
+  .filter((b) => !(b.kind === 'section' && !b.html.trim()));
+
+/* ── Quick overview (only for a study with an `overview`) ─────────────
+   The overview's sections, each followed by the showcase blocks it names,
+   rendered by the same switch below as the full study. The hard problem in
+   an overview is condensed: the section's own body stands in for its
+   beats, under its punchline and code. The overview panel goes through
+   Namespaced with prefix "ov-", so its copies of blocks don't repeat the
+   full study's ids. */
+type Item =
+  | Block
+  | { kind: 'ovSection'; number: number; heading: string; html: string; labels?: string[]; image?: { src: string; alt: string; crop?: { x: number; y: number; w: number; h: number } }; id: string }
+  | { kind: 'ovHard'; heading: string; html: string }
+  | { kind: 'ovMore' };
+
+const ov = d.overview;
+const ovItems: Item[] = [];
+if (ov) {
+  if (ov.glance) ovItems.push({ kind: 'glance' });
+  for (const [i, sec] of ov.sections.entries()) {
+    const body = await md(sec.body);
+    const shows = sec.show ?? [];
+    if (shows.includes('hardProblem')) {
+      if (!d.hardProblem) fail('hardProblem', 'the overview shows it but the study has no hardProblem');
+      ovItems.push({ kind: 'ovHard', heading: sec.heading, html: body });
+    } else {
+      ovItems.push({ kind: 'ovSection', number: i + 1, heading: sec.heading, html: body, labels: sec.labels, image: sec.image, id: `section-${i + 1}` });
+    }
+    for (const key of shows.filter((k) => k !== 'hardProblem')) ovItems.push(toBlock(key));
+  }
+  ovItems.push({ kind: 'ovMore' });
+}
+
+/* Reading time, from the words each view prints (≈230 a minute). */
+const words = (...parts: Array<string | undefined>) =>
+  parts.join(' ').replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
+const minutes = (n: number) => Math.max(1, Math.round(n / 230));
+const sharedWords = words(d.label, ...(inShortInHero ? html.inShort : []));
+const glanceWords = words(...d.atAGlance.flatMap((g) => [g.value, g.label, g.note]));
+const overviewMinutes = ov
+  ? minutes(sharedWords + (ov.glance ? glanceWords : 0) + words(...ov.sections.map((x) => x.body)))
+  : 0;
+const fullMinutes = minutes(
+  sharedWords +
+    glanceWords +
+    words(
+      d.situation,
+      d.myRole,
+      d.result,
+      d.differently,
+      ...d.story.map((x) => x.body),
+      ...(d.keyDecisions ?? []).map((k) => k.body),
+      d.hardProblem?.punchline,
+      d.hardProblem?.problem,
+      d.hardProblem?.assumption,
+      d.hardProblem?.found,
+      d.hardProblem?.fix,
+      d.hardProblem?.verified,
+      ...(d.eras?.items ?? []).map((e) => e.body),
+      ...(d.viewers ?? []).flatMap((v) => v.steps.map((x) => x.body)),
+    ),
+);
+
+/* The two panels. Without an overview there is one, with no wrapper, and
+   the page is exactly what it was before views existed. */
+const panels: Array<{ id?: 'overview' | 'full'; prefix: string; items: Item[] }> = ov
+  ? [
+      { id: 'overview', prefix: 'ov-', items: ovItems },
+      { id: 'full', prefix: '', items: blocks },
+    ]
+  : [{ prefix: '', items: blocks }];
+
+/* Next Project only renders when its target is a page this build produces. */
+const nextBuilt = await workRouteExists(d.next.href);
+if (!nextBuilt) {
+  console.warn(`[case study] ${study.id}: next project ${d.next.href} is not built — Next Project hidden`);
+}
+---
+
+<article class:list={['cs', ov && 'cs--views']}>
+  {
+    !d.approved && (
+      <p class="cs-draft">
+        <strong>Draft.</strong> Not approved for publication — this page exists in development only and is excluded
+        from production builds.
+      </p>
+    )
+  }
+
+  <StudyHero data={d} parentHref={parentHref} parentName={parentName} inShort={inShortInHero ? html.inShort : undefined} split={!!ov}>
+    {ov && <ViewSwitch slot="switch" overviewMinutes={overviewMinutes} fullMinutes={fullMinutes} />}
+  </StudyHero>
+
+  {
+    family.length > 1 && (
+      <nav class="cs-family" aria-label={`${family[0].data.name} sites`}>
+        <div class="container-bleed">
+          <p class="text-small text-fg-muted">
+            {family.length} sites at {family[0].data.company}
+          </p>
+          <ul>
+            {family.map((s) => {
+              const current = s.id === study.id;
+              return (
+                <li>
+                  <a href={hrefFor(s)} aria-current={current ? 'page' : undefined} class:list={[current && 'is-current']}>
+                    <b>{s.data.name}</b>
+                    {s.data.kind && <span>{s.data.kind}</span>}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </nav>
+    )
+  }
+
+  {
+    panels.map((panel) => (
+      <ViewPanel id={panel.id}>
+        <Namespaced prefix={panel.prefix}>
+          {panel.items.map((b) => {
+      switch (b.kind) {
+        case 'ovSection':
+          return <StudyOverview number={b.number} heading={b.heading} html={b.html} labels={b.labels} image={b.image} id={b.id} />;
+        case 'ovMore':
+          return (
+            <div class="cs-sec cs-sec--tight">
+              <div class="container-bleed">
+                <a href="?view=full" class="ov-more link-reveal group text-lead font-medium text-fg">
+                  Read the full case study<span class="link-arrow ml-2" aria-hidden="true">→</span>
+                </a>
+              </div>
+            </div>
+          );
+        case 'ovHard':
+          return (
+            <HardProblem
+              title={b.heading}
+              punchlineHtml={html.punchline}
+              beats={[]}
+              code={d.hardProblem?.code}
+              condensedHtml={b.html}
+            />
+          );
+        case 'section':
+          return <StudySection heading={b.heading} html={b.html} id={b.id} />;
+        case 'inShort':
+          return (
+            <div class="cs-sec cs-sec--tight">
+              <div class="container-bleed">
+                <InShort lines={html.inShort} />
+              </div>
+            </div>
+          );
+        case 'result':
+          return (
+            <StudySection heading="Result" html={html.result} id="result">
+              {d.testimonial && (
+                <blockquote class="cs-quote">
+                  <p>“{d.testimonial.quote}”</p>
+                  <footer>
+                    {d.testimonial.name}, {d.testimonial.title}
+                  </footer>
+                </blockquote>
+              )}
+            </StudySection>
+          );
+        case 'glance':
+          return <Glance items={d.atAGlance} />;
+        case 'decisions':
+          return <Decisions
+              items={(d.keyDecisions ?? [])
+                .map((k, i) => ({ heading: k.heading, html: html.decisions[i] }))
+                .filter((k) => showPlaceholders || (!isPlaceholder(k.heading) && k.html.trim()))}
+            />;
+        case 'hardProblem':
+          return (
+            <HardProblem
+              title={d.hardProblem?.title}
+              punchlineHtml={html.punchline}
+              beats={BEAT_LABELS.map((label, i) => ({ label, html: html.beats[i], key: BEAT_KEYS[i] }))}
+              code={d.hardProblem?.code}
+            />
+          );
+        case 'fullStack':
+          return (
+            <section class="cs-sec" aria-labelledby="stack-title">
+              <div class="container-bleed">
+                <h2 id="stack-title" class="cs-h2" data-split>
+                  Full stack
+                </h2>
+                <dl class="cs-stack">
+                  {d.fullStack.map((g) => (
+                    <div class="cs-stack__row" data-reveal>
+                      <dt class="text-body font-medium text-fg">{g.group}</dt>
+                      <dd>
+                        <ul>
+                          {g.items.map((item) => (
+                            <li class:list={['text-body text-fg', item.replace(/\s+/g, ' ').split(' ').some((w) => w.length > 15) && 'is-long']}>{item}</li>
+                          ))}
+                        </ul>
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            </section>
+          );
+        case 'eras':
+          return (
+            <Eras
+              heading={d.eras!.heading}
+              introHtml={html.erasIntro}
+              items={d.eras!.items.map((e, i) => ({ ...e, html: html.eras[i] }))}
+            />
+          );
+        case 'scroller':
+          return <PageScroller scroller={d.scroller!} introHtml={html.scrollerIntro} />;
+        case 'mockup':
+          return <Mockup src={b.mockup.src} alt={b.mockup.alt} caption={b.mockup.caption} crop={b.mockup.crop} panel={b.mockup.panel} inset={b.mockup.inset} />;
+        case 'viewer':
+          return (
+            <StepViewer
+              viewer={d.viewers![b.index]}
+              introHtml={html.viewers[b.index].intro}
+              stepHtml={html.viewers[b.index].steps}
+            />
+          );
+        case 'feature':
+          return <Feature feature={d.features![b.index]} />;
+        case 'photos': {
+          const p = d.photoSets![b.index];
+          return <PhotoSet id={p.id} heading={p.heading} introHtml={html.photoSets[b.index]} tabs={p.tabs} categories={p.categories} />;
+        }
+        case 'reels': {
+          const r = d.reelSets![b.index];
+          return <ReelRow id={r.id} heading={r.heading} introHtml={html.reelSets[b.index]} items={r.items} />;
+        }
+        case 'list': {
+          const l = d.lists![b.index];
+          const items = l.from ? LIST_SOURCES[l.from] : l.items!;
+          return <ListRows id={l.id} heading={l.heading} introHtml={html.lists[b.index]} items={items} />;
+        }
+        case 'strip': {
+          const s = d.strips![b.index];
+          return <Strip id={s.id} heading={s.heading} introHtml={html.strips[b.index]} items={s.items} />;
+        }
+        case 'beforeAfter':
+          return (
+            <figure class="cs-sec cs-ba">
+              <div class="container-bleed">
+                <div class="cs-ba__pair">
+                  <div>
+                    <p class="cs-ba__tag">Before</p>
+                    <Image src={beforeAfter!.beforeImg} alt={beforeAfter!.beforeAlt} widths={[480, 800, 1200]} sizes="(min-width: 64rem) 46vw, 92vw" />
+                  </div>
+                  <div>
+                    <p class="cs-ba__tag">After</p>
+                    <Image src={beforeAfter!.afterImg} alt={beforeAfter!.afterAlt} widths={[480, 800, 1200]} sizes="(min-width: 64rem) 46vw, 92vw" />
+                  </div>
+                </div>
+                {beforeAfter!.caption && <figcaption class="mt-4 max-w-measure text-small text-fg-muted">{beforeAfter!.caption}</figcaption>}
+              </div>
+            </figure>
+          );
+        case 'gallery':
+          return (
+            <section class="cs-sec cs-gallery" aria-labelledby="gallery-title">
+              <div class="container-bleed">
+                <h2 id="gallery-title" class="cs-h2" data-split>
+                  {gallery!.heading}
+                </h2>
+                {gallery!.introHtml && <div class="cs-prose cs-intro" set:html={gallery!.introHtml} />}
+
+                {gallery!.desktop.length > 0 && (
+                  <ul class="cs-gallery__desk">
+                    {gallery!.desktop.map((g) => (
+                      <li>
+                        <div class:list={['cs-gallery__frame', g.tall && 'is-tall']}>
+                          <Image src={g.img} alt={g.alt} widths={[420, 720, 1100]} sizes="(min-width: 64rem) 30vw, 92vw" loading="lazy" />
+                        </div>
+                        <p>{g.label}</p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {gallery!.mobile.length > 0 && (
+                  <ul class="cs-gallery__mobile" data-lenis-prevent-horizontal>
+                    {gallery!.mobile.map((g) => (
+                      <li>
+                        <div class="cs-gallery__phone">
+                          <Image src={g.img} alt={g.alt} widths={[220, 430]} sizes="12rem" loading="lazy" />
+                        </div>
+                        <p>{g.label}</p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </section>
+          );
+      }
+          })}
+        </Namespaced>
+      </ViewPanel>
+    ))
+  }
+
+  {
+    ov && (
+      <script is:inline>
+        (function () {
+          /* Park the view that isn't showing outside the document, so
+             nothing measures it (see ViewSwitch). Runs before any module. */
+          var view = document.documentElement.dataset.view === 'full' ? 'full' : 'overview';
+          var store = { current: view, path: location.pathname, panels: {}, markers: {} };
+          ['overview', 'full'].forEach(function (id) {
+            var el = document.getElementById('cs-' + id);
+            if (!el) return;
+            var marker = document.createComment('cs-' + id);
+            el.parentNode.insertBefore(marker, el);
+            store.panels[id] = el;
+            store.markers[id] = marker;
+            if (id !== view) {
+              el.hidden = true;
+              el.remove();
+            }
+          });
+          window.__csView = store;
+        })();
+      </script>
+    )
+  }
+
+  {nextBuilt && <NextStudy href={d.next.href} name={d.next.name} line={d.next.line} />}
+
+  {/* Phones and tablets: the reading pill — the section you're in, how far
+      through the study you are, and a list to jump between sections. Built
+      out by studyProgress (mobile-motion.ts); styles in mobile.css. Hidden
+      until then, so without JS it's simply not there. */}
+  <div class="cs-pill__scrim" hidden data-cs-pill-scrim aria-hidden="true"></div>
+  <div class="cs-pill" hidden data-cs-pill>
+    <div class="cs-pill__sheet" id="cs-pill-sheet" hidden data-cs-pill-sheet>
+      <ol class="cs-pill__list" aria-label="Sections" data-cs-pill-list></ol>
+    </div>
+    <button type="button" class="cs-pill__btn" aria-expanded="false" aria-controls="cs-pill-sheet" data-cs-pill-btn>
+      <svg class="cs-pill__ring" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" />
+        <circle cx="12" cy="12" r="10" pathLength="100" data-cs-pill-ring />
+      </svg>
+      <span class="sr-only">Sections. Now reading: </span>
+      <span class="cs-pill__label" data-cs-pill-label>{d.name}</span>
+      <svg class="cs-pill__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6" /></svg>
+    </button>
+  </div>
+</article>
+
+<script>
+  import { registerMotion } from '../../scripts/motion';
+  import {
+    studyVideos,
+    studyZoom,
+    erasStage,
+    pageScroller,
+    stepViewers,
+    hardBeats,
+    studyHighlights,
+    highlightShapes,
+    viewSwitch,
+  } from '../../scripts/study-motion';
+  import { scrollerMobile, stepSwipe, erasMobile, studyProgress, stripSwipe } from '../../scripts/mobile-motion';
+
+  /* Videos and the step viewers have a job with motion off too (play
+     buttons, tabs); they handle reduced motion themselves. */
+  /* First, so the right view is in the document before anything else
+     measures it (it's a no-op on a study without an overview). */
+  registerMotion(viewSwitch, { reduced: true });
+  registerMotion(studyVideos, { reduced: true });
+  registerMotion(stepViewers, { reduced: true });
+  registerMotion(studyZoom);
+  registerMotion(erasStage);
+  registerMotion(pageScroller, { reduced: true });
+  registerMotion(hardBeats);
+  registerMotion(studyHighlights);
+  registerMotion(highlightShapes, { reduced: true });
+  /* Phones and tablets (mobile-motion.ts). The swipes, counters and the
+     reading pill work with motion off too; they drop their animation then. */
+  registerMotion(scrollerMobile, { reduced: true });
+  registerMotion(stepSwipe, { reduced: true });
+  registerMotion(erasMobile, { reduced: true });
+  registerMotion(studyProgress, { reduced: true });
+  /* With reduced motion too: the swipe rows still need to fit their height
+     to the piece on screen (the nudge hint skips itself). */
+  registerMotion(stripSwipe, { reduced: true });
+</script>
+
+<style>
+  .cs-draft {
+    padding: 0.6rem var(--grid-margin);
+    background: var(--color-fg);
+    color: var(--color-surface);
+    font-size: var(--text-small);
+    text-align: center;
+  }
+
+  /* Family switcher: the current site is marked with a tan bar, not tan type. */
+  .cs-family {
+    padding-block: var(--spacing-section-sm) 0;
+  }
+
+  .cs-family ul {
+    margin-top: 0.85rem;
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    border-top: 1px solid var(--color-edge);
+  }
+
+  .cs-family a {
+    position: relative;
+    display: grid;
+    gap: 0.2rem;
+    height: 100%;
+    padding: 1rem 1rem 1rem 1.1rem;
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px solid var(--color-edge);
+  }
+
+  .cs-family a::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 1rem;
+    bottom: 1rem;
+    width: 3px;
+    border-radius: 2px;
+    background: var(--color-accent-fill);
+    transform: scaleY(0);
+    transition: transform var(--duration-base) var(--ease-out-soft);
+  }
+
+  .cs-family a:hover::before,
+  .cs-family a.is-current::before {
+    transform: scaleY(1);
+  }
+
+  .cs-family b {
+    font-size: var(--text-body);
+    font-weight: 600;
+    color: var(--color-fg);
+  }
+
+  .cs-family span {
+    font-size: var(--text-small);
+    color: var(--color-fg-muted);
+  }
+
+  .cs-quote {
+    margin-top: var(--spacing-stack);
+    padding-left: 1.25rem;
+    border-left: 3px solid var(--color-accent-fill);
+  }
+
+  .cs-quote p {
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+    color: var(--color-fg);
+  }
+
+  .cs-quote footer {
+    margin-top: 0.6rem;
+    font-size: var(--text-small);
+    color: var(--color-fg-muted);
+  }
+
+  .cs-stack {
+    margin-top: var(--spacing-block);
+  }
+
+  .cs-stack__row {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+    row-gap: 0.5rem;
+    padding-block: 1.25rem;
+    border-top: 1px solid var(--color-edge);
+  }
+
+  .cs-stack__row:last-child {
+    border-bottom: 1px solid var(--color-edge);
+  }
+
+  .cs-stack dt,
+  .cs-stack dd {
+    grid-column: 1 / -1;
+  }
+
+  .cs-stack ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0;
+  }
+
+  /* Items run as a line separated by thin rules, so a group reads as one
+     sentence of tools rather than a column of chips. */
+  .cs-stack li:not(:last-child)::after {
+    content: '';
+    display: inline-block;
+    width: 1px;
+    height: 0.9em;
+    margin-inline: 0.85rem;
+    vertical-align: -0.1em;
+    background: var(--color-edge-strong);
+  }
+
+  /* Below 1024 the last tool row's rule ran straight into Next project's
+     top rule; Next project's stays. */
+  @media (max-width: 63.999rem) {
+    .cs-stack__row:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  /* Phones: two tidy columns of tools. The rule between items dangled at
+     the end of every wrapped line. */
+  @media (max-width: 47.999rem) {
+    .cs-stack ul {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.4rem 1.25rem;
+    }
+    .cs-stack li:not(:last-child)::after {
+      display: none;
+    }
+    /* A single long word (requestAnimationFrame) can't fit half a phone. */
+    .cs-stack li.is-long {
+      grid-column: 1 / -1;
+    }
+    .cs-stack li {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .cs-stack dt {
+      grid-column: 1 / span 4;
+    }
+    .cs-stack dd {
+      grid-column: 5 / -1;
+    }
+  }
+
+  /* Before / after (legacy, QuickStrike). */
+  .cs-ba__pair {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  @media (min-width: 56rem) {
+    .cs-ba__pair {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--grid-gutter);
+    }
+  }
+
+  .cs-ba__pair > div {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .cs-ba__tag {
+    font-size: var(--text-body);
+    font-weight: 600;
+    color: var(--color-fg);
+  }
+
+  .cs-ba img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1440 / 1400;
+    object-fit: cover;
+    object-position: top;
+    border: 1px solid var(--color-edge);
+    border-radius: var(--radius-media);
+    background: var(--color-surface-sunken);
+  }
+
+  /* Gallery (legacy, QuickStrike). */
+  .cs-gallery__desk {
+    margin-top: var(--spacing-block);
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 1.75rem var(--grid-gutter);
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  }
+
+  .cs-gallery__frame {
+    overflow: hidden;
+    aspect-ratio: 16 / 11;
+    border: 1px solid var(--color-edge);
+    border-radius: var(--radius-media);
+    background: var(--color-surface-sunken);
+  }
+
+  .cs-gallery__frame img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+  }
+
+  .cs-gallery__frame.is-tall img {
+    height: auto;
+    object-fit: initial;
+    transition: transform 2.4s var(--ease-out-soft);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .cs-gallery__frame.is-tall:hover img {
+      transform: translateY(calc(-100% + 11rem));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cs-gallery__frame.is-tall img {
+      transition: none;
+    }
+    .cs-gallery__frame.is-tall:hover img {
+      transform: none;
+    }
+  }
+
+  .cs-gallery__desk p,
+  .cs-gallery__mobile p {
+    margin-top: 0.55rem;
+    font-size: var(--text-small);
+    color: var(--color-fg-muted);
+  }
+
+  .cs-gallery__mobile {
+    margin-top: 2.75rem;
+    list-style: none;
+    padding: 0 0 0.25rem;
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .cs-gallery__mobile li {
+    flex: 0 0 auto;
+    width: 11rem;
+  }
+
+  .cs-gallery__phone {
+    overflow: hidden;
+    aspect-ratio: 430 / 900;
+    border: 1px solid var(--color-edge-strong);
+    border-radius: 1.1rem;
+    background: var(--color-surface-sunken);
+  }
+
+  .cs-gallery__phone img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+</style>

@@ -1,0 +1,28 @@
+---
+/*
+  A prose section: the heading holds the left five columns (sticky beside
+  long copy on desktop), the markdown sits from column 7 at a readable
+  measure. Used for situation, role, story sections, result and "what I'd
+  do differently". A default slot after the prose takes extras such as the
+  testimonial.
+*/
+
+interface Props {
+  heading: string;
+  html: string;
+  id?: string;
+}
+
+const { heading, html, id } = Astro.props;
+const headingId = id ? `${id}-title` : undefined;
+---
+
+<section class="cs-sec" id={id} aria-labelledby={headingId}>
+  <div class="container-bleed cs-split">
+    <h2 class="cs-h2" id={headingId} data-split>{heading}</h2>
+    <div>
+      <div class="cs-prose" set:html={html} data-reveal />
+      <slot />
+    </div>
+  </div>
+</section>

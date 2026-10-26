@@ -1,146 +1,282 @@
 ---
 import { getCollection, render } from 'astro:content';
-import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
-import Container from '../../components/Container.astro';
 import UnderTheHood from '../../components/study/UnderTheHood.astro';
+import ProjectCover from '../../components/ProjectCover.astro';
 import Stat from '../../components/study/Stat.astro';
 import Stats from '../../components/study/Stats.astro';
 import Figure from '../../components/study/Figure.astro';
 import BeforeAfter from '../../components/study/BeforeAfter.astro';
+import Exhibit from '../../components/study/Exhibit.astro';
+import ConceptScreens from '../../components/study/ConceptScreens.astro';
+import NextStudy from '../../components/study/NextStudy.astro';
+import { topLevelStudies } from '../../lib/studies';
+import { longestWordEm } from '../../lib/display-fit';
+import { conceptName } from '../../components/projects/data';
 
 /*
-  Case study page.
+  The project pages still written in MDX — today, the six design concepts.
 
-  Body sections are written in the MDX itself; this file supplies the hero, the
-  under-the-hood block and the next/previous navigation. The study components
-  are passed into the MDX so they can be used without an import in every file.
+  Laid out like the case studies (StudyHero, StudySection, NextStudy): the
+  name huge and uppercase, the one line and the summary on the left with the
+  facts beside them, the cover across the content width, then the MDX body
+  with its headings in the left columns and the prose from column 7, and
+  the next project as one big link. The MDX's <Gallery> is drawn by
+  ConceptScreens here: the screens big, stacked on phones and two across
+  from 768. Concept status is said once, in words,
+  in the facts ("Self-directed design concept"), never as a badge.
+
+  The study components are passed into the MDX so they can be used without
+  an import in every file.
 */
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
 
-  /* Concepts get a page too — they're clearly labelled as self-directed rather
-     than passed off as client work. */
-  const studies = projects
+  /* A project that has been rewritten on the build sheet is served by the
+     study route instead, at the same URL. Cards have no page. */
+  const replaced = new Set((await topLevelStudies()).map((study) => study.id));
+
+  const pages = projects
     .filter((project) => project.data.depth !== 'card')
+    .filter((project) => !replaced.has(project.id))
     .sort((a, b) => a.data.order - b.data.order);
 
-  return studies.map((entry, index) => ({
+  /* Next project wraps round, so the last concept still leads somewhere. */
+  return pages.map((entry, index) => ({
     params: { slug: entry.id },
     props: {
       entry,
-      previous: index > 0 ? studies[index - 1] : undefined,
-      next: index < studies.length - 1 ? studies[index + 1] : undefined,
+      next: pages.length > 1 ? pages[(index + 1) % pages.length] : undefined,
     },
   }));
 }
 
-const { entry, previous, next } = Astro.props;
+const { entry, next } = Astro.props;
 const { Content } = await render(entry);
 const data = entry.data;
 
-/* Passed into the MDX so a case study can use them without importing anything.
-   UnderTheHood is authored in the body rather than rendered here, because its
-   code snippet has to be a fenced block inside it. */
-const components = { Stat, Stats, Figure, BeforeAfter, UnderTheHood };
+/* The MDX calls <Gallery>; here that's the big screens layout. */
+const components = { Stat, Stats, Figure, BeforeAfter, UnderTheHood, Exhibit, Gallery: ConceptScreens };
+
+/* The short name for the h1 ("Zion Explorer"); the MDX title is the one
+   line under it. Where the title is the name already (ExoticRides), the
+   outcome is the one line instead. */
+const name = conceptName(entry.id) ?? data.title;
+const line = data.title === name ? data.outcome.trim() : data.title;
+const isConcept = data.depth === 'concept';
+
+const META = [
+  {
+    label: 'Type',
+    value: isConcept ? `Self-directed design concept, ${data.year}` : `${data.client}, ${data.year}`,
+  },
+  { label: 'Role', value: data.role.join(', ') },
+  { label: 'Made with', value: data.stack.join(', ') },
+];
+
+const nextName = next ? (conceptName(next.id) ?? next.data.title) : undefined;
+const nextLine = next ? (next.data.title === nextName ? next.data.outcome.trim() : next.data.title) : undefined;
+
 ---
 
-<Base title={data.title} description={data.outcome} ogImage={data.cover.src}>
-  <article>
-    <header class="border-b border-edge bg-surface-sunken pt-16 pb-14">
-      <Container width="wide">
-        <div class="flex flex-wrap items-center gap-3">
-          {
-            data.depth === 'concept' && (
-              <p class="rounded-full border border-signal px-3 py-1 font-body text-2xs tracking-widest text-signal uppercase">
-                Self-directed concept
-              </p>
-            )
-          }
-          <p class="font-body text-2xs tracking-widest text-fg-faint uppercase">
-            {data.client} · {data.year}
-          </p>
-        </div>
+{/* The site's share card (Base's default), not the raw WebP cover: some
+    networks don't preview WebP. */}
+<Base
+  title={isConcept ? `${name} — design concept` : name}
+  description={data.outcome}
+  ogImageAlt={`${name}${isConcept ? ', a design concept' : ''} by Brendon Jensen, web developer, designer and marketer. brendonjensen.dev`}
+>
+  <article class="cc">
+    <header class="cc-hero">
+      <div class="container-bleed">
+        <p class="cc-crumb text-small">
+          <a href="/work/" class="link-reveal">Projects</a>
+          <span aria-hidden="true"> / </span>
+          {isConcept ? 'Design concepts' : name}
+        </p>
 
-        {/* Shares a transition name with its row on the work index, so the
-            title morphs into place rather than the page cutting. */}
         <h1
-          class="mt-8 max-w-[16ch] font-display text-5xl leading-[0.9] uppercase md:text-7xl"
-          style="letter-spacing: var(--tracking-display);"
+          class="cc-name text-mega"
+          data-split="lines"
+          style={`--cc-fit: ${longestWordEm(name)}`}
           transition:name={`study-${entry.id}`}
         >
-          {data.title}
+          {name}
         </h1>
 
-        <p class="mt-8 max-w-measure font-body text-xl text-fg md:text-2xl">{data.outcome}</p>
+        <div class="cc-grid">
+          <div class="cc-intro" data-reveal>
+            <p class="text-lead text-fg">{line}</p>
+            <p class="cc-summary text-body text-fg-muted">{data.summary.trim()}</p>
+          </div>
 
-        <ul class="mt-10 flex flex-wrap gap-x-6 gap-y-2">
-          {
-            data.role.map((role) => (
-              <li class="font-body text-2xs tracking-widest text-fg-faint uppercase">{role}</li>
-            ))
-          }
-        </ul>
-      </Container>
+          <dl class="cc-meta" data-reveal-group>
+            {
+              META.map((m) => (
+                <div data-reveal>
+                  <dt class="text-small text-fg-muted">{m.label}</dt>
+                  <dd class="text-small text-fg">{m.value}</dd>
+                </div>
+              ))
+            }
+          </dl>
+        </div>
+      </div>
+
+      <div class="container-bleed cc-cover">
+        <ProjectCover
+          image={data.cover}
+          alt={data.coverAlt}
+          widths={[640, 960, 1440, 1920]}
+          sizes="(min-width: 1440px) 88rem, (min-width: 64rem) 94vw, (min-width: 48rem) calc(100vw - 5rem), calc(100vw - 2.5rem)"
+          class="aspect-[8/5] w-full rounded-media border border-edge object-cover"
+          priority
+        />
+      </div>
     </header>
 
-    <Container width="wide">
-      <Image
-        src={data.cover}
-        alt={data.coverAlt}
-        widths={[640, 960, 1440, 1920]}
-        sizes="(min-width: 1440px) 88rem, 100vw"
-        class="mt-14 w-full rounded-card border border-edge"
-      />
-    </Container>
-
-    {/* The reading column is narrower than the page so long-form prose keeps a
-        sane measure; figures break out of it deliberately. */}
-    <Container width="content">
-      <div
-        class="prose-study mx-auto mt-20 max-w-measure font-body text-lg text-fg"
-      >
+    <section class="cc-sec" aria-label="About the concept">
+      <div class="container-bleed cc-body">
         <Content components={components} />
       </div>
-    </Container>
+    </section>
 
-    {
-      (previous || next) && (
-        <nav class="mt-24 border-t border-edge" aria-label="More work">
-          <Container width="wide">
-            <ul class="grid gap-px md:grid-cols-2">
-              {previous && (
-                <li>
-                  <a
-                    href={`/work/${previous.id}/`}
-                    class="transition-soft group block py-10 pr-6"
-                  >
-                    <span class="font-body text-2xs tracking-widest text-fg-faint uppercase">
-                      Previous
-                    </span>
-                    <span class="mt-3 block font-display text-3xl uppercase transition-soft group-hover:text-signal">
-                      {previous.data.title}
-                    </span>
-                  </a>
-                </li>
-              )}
-              {next && (
-                <li class="md:text-right">
-                  <a href={`/work/${next.id}/`} class="transition-soft group block py-10 pl-6">
-                    <span class="font-body text-2xs tracking-widest text-fg-faint uppercase">
-                      Next
-                    </span>
-                    <span class="mt-3 block font-display text-3xl uppercase transition-soft group-hover:text-signal">
-                      {next.data.title}
-                    </span>
-                  </a>
-                </li>
-              )}
-            </ul>
-          </Container>
-        </nav>
-      )
-    }
+    {next && nextName && nextLine && <NextStudy href={`/work/${next.id}/`} name={nextName} line={nextLine} />}
   </article>
 </Base>
+
+<style>
+  .cc-hero {
+    padding-top: var(--spacing-section-sm);
+  }
+
+  .cc-crumb {
+    margin-bottom: var(--spacing-stack);
+    color: var(--color-fg-muted);
+  }
+  .cc-crumb a {
+    color: var(--color-fg);
+  }
+
+  /* The study hero's name: the mega step, capped so the longest word fits. */
+  .cc-name {
+    font-size: min(var(--text-mega), calc((100vw - 2 * var(--grid-margin)) / 12.6));
+    color: var(--color-fg);
+    overflow-wrap: normal;
+  }
+  @media (max-width: 63.999rem) {
+    .cc-name {
+      font-size: min(4.5rem, calc((100vw - 2 * var(--grid-margin)) / (var(--cc-fit, 12.6) * 1.04)));
+    }
+  }
+
+  .cc-grid {
+    margin-top: var(--spacing-block);
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+    row-gap: var(--spacing-block);
+  }
+  .cc-intro,
+  .cc-meta {
+    grid-column: 1 / -1;
+  }
+  .cc-intro {
+    max-width: var(--container-measure);
+  }
+  .cc-summary {
+    margin-top: var(--spacing-stack);
+  }
+
+  .cc-meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem var(--grid-gutter);
+    align-content: start;
+  }
+  .cc-meta > div {
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--color-edge);
+  }
+  .cc-meta > div:first-child {
+    grid-column: 1 / -1;
+  }
+  .cc-meta dd {
+    margin-top: 0.2rem;
+    overflow-wrap: anywhere;
+  }
+
+  @media (min-width: 64rem) {
+    .cc-intro {
+      grid-column: 1 / span 6;
+    }
+    .cc-meta {
+      grid-column: 8 / -1;
+    }
+  }
+
+  .cc-cover {
+    margin-top: var(--spacing-block);
+  }
+
+  /* ── The MDX body ──────────────────────────────────────────────────────
+     Headings in the left five columns, prose from column 7 at a readable
+     measure (the case studies' split), and the gallery across the page. The
+     gallery breaks out to the viewport from the centre of its parent, so its
+     parent has to be the full content width — hence one grid here rather
+     than a narrow prose column. */
+  .cc-sec {
+    padding-block: var(--spacing-section);
+    border-top: 1px solid var(--color-edge);
+    margin-top: var(--spacing-section-sm);
+  }
+
+  .cc-body {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+  }
+  .cc-body > :global(*) {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+  .cc-body > :global(h2) {
+    margin-bottom: var(--spacing-stack);
+    font-family: var(--font-display);
+    font-stretch: var(--display-stretch);
+    text-transform: var(--display-case);
+    font-size: var(--text-heading);
+    line-height: var(--text-heading--line-height);
+    letter-spacing: var(--text-heading--letter-spacing);
+    font-weight: var(--text-heading--font-weight);
+    color: var(--color-fg);
+  }
+  .cc-body > :global(p) {
+    max-width: var(--container-measure);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    color: var(--color-fg);
+  }
+  .cc-body > :global(p + p) {
+    margin-top: 1em;
+  }
+  /* The screens follow the prose a block down; with no prose
+     (ExoticRides) they open the body. */
+  .cc-body > :global([data-screens]) {
+    margin-top: var(--spacing-section-sm);
+  }
+  .cc-body > :global([data-screens]:first-child) {
+    margin-top: 0;
+  }
+
+  @media (min-width: 64rem) {
+    .cc-body > :global(h2) {
+      grid-column: 1 / span 5;
+      margin-bottom: 0;
+    }
+    .cc-body > :global(p) {
+      grid-column: 7 / -1;
+    }
+  }
+</style>

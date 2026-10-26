@@ -1,0 +1,52 @@
+---
+/*
+  One section of a case study's Quick overview: its number, heading, short
+  body and labels, and an optional still. The showcase blocks it names
+  (`show`) are rendered after it by CaseStudy with the full study's own
+  components, so they look and move exactly as they do in the full view.
+
+  Same system as the rest of the study: the prose section's split (heading
+  left, copy from column 7), hairlines, Geist body, no cards. Labels are
+  plain bordered words in sentence case, not mono caps.
+*/
+import StudyImage from './StudyImage.astro';
+
+interface Props {
+  number: number;
+  heading: string;
+  html: string;
+  labels?: string[];
+  image?: { src: string; alt: string; crop?: { x: number; y: number; w: number; h: number } };
+  id: string;
+}
+
+const { number, heading, html, labels = [], image, id } = Astro.props;
+---
+
+<section class="cs-sec ov" id={id} aria-labelledby={`${id}-title`}>
+  <div class="container-bleed cs-split">
+    <div class="ov__head">
+      <p class="ov__num text-small text-fg-muted tabular-nums" aria-hidden="true">{String(number).padStart(2, '0')}</p>
+      <h2 class="cs-h2" id={`${id}-title`} data-split>{heading}</h2>
+    </div>
+    <div>
+      {html && <div class="cs-prose" set:html={html} data-reveal />}
+      {
+        labels.length > 0 && (
+          <ul class="ov__labels" aria-label="Technologies and topics" data-reveal>
+            {labels.map((l) => (
+              <li class="text-small text-fg">{l}</li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+  </div>
+  {
+    image && (
+      <div class="container-bleed ov__image" data-reveal>
+        <StudyImage src={image.src} alt={image.alt} crop={image.crop} sizes="(min-width: 64rem) 80vw, 92vw" />
+      </div>
+    )
+  }
+</section>

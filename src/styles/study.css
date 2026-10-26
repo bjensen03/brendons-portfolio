@@ -1,0 +1,772 @@
+/*
+  Case-study blocks — shared styles.
+
+  Global rather than scoped because the prose comes in as rendered markdown
+  (set:html), and because the blocks share the browser frame, the crop, the
+  placeholder and the step/index treatments. Every class is cs- prefixed.
+
+  Colour rules, same as the rest of the site: tokens only; text is fg or
+  fg-muted, never the accent. Tan appears only as a fill (markers, active
+  bars, progress) with graphite type on it (--color-on-accent).
+*/
+
+/* ── Sections ──────────────────────────────────────────────────────────── */
+
+.cs-sec {
+  padding-block: var(--spacing-section);
+}
+
+.cs-sec + .cs-sec {
+  border-top: 1px solid var(--color-edge);
+}
+
+.cs-sec--tight {
+  padding-block: var(--spacing-section-sm);
+}
+
+/* Heading column + prose column on the 12-column grid. */
+.cs-split {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+  row-gap: var(--spacing-stack);
+}
+
+.cs-split > :first-child {
+  grid-column: 1 / -1;
+}
+
+.cs-split > :nth-child(2) {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 64rem) {
+  .cs-split > :first-child {
+    grid-column: 1 / span 5;
+    align-self: start;
+    position: sticky;
+    top: calc(var(--spacing-nav) + 1.5rem);
+  }
+  .cs-split > :nth-child(2) {
+    grid-column: 7 / -1;
+  }
+}
+
+.cs-h2 {
+  font-size: var(--text-heading);
+  line-height: var(--text-heading--line-height);
+  letter-spacing: var(--text-heading--letter-spacing);
+  font-weight: var(--text-heading--font-weight);
+  font-family: var(--font-display);
+  font-stretch: var(--display-stretch);
+  text-transform: var(--display-case);
+  color: var(--color-fg);
+  overflow-wrap: break-word;
+  hyphens: manual;
+}
+
+/* Lead-in under a block heading. */
+.cs-intro {
+  margin-top: var(--spacing-stack);
+  max-width: var(--container-measure);
+}
+
+/* ── Prose (markdown from the yaml) ────────────────────────────────────── */
+
+.cs-prose {
+  max-width: var(--container-measure);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  color: var(--color-fg);
+}
+
+.cs-prose > * + * {
+  margin-top: 1em;
+}
+
+.cs-prose strong {
+  font-weight: 600;
+  color: var(--color-fg);
+}
+
+.cs-prose h3 {
+  margin-top: 2.25em;
+  font-family: var(--font-body);
+  font-size: var(--text-title);
+  line-height: var(--text-title--line-height);
+  letter-spacing: var(--text-title--letter-spacing);
+  font-weight: var(--text-title--font-weight);
+  color: var(--color-fg);
+}
+
+.cs-prose h3:first-child {
+  margin-top: 0;
+}
+
+.cs-prose h3 + p {
+  margin-top: 0.75em;
+}
+
+.cs-prose ul {
+  padding-left: 0;
+  list-style: none;
+}
+
+.cs-prose li {
+  position: relative;
+  padding-left: 1.25em;
+}
+
+.cs-prose li + li {
+  margin-top: 0.35em;
+}
+
+/* A short tan dash as the bullet: a fill, not text. */
+.cs-prose li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.78em;
+  width: 0.6em;
+  height: 2px;
+  background: var(--color-accent-fill);
+}
+
+.cs-prose code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  padding: 0.1em 0.35em;
+  border-radius: 0.3em;
+  background: var(--color-surface-raised);
+}
+
+.cs-prose a {
+  color: var(--color-fg);
+  text-decoration: underline;
+  text-decoration-color: var(--color-edge-strong);
+  text-underline-offset: 0.25em;
+}
+
+.cs-prose a:hover {
+  text-decoration-color: currentColor;
+}
+
+/* Smaller prose inside a panel (step annotations, era text). */
+.cs-prose--sm {
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+}
+
+.cs-muted {
+  color: var(--color-fg-muted);
+}
+
+/*
+  Highlights — ==phrase== in the yaml (src/lib/highlight.ts) becomes
+  <mark class="hl" data-hl="1|2|3">. A hand-drawn marker underline for
+  skimmers: the words go full fg and a step heavier, and a loose tan stroke
+  runs just under them. No fill, and tan is never the text colour.
+
+  How the stroke is drawn, so it stays on tokens:
+    - The colour is a plain gradient in --hl-ink, painted as a strip in the
+      mark's bottom padding (padding reserves nothing in an inline box, so
+      lines don't move).
+    - The shape is a mask: one layer lets the text area through untouched,
+      the other is a scribble SVG stretched along the strip. Three scribbles
+      (data-hl, assigned by the remark step) so a page of them doesn't look
+      stamped.
+    - box-decoration-break: clone gives each wrapped line its own stroke.
+
+  --hl-ink is --color-focus: the accent at the strength that clears 3:1 as a
+  non-text mark against every ground the slider produces and in the bands
+  (measured by scripts/verify-contrast.mjs alongside the focus ring).
+
+  Motion: inside a case study with motion allowed (html.motion-ok, set before
+  first paint) the strip starts 0 wide and studyHighlights (study-motion.ts)
+  adds .is-lit as the phrase scrolls into view, so the stroke draws left to
+  right through the scribble. Reduced motion, no JS, or a page without the
+  script: drawn from the start.
+*/
+.hl {
+  --hl-line: 0.4em;
+  /* Where the text layer of the mask starts: just above the tallest glyphs.
+     The mask is one shape for the whole mark, so a wrapped line's text layer
+     would otherwise uncover the line above's stroke strip as a solid bar
+     wherever the two boxes overlap. Needs a line-height of about 1.5 or more
+     (prose is 1.6) — on tight display type the stroke would cross the next
+     line's capitals anyway, so don't highlight there. */
+  --hl-top: 0.14em;
+  --hl-ink: var(--color-focus);
+  --hl-shape: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 20' preserveAspectRatio='none'%3E%3Cpath d='M3 11C30 8 52 12.5 84 9.5S146 7 172 9.5C184 10.5 191 10 197 7' fill='none' stroke='black' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  color: var(--color-fg);
+  font-weight: 600;
+  background-color: transparent;
+  background-image: linear-gradient(var(--hl-ink), var(--hl-ink));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  /* The colour stops short of the strip's top edge (the scribbles never
+     reach it), so no hairline leaks through the seam between the two mask
+     layers. */
+  --hl-paint: calc(var(--hl-line) * 0.82);
+  background-size: 100% var(--hl-paint);
+  padding-inline: 0.08em;
+  margin-inline: -0.08em;
+  padding-bottom: var(--hl-line);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  -webkit-mask-image: linear-gradient(black, black), var(--hl-shape);
+  mask-image: linear-gradient(black, black), var(--hl-shape);
+  -webkit-mask-size: 100% calc(100% - var(--hl-line) - var(--hl-top)), 100% var(--hl-line);
+  mask-size: 100% calc(100% - var(--hl-line) - var(--hl-top)), 100% var(--hl-line);
+  -webkit-mask-position: 0 var(--hl-top), 0 100%;
+  mask-position: 0 var(--hl-top), 0 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.hl[data-hl='2'] {
+  --hl-shape: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 20' preserveAspectRatio='none'%3E%3Cpath d='M2 8.5C26 12.5 58 6.5 96 10S158 12.5 196 8.5' fill='none' stroke='black' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.hl[data-hl='3'] {
+  --hl-shape: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 20' preserveAspectRatio='none'%3E%3Cpath d='M4 12C40 8 70 9.5 104 8.5S162 12 184 9.5C190 9 195 10.5 197 12.5' fill='none' stroke='black' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/*
+  WebKit can't paint the two-layer mask across a mark that wraps: with
+  box-decoration-break: clone the whole mark — text and stroke — comes out
+  blank. So in WebKit (the only engine with -apple-system font keywords) the
+  mask is off by default and the highlight is a plain bar under the text,
+  drawn in by the same background-size sweep. Marks that sit on one line get
+  .hl--single from highlightShapes (study-motion.ts) and their scribble back;
+  it re-checks on resize. Chrome and Firefox keep the scribble everywhere.
+*/
+@supports (font: -apple-system-body) {
+  .hl:not(.hl--single) {
+    /* A pen-weight line in the middle of the stroke strip, not the strip. */
+    --hl-paint: 0.13em;
+    background-position: 0 calc(100% - 0.13em);
+    -webkit-mask: none;
+    mask: none;
+  }
+}
+
+/* Bold and links inside a highlight take its colour and weight. */
+mark.hl strong,
+mark.hl a,
+mark.hl em {
+  color: inherit;
+  font-weight: inherit;
+}
+
+html.motion-ok .cs .hl {
+  transition: background-size var(--duration-slow) var(--ease-out-soft) var(--hl-delay, 0s);
+}
+
+html.motion-ok .cs .hl:not(.is-lit) {
+  background-size: 0% var(--hl-paint);
+}
+
+@media (forced-colors: active) {
+  .hl {
+    background: none;
+    -webkit-mask: none;
+    mask: none;
+    padding-bottom: 0;
+    text-decoration: underline;
+  }
+}
+
+/* ── In short ──────────────────────────────────────────────────────────── */
+
+/*
+  Three or four lines for someone who reads nothing else: what it was, what
+  was built, the result, the role. Rendered in the hero between the facts and
+  the hero media when `inShort` leads the layout, otherwise as its own
+  section wherever the key sits.
+*/
+.cs-short {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+  row-gap: 1.25rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-edge-strong);
+}
+
+.cs-short__h {
+  grid-column: 1 / -1;
+  font-family: var(--font-body);
+  font-size: var(--text-title);
+  line-height: var(--text-title--line-height);
+  letter-spacing: var(--text-title--letter-spacing);
+  font-weight: var(--text-title--font-weight);
+  color: var(--color-fg);
+}
+
+.cs-short__list {
+  grid-column: 1 / -1;
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.cs-short__list li {
+  position: relative;
+  padding-left: 1.6rem;
+  max-width: 44ch;
+  font-size: var(--text-lead);
+  /* A little more than lead's 1.4, so a highlight's underline clears the
+     next line (see .hl). */
+  line-height: 1.5;
+  letter-spacing: var(--text-lead--letter-spacing);
+  color: var(--color-fg);
+  text-wrap: pretty;
+}
+
+/* A small tan square, set on the first line's x-height. */
+.cs-short__list li::before {
+  content: '';
+  position: absolute;
+  left: 0.1rem;
+  top: calc(0.75em - 0.3rem);
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 1px;
+  background: var(--color-accent-fill);
+}
+
+.cs-short__list strong {
+  font-weight: 600;
+}
+
+@media (min-width: 64rem) {
+  .cs-short__h {
+    grid-column: 1 / span 5;
+  }
+  .cs-short__list {
+    grid-column: 7 / -1;
+  }
+}
+
+/* As its own section, away from the hero. */
+.cs-sec > .container-bleed > .cs-short {
+  border-top: 0;
+  padding-top: 0;
+}
+
+/* ── Media primitives ──────────────────────────────────────────────────── */
+
+/* Crop: see cropStyle() in src/lib/study-media.ts. */
+.cs-crop {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: var(--crop-ratio, 16 / 9);
+}
+
+.cs-crop__media {
+  position: absolute;
+  left: var(--crop-x, 0%);
+  top: var(--crop-y, 0%);
+  width: var(--crop-w, 100%);
+  height: var(--crop-h, 100%);
+  max-width: none;
+  object-fit: fill;
+}
+
+.cs-natural {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.cs-fill-top {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+/* Missing asset. Deliberately obvious. */
+.cs-need {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 12rem;
+  aspect-ratio: var(--crop-ratio, 16 / 10);
+  padding: 1.5rem;
+  border: 1px dashed var(--color-edge-strong);
+  background: var(--color-surface-raised);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--color-fg);
+  text-align: center;
+}
+
+/* ── Browser frame ─────────────────────────────────────────────────────── */
+
+.cs-browser {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-frame);
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-frame);
+}
+
+.cs-browser__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: 2.25rem;
+  padding-inline: 0.85rem;
+  border-bottom: 1px solid var(--color-edge);
+}
+
+.cs-browser__dots {
+  display: flex;
+  gap: 0.35rem;
+  flex: none;
+}
+
+.cs-browser__dots span {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--color-edge-strong);
+}
+
+.cs-browser__url {
+  flex: 1;
+  min-width: 0;
+  max-width: 28rem;
+  margin-inline: auto;
+  padding: 0.15rem 0.75rem;
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--color-fg-muted);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cs-browser__view {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  background: var(--color-surface-sunken);
+}
+
+/* Screenshots are light pages; this keeps them from glaring before load. */
+.cs-browser__view img {
+  background: var(--color-surface-raised);
+}
+
+/* ── Video ─────────────────────────────────────────────────────────────── */
+
+.cs-video {
+  position: relative;
+  background: var(--matte, var(--color-surface-raised));
+}
+
+.cs-video video {
+  display: block;
+  background: var(--matte, transparent);
+}
+
+.cs-video__toggle {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-fg);
+  border: 1px solid var(--color-edge-strong);
+  cursor: pointer;
+  transition:
+    transform var(--duration-fast) var(--ease-out-soft),
+    background-color var(--duration-fast) var(--ease-out-soft);
+}
+
+.cs-video__toggle:hover {
+  transform: scale(1.06);
+}
+
+/* Play triangle by default; two bars while playing. Drawn, not an icon font. */
+.cs-video__icon {
+  width: 0.75rem;
+  height: 0.85rem;
+  background: currentColor;
+  clip-path: polygon(10% 0, 100% 50%, 10% 100%);
+}
+
+.cs-video__toggle[aria-pressed='true'] .cs-video__icon {
+  clip-path: polygon(0 0, 35% 0, 35% 100%, 0 100%, 0 0, 65% 0, 100% 0, 100% 100%, 65% 100%, 65% 0);
+}
+
+/* ── Index list (used by eras, scroller, beats) ────────────────────────── */
+
+/* A row that lights up when active: muted → fg, with a tan bar beside it. */
+.cs-index {
+  list-style: none;
+  padding: 0;
+}
+
+.cs-index > li {
+  position: relative;
+}
+
+.cs-index__item {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0.55rem 0 0.55rem 1.1rem;
+  text-align: left;
+  color: var(--color-fg-muted);
+  background: none;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-out-soft);
+}
+
+.cs-index__item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--color-accent-fill);
+  transform: scaleY(0);
+  transform-origin: 50% 0;
+  transition: transform var(--duration-base) var(--ease-out-soft);
+}
+
+.cs-index__item:hover,
+.cs-index__item[aria-current='true'],
+.cs-index__item.is-active {
+  color: var(--color-fg);
+}
+
+.cs-index__item[aria-current='true']::before,
+.cs-index__item.is-active::before {
+  transform: scaleY(1);
+}
+
+/* Numbered marker: a tan disc with graphite type. */
+.cs-marker {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: var(--color-accent-fill);
+  color: var(--color-on-accent);
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-index__item,
+  .cs-index__item::before,
+  .cs-video__toggle {
+    transition: none;
+  }
+}
+
+/* Phones: block headings a step down (36px read as shouting at 390, and a
+   long one ran to five lines). Balanced so a wrap doesn't strand a word. */
+@media (max-width: 47.999rem) {
+  .cs-h2 {
+    font-size: min(2.1rem, 8.6vw);
+    text-wrap: balance;
+  }
+}
+
+/* ── Quick overview / Full case study (ViewSwitch, ViewPanel) ──────────────
+   The switch: a sticky bar under the nav (it rides up to the top when the
+   nav hides on scroll), a two-tab segmented control, and the reading time.
+   The active tab is the tan fill with graphite type. */
+
+.vw {
+  position: sticky;
+  top: var(--spacing-nav);
+  z-index: 30;
+  margin-top: var(--spacing-block);
+  background: var(--color-surface);
+  border-block: 1px solid var(--color-edge);
+  transition: top var(--duration-snap) var(--ease-in-out-soft);
+}
+:root:has(.site-header[data-hidden]) .vw {
+  top: 0;
+}
+
+.vw__in {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 0.625rem;
+}
+
+.vw__tabs {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: var(--radius-control);
+  background: var(--color-surface-raised);
+}
+
+.vw__tab {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  align-items: center;
+  border-radius: calc(var(--radius-control) - 2px);
+  color: var(--color-fg);
+  font-size: var(--text-small);
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-fast) var(--ease-out-soft),
+    color var(--duration-fast) var(--ease-out-soft);
+}
+.vw__tab:hover {
+  background: color-mix(in oklab, var(--color-surface) 50%, transparent);
+}
+.vw__tab[aria-selected='true'] {
+  background: var(--color-accent-fill);
+  color: var(--color-on-accent);
+}
+.vw__tab:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+.vw__time {
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+/* The reading time beside the tabs follows the view. */
+.vw__read [data-vw-read] {
+  display: none;
+}
+html[data-view='overview'] .vw__read [data-vw-read='overview'],
+html[data-view='full'] .vw__read [data-vw-read='full'] {
+  display: inline;
+}
+
+/* Without JavaScript: no tabs (they need a script), both views show, and
+   a plain link skips to the full study. */
+html:not(.js) .vw__tabs,
+html:not(.js) .vw__read {
+  display: none;
+}
+.vw__skip {
+  color: var(--color-fg);
+  text-decoration: underline;
+  text-underline-offset: 6px;
+}
+html.js .vw__skip {
+  display: none;
+}
+html:not(.js) .vw {
+  position: static;
+}
+
+/* First paint: only the chosen view (html[data-view] is set by an inline
+   script before the panels are parsed; the script after them then takes
+   the other one out of the document). */
+html[data-view='overview'] [data-cs-view='full'],
+html[data-view='full'] [data-cs-view='overview'] {
+  display: none;
+}
+.cs-view:focus {
+  outline: none;
+}
+
+/* The view that just arrived fades in (opacity only). */
+html.motion-ok .cs-view.is-entering {
+  animation: cs-view-in var(--duration-base) var(--ease-out-soft) both;
+}
+@keyframes cs-view-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Phones: the reading time goes; the tabs split the width. The article is
+   a column so the hero's parts (StudyHero, sh--split) can be ordered
+   around the switch. */
+@media (max-width: 39.999rem) {
+  .cs--views {
+    display: flex;
+    flex-direction: column;
+  }
+  .cs--views > .vw,
+  .cs--views .vw {
+    order: -7;
+  }
+}
+@media (max-width: 47.999rem) {
+  .vw__read,
+  .vw__time {
+    display: none !important;
+  }
+  .vw__tabs {
+    width: 100%;
+  }
+  .vw__tab {
+    flex: 1;
+    justify-content: center;
+    padding: 0 0.5rem;
+  }
+}
+
+/* ── Overview sections (StudyOverview) ─────────────────────────────────── */
+.ov__head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.ov__labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: var(--spacing-stack);
+}
+.ov__labels li {
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--color-edge-strong);
+  border-radius: var(--radius-control);
+}
+.ov__image {
+  margin-top: var(--spacing-block);
+}
+.ov-more {
+  text-decoration: underline;
+  text-decoration-color: var(--color-edge-strong);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 8px;
+}
+.ov-more:hover {
+  text-decoration-color: currentColor;
+}

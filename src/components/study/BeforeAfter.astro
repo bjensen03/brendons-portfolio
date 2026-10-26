@@ -33,14 +33,14 @@ const { before, after, beforeAlt, afterAlt, caption } = Astro.props;
             alt={item.alt}
             widths={[480, 720, 1080]}
             sizes="(min-width: 768px) 30rem, 100vw"
-            class="w-full rounded-card border border-edge"
+            class="w-full rounded-media border border-edge"
           />
-          <p class="absolute top-3 left-3 rounded-full bg-surface-sunken/90 px-3 py-1 font-body text-2xs tracking-widest text-fg uppercase backdrop-blur-sm">
+          <p class="absolute top-3 left-3 rounded-full bg-surface-sunken/90 px-3 py-1 font-body text-label tracking-widest text-fg uppercase backdrop-blur-sm">
             {item.label}
           </p>
         </div>
       ))
     }
   </div>
-  {caption && <figcaption class="mt-4 font-body text-sm text-fg-muted">{caption}</figcaption>}
+  {caption && <figcaption class="mt-4 font-body text-small text-fg-muted">{caption}</figcaption>}
 </figure>

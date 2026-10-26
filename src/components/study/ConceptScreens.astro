@@ -1,0 +1,157 @@
+---
+import { Image } from 'astro:assets';
+
+/*
+  The screens on a concept page, big. Stands in for <Gallery> in the concept
+  MDX (src/pages/work/[...slug].astro maps it), so the MDX keeps the same
+  call and Gallery itself — still a sideways strip on the Twilight page — is
+  untouched.
+
+  Phones: phone screens two across, whole and uncropped; desktop screens
+  and full pages edge to edge, capped at 80% of the screen height. From
+  768: two across in the content width. No cards or borders round the
+  images; the caption sits under each one.
+
+  Shapes, from the `size` the MDX already passes:
+  - narrow (phone screens): uncropped on phones; from 768 cropped from the
+    top to a phone's 9:19.5 and held to the screen height so a whole screen is visible at once
+  - wide (desktop screens): from 768, 16:10 cropped from the top
+  - document (full pages): their own shape, uncropped
+*/
+
+interface Item {
+  src: ImageMetadata;
+  alt: string;
+  caption?: string;
+}
+
+interface Props {
+  items: Item[];
+  label?: string;
+  size?: 'wide' | 'narrow' | 'document';
+}
+
+const { items, label, size = 'wide' } = Astro.props;
+const widthsFor = (w: number) => [480, 800, 1200, 1600].filter((x) => x <= w);
+---
+
+<section class:list={['scr', `scr--${size}`]} aria-label={label ?? 'The screens'} data-screens>
+  {label && <h2 class="scr__title">{label}</h2>}
+  <ul class="scr__list" role="list">
+    {
+      items.map((item) => (
+        <li class="scr__item">
+          <div class="scr__frame">
+            <Image
+              src={item.src}
+              alt={item.alt}
+              widths={widthsFor(item.src.width)}
+              sizes={size === 'narrow' ? '46vw' : '(min-width: 48rem) 46vw, 100vw'}
+              loading="lazy"
+              class="scr__img"
+            />
+          </div>
+          {item.caption && <p class="scr__cap text-small text-fg-muted">{item.caption}</p>}
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .scr__title {
+    font-family: var(--font-display);
+    font-stretch: var(--display-stretch);
+    text-transform: var(--display-case);
+    font-size: var(--text-heading);
+    line-height: var(--text-heading--line-height);
+    letter-spacing: var(--text-heading--letter-spacing);
+    font-weight: var(--text-heading--font-weight);
+    color: var(--color-fg);
+    margin-bottom: var(--spacing-stack);
+  }
+
+  .scr__list {
+    display: grid;
+    gap: var(--spacing-block) var(--grid-gutter);
+    list-style: none;
+    padding: 0;
+  }
+
+  .scr__frame {
+    overflow: hidden;
+  }
+  .scr__img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .scr__cap {
+    margin-top: 0.75rem;
+  }
+
+  /* ── Phones ──────────────────────────────────────────────────────────
+     Phone screens two across, each whole: nothing cropped, so a tall
+     screen is simply a tall thumbnail. Desktop and full-page captures run
+     edge to edge, held to 80% of the screen height and cropped from the
+     top, so one long capture can't run on for screens. */
+  @media (max-width: 47.999rem) {
+    .scr--narrow .scr__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem var(--grid-gutter);
+      align-items: start;
+    }
+    .scr--narrow .scr__frame {
+      border-radius: var(--radius-media);
+    }
+    .scr--narrow .scr__cap {
+      margin-top: 0.5rem;
+    }
+
+    .scr--wide .scr__frame,
+    .scr--document .scr__frame {
+      margin-inline: calc(-1 * var(--grid-margin));
+    }
+    .scr--wide .scr__img,
+    .scr--document .scr__img {
+      max-height: 80svh;
+      object-fit: cover;
+      object-position: top;
+    }
+  }
+
+  /* ── From 768: two across, unchanged from before ────────────────────── */
+  @media (min-width: 48rem) {
+    .scr__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: start;
+    }
+    .scr__frame {
+      border-radius: var(--radius-media);
+    }
+    .scr--wide .scr__img {
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      object-position: top;
+    }
+    /* A phone screen the full column wide would be taller than the window;
+       held to the window's height it can be read in one look. */
+    .scr--narrow .scr__frame {
+      width: fit-content;
+      max-width: 100%;
+      margin-inline: auto;
+    }
+    .scr--narrow .scr__cap {
+      text-align: center;
+    }
+    .scr--narrow .scr__img {
+      width: auto;
+      max-width: 100%;
+      height: min(82svh, 52rem);
+      aspect-ratio: 9 / 19.5;
+      object-fit: cover;
+      object-position: top;
+    }
+  }
+</style>

@@ -1,0 +1,87 @@
+---
+/*
+  Key decisions. One row per decision on the 12-column grid: a large number,
+  the decision as a heading (sticky beside its reasoning on desktop), and
+  the reasoning at reading measure from column 7.
+*/
+
+interface Props {
+  items: Array<{ heading: string; html: string }>;
+}
+
+const { items } = Astro.props;
+---
+
+{
+  items.length > 0 && (
+    <section class="cs-sec" aria-labelledby="decisions-title">
+      <div class="container-bleed">
+        <h2 id="decisions-title" class="cs-h2" data-split>Key decisions</h2>
+
+        <ol class="kd">
+          {
+            items.map((k, i) => (
+              <li class="kd-row">
+                <div class="kd-head">
+                  <p class="kd-no" aria-hidden="true">{String(i + 1).padStart(2, '0')}</p>
+                  <h3 class="kd-title text-title" data-reveal>{k.heading}</h3>
+                </div>
+                <div class="kd-body cs-prose" set:html={k.html} data-reveal />
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .kd {
+    margin-top: var(--spacing-block);
+    list-style: none;
+    padding: 0;
+  }
+
+  .kd-row {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+    row-gap: var(--spacing-stack);
+    padding-block: var(--spacing-block);
+    border-top: 1px solid var(--color-edge);
+  }
+
+  .kd-head,
+  .kd-body {
+    grid-column: 1 / -1;
+  }
+
+  .kd-no {
+    font-family: var(--font-display);
+    font-stretch: var(--display-stretch);
+    font-weight: 850;
+    font-size: clamp(2.5rem, 1.5rem + 3vw, 4.5rem);
+    line-height: 0.9;
+    color: var(--color-fg-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .kd-title {
+    margin-top: 1rem;
+    max-width: 22ch;
+    color: var(--color-fg);
+  }
+
+  @media (min-width: 64rem) {
+    .kd-head {
+      grid-column: 1 / span 5;
+      align-self: start;
+      position: sticky;
+      top: calc(var(--spacing-nav) + 1.5rem);
+    }
+    .kd-body {
+      grid-column: 7 / -1;
+    }
+  }
+</style>

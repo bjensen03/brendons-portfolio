@@ -1,0 +1,77 @@
+---
+/*
+  "Quick overview | Full case study" — one case study, two depths, on one
+  URL. Only rendered for a study with an `overview`.
+
+  A real tablist: two tabs, roving tabindex, arrows / Home / End move and
+  select. The active tab is the tan fill with graphite type (the primary
+  button's pairing, 7.25:1). Each tab carries its reading time, worked out
+  from the words on the page at build time; phones drop the times.
+
+  Sticky under the nav for the rest of the study, and up to the top of the
+  screen when the nav hides on scroll. It sits above the hero media
+  (CaseStudy passes it into StudyHero's `switch` slot).
+
+  The view is in the URL: the bare address is the overview, ?view=full the
+  full study. Two inline scripts make first paint right without waiting for
+  any module:
+    - this one (before the panels) sets html[data-view], so CSS shows only
+      the chosen panel from the first frame (no flash, no layout shift);
+    - CaseStudy's, after the panels, takes the other panel out of the
+      document and parks it (window.__csView), so nothing on the page —
+      ScrollTrigger pins, reveals, the reading pill — ever measures it.
+  viewSwitch (study-motion.ts) does the switching after that.
+
+  Without JavaScript neither script runs: both panels show, overview first,
+  and a plain link under the tabs' place skips to the full study.
+*/
+
+interface Props {
+  overviewMinutes: number;
+  fullMinutes: number;
+}
+
+const { overviewMinutes, fullMinutes } = Astro.props;
+---
+
+<div class="vw" data-vw>
+  <div class="container-bleed vw__in">
+    <div class="vw__tabs" role="tablist" aria-label="How much of the case study to show" data-vw-tabs>
+      <button
+        type="button"
+        role="tab"
+        id="vw-tab-overview"
+        class="vw__tab"
+        aria-selected="true"
+        aria-controls="cs-overview"
+        tabindex="0"
+        data-vw-tab="overview"
+      >
+        Quick overview<span class="vw__time" aria-hidden="true">{overviewMinutes} min</span>
+      </button>
+      <button
+        type="button"
+        role="tab"
+        id="vw-tab-full"
+        class="vw__tab"
+        aria-selected="false"
+        aria-controls="cs-full"
+        tabindex="-1"
+        data-vw-tab="full"
+      >
+        Full case study<span class="vw__time" aria-hidden="true">{fullMinutes} min</span>
+      </button>
+    </div>
+    <p class="vw__read text-small text-fg-muted">
+      <span data-vw-read="overview">About {overviewMinutes} min read</span><span data-vw-read="full">About {fullMinutes} min read</span>
+    </p>
+    <a href="#cs-full" class="vw__skip text-small">Skip to the full case study ↓</a>
+  </div>
+</div>
+
+<script is:inline>
+  (function () {
+    var v = new URLSearchParams(location.search).get('view') === 'full' ? 'full' : 'overview';
+    document.documentElement.dataset.view = v;
+  })();
+</script>

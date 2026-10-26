@@ -1,0 +1,37 @@
+---
+/*
+  Renders its children with every id in them prefixed, and every reference
+  to those ids (aria-labelledby/-controls/-describedby/-owns, for, href="#…")
+  rewritten to match. The case study's Quick overview shows some of the same
+  blocks as the full study on the same page; their ids are fixed in the
+  block components (glance-title, hard-title, the viewers' tab ids), so the
+  overview's copies are rendered through this with prefix "ov-" and nothing
+  in the page clashes.
+
+  Only ids defined inside the children are rewritten, so a link out to an
+  id elsewhere on the page still points at it. With an empty prefix the
+  children are passed through untouched.
+*/
+
+interface Props {
+  prefix: string;
+}
+
+const { prefix } = Astro.props;
+const raw = await Astro.slots.render('default');
+
+let html = raw;
+if (prefix) {
+  const ids = new Set(Array.from(raw.matchAll(/\sid="([^"]+)"/g), (m) => m[1]));
+  const swap = (id: string) => (ids.has(id) ? `${prefix}${id}` : id);
+  html = raw
+    .replace(/(\sid=")([^"]+)(")/g, (_, a, id, b) => `${a}${swap(id)}${b}`)
+    .replace(
+      /(\s(?:aria-labelledby|aria-describedby|aria-controls|aria-owns|aria-flowto|aria-activedescendant|aria-details|aria-errormessage|for|headers|list)=")([^"]+)(")/g,
+      (_, a, v: string, b) => `${a}${v.split(/\s+/).map(swap).join(' ')}${b}`,
+    )
+    .replace(/(\shref="#)([^"]+)(")/g, (_, a, id, b) => `${a}${swap(id)}${b}`);
+}
+---
+
+<Fragment set:html={html} />

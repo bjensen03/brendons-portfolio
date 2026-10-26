@@ -1,0 +1,78 @@
+---
+import StudyImage from './StudyImage.astro';
+import type { Crop } from '../../lib/study-media';
+
+/*
+  A device mockup or photograph between sections, edge to edge. It wipes up
+  into view (data-mask) and eases back from a slight zoom while it crosses
+  the screen (data-study-zoom, study-motion.ts). Reduced motion: it simply
+  sits there.
+
+  No background by default: a device exported on a transparent canvas sits
+  straight on the page, and a photographed scene brings its own. `panel`
+  puts it on a full-width sunken band instead, for a crop that cuts the
+  device off and needs an edge to end against. `inset` is for a flat
+  screenshot: it sits inside the page margins with the media radius, like
+  the other figures, at every width.
+*/
+
+interface Props {
+  src: string;
+  alt: string;
+  caption?: string;
+  crop?: Crop;
+  panel?: boolean;
+  inset?: boolean;
+}
+
+const { src, alt, caption, crop, panel = false, inset = false } = Astro.props;
+
+/* A crop is held to the screen height (CSS below), so it's drawn at the
+   smaller of the viewport width and the height times its ratio. */
+const sizes = inset
+  ? '(min-width: 1440px) 88rem, 94vw'
+  : crop
+    ? (ratio: number) => `min(100vw, ${(ratio * 100).toFixed(2)}vh)`
+    : '100vw';
+---
+
+<figure class:list={['mk', inset && 'mk--inset container-bleed']}>
+  <div class:list={['mk-frame', panel && 'mk-frame--panel', inset && 'mk-frame--inset']} data-mask>
+    <div data-study-zoom>
+      <StudyImage src={src} alt={alt} crop={crop} sizes={sizes} />
+    </div>
+  </div>
+  {caption && <figcaption class:list={[!inset && 'container-bleed', 'mt-4 text-small text-fg-muted']}>{caption}</figcaption>}
+</figure>
+
+<style>
+  .mk {
+    padding-block: var(--spacing-section-sm);
+  }
+
+  .mk-frame {
+    overflow: hidden;
+  }
+
+  .mk-frame--panel {
+    background: var(--color-surface-sunken);
+  }
+  .mk-frame--inset {
+    border-radius: var(--radius-media);
+  }
+
+  /* A capture that would be taller than the screen is held to it. */
+  .mk-frame :global(.cs-crop) {
+    max-width: calc(100svh * var(--crop-ratio));
+    margin-inline: auto;
+  }
+
+  .mk-frame :global(.cs-natural) {
+    max-height: 100svh;
+    object-fit: cover;
+  }
+
+  [data-study-zoom] {
+    transform-origin: 50% 50%;
+  }
+</style>

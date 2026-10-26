@@ -1,0 +1,34 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import CaseStudy from '../../../components/study/CaseStudy.astro';
+import { showDrafts } from '../../../lib/drafts';
+import { studyHref } from '../../../lib/studies';
+
+/*
+  Studies nested under PROLOOK. Today only ALL IN, which is standalone, so
+  this route only builds its old address as a redirect.
+
+  Only approved ones become pages in a production build. Unapproved studies are
+  not hidden or unlinked, they are simply not generated, so there is no URL to
+  find.
+
+  A standalone one (ALL IN, since 2026-10-23) has its own page at
+  /work/<id>/; its old address here stays as a redirect so no link breaks.
+*/
+
+export async function getStaticPaths() {
+  const studies = await getCollection('studies');
+  return studies
+    .filter((s) => s.data.parent === 'prolook' && (s.data.approved || showDrafts()))
+    .map((study) => ({ params: { slug: study.id }, props: { study } }));
+}
+
+const { study } = Astro.props;
+if (study.data.standalone) return Astro.redirect(studyHref(study), 301);
+const parent = await getEntry('studies', 'prolook');
+---
+
+<Base title={`${study.data.name} — case study`} description={study.data.label} ogImage={`/og/${study.id}.jpg`}>
+  <CaseStudy study={study} parentHref="/work/prolook/" parentName={parent?.data.name ?? 'PROLOOK'} />
+</Base>

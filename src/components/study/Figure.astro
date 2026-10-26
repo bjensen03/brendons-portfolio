@@ -26,11 +26,11 @@ const { src, alt, caption, width = 'wide' } = Astro.props;
     alt={alt}
     widths={[640, 960, 1440, 1920]}
     sizes="(min-width: 1024px) 60rem, 100vw"
-    class="w-full rounded-card border border-edge"
+    class="w-full rounded-media border border-edge"
   />
   {
     caption && (
-      <figcaption class="mt-4 font-body text-sm text-fg-muted">{caption}</figcaption>
+      <figcaption class="mt-4 font-body text-small text-fg-muted">{caption}</figcaption>
     )
   }
 </figure>

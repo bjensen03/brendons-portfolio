@@ -1,8 +1,20 @@
 ---
-/* Grid wrapper for Stat. Kept separate so a study with one number doesn't get
-   a three-column layout with two holes in it. */
+/*
+  The results band.
+
+  These numbers are the single most persuasive thing on a case study page and
+  they used to sit inside the reading column at the same width as a paragraph.
+  Now the band breaks the page, goes to ink, and gives them the size they earn.
+
+  Still a plain grid: a study with one number gets one column, not three columns
+  with two holes in them.
+*/
 ---
 
-<div class="my-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-  <slot />
+<div data-tone="dark" class="relative left-1/2 my-20 w-screen -translate-x-1/2 bg-surface py-16 md:py-20" data-stats>
+  <div class="container-bleed">
+    <div class="grid gap-12 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
+      <slot />
+    </div>
+  </div>
 </div>

@@ -1,0 +1,23 @@
+---
+/*
+  In short — three or four lines for someone who reads nothing else. Large
+  type, each line marked with a small tan square (a fill, not text colour).
+  Lines are inline markdown, so ==highlights== and **bold** work.
+
+  CaseStudy puts it inside the hero (between the facts and the hero media)
+  when `inShort` leads the layout, and wraps it in a section otherwise.
+*/
+
+interface Props {
+  lines: string[];
+}
+
+const { lines } = Astro.props;
+---
+
+<section class="cs-short" aria-labelledby="in-short-title">
+  <h2 id="in-short-title" class="cs-short__h" data-reveal>In short</h2>
+  <ul class="cs-short__list" data-reveal-group>
+    {lines.map((html) => <li set:html={html} data-reveal />)}
+  </ul>
+</section>

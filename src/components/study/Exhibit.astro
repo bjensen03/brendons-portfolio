@@ -1,0 +1,134 @@
+---
+import { Image } from 'astro:assets';
+
+/*
+  A full-bleed image band.
+
+  Figure breaks out of the reading measure by a fixed margin; this breaks out of
+  the page entirely. A case study that stays at one width for seven thousand
+  pixels reads as a document no matter how good the prose is, and the cheapest
+  way to make it read as a portfolio piece instead is to let the work interrupt
+  the writing at full width.
+
+  `tone="dark"` puts the image on ink rather than paper, which is what product
+  photography and logo work want. Screenshots of a white interface want the
+  default — a dark surround makes them glow.
+*/
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  caption?: string;
+  tone?: 'paper' | 'dark';
+  /** 'cover' crops to the band height; 'contain' shows the whole image. */
+  fit?: 'cover' | 'contain';
+  /** Band aspect ratio. Tall images want a taller band. */
+  ratio?: string;
+}
+
+const {
+  src,
+  alt,
+  caption,
+  tone = 'paper',
+  fit = 'cover',
+  ratio = '21/9',
+} = Astro.props;
+---
+
+{/* 100vw from the centre of the container, so it escapes whatever column it is
+    nested inside without needing to know how wide that column is. */}
+<figure
+  class:list={[
+    'relative left-1/2 my-20 w-screen -translate-x-1/2',
+    tone === 'dark' ? 'bg-surface' : 'bg-surface-sunken',
+  ]}
+  data-tone={tone === 'dark' ? 'dark' : undefined}
+  data-exhibit
+>
+  <div class="overflow-hidden" style={`aspect-ratio: ${ratio};`}>
+    <Image
+      src={src}
+      alt={alt}
+      widths={[960, 1440, 1920, 2400]}
+      sizes="100vw"
+      class:list={[
+        'h-full w-full',
+        fit === 'cover' ? 'object-cover' : 'object-contain',
+      ]}
+      data-exhibit-image
+    />
+  </div>
+
+  {
+    caption && (
+      <figcaption class="container-bleed py-5">
+        <span
+          class:list={[
+            'font-mono text-label tracking-wide',
+            tone === 'dark' ? 'text-fg-muted' : 'text-fg-faint',
+          ]}
+        >
+          {caption}
+        </span>
+      </figcaption>
+    )
+  }
+</figure>
+
+<style>
+  /* Scroll-scrubbed drift. The image is oversized inside its band so it has
+     somewhere to travel — without the extra height the parallax would expose
+     the band's background at one end. */
+  [data-exhibit] [data-exhibit-image] {
+    will-change: transform;
+  }
+</style>
+
+<script>
+  import { registerMotion, prefersReducedMotion, motion } from '../../scripts/motion';
+
+  registerMotion(() => {
+    if (prefersReducedMotion()) return;
+
+    const figures = Array.from(document.querySelectorAll<HTMLElement>('[data-exhibit]'));
+    if (figures.length === 0) return;
+
+    const gsap = motion.gsap;
+
+    /* Only images that actually crop have room to move. A contained image
+       drifting would slide away from its own frame. */
+    const tweens = figures.map((figure) => {
+      const image = figure.querySelector<HTMLElement>('[data-exhibit-image]');
+      if (!image || image.classList.contains('object-contain')) return null;
+
+      gsap.set(image, { scale: 1.12 });
+
+      return gsap.fromTo(
+        image,
+        { yPercent: -4 },
+        {
+          yPercent: 4,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: figure,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 0.6,
+          },
+        },
+      );
+    });
+
+    return () => {
+      tweens.forEach((tween) => {
+        tween?.scrollTrigger?.kill();
+        tween?.kill();
+      });
+      figures.forEach((figure) => {
+        const image = figure.querySelector<HTMLElement>('[data-exhibit-image]');
+        if (image) gsap.set(image, { clearProps: 'transform' });
+      });
+    };
+  });
+</script>

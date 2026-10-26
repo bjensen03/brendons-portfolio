@@ -1,0 +1,86 @@
+---
+import { Picture } from 'astro:assets';
+import { cropRatio, cropStyle, scaleSizes, tryStudyImage, widthsFor } from '../../lib/study-media';
+import type { Crop } from '../../lib/study-media';
+import { showPlaceholders } from '../../lib/placeholders';
+
+/*
+  One study image: a path relative to src/content/studies/images, rendered
+  through astro:assets (AVIF with a WebP fallback — never PNG, which for the
+  full-page captures came out at 18 MB — responsive widths, lazy by default).
+
+  `crop` shows only part of the file — the frame takes the cropped region's
+  aspect ratio. `fit="top"` fills a fixed-ratio frame from the top edge
+  (screenshots in a browser frame). A missing file renders an obvious
+  [NEED …] panel in the same spot.
+*/
+
+interface Props {
+  src: string;
+  alt: string;
+  /* How wide the visible frame is drawn — for a crop, not the <img> inside
+     it; the crop is accounted for here. A function gets the crop's aspect
+     ratio, for frames capped by the viewport height. */
+  sizes: string | ((ratio: number) => string);
+  crop?: Crop;
+  eager?: boolean;
+  /** The page's first visible media (a study hero): eager, and fetched at
+      high priority because it's the LCP. Only one per page. */
+  priority?: boolean;
+  fit?: 'crop' | 'top' | 'natural';
+  class?: string;
+  imgClass?: string;
+  /** Extra attributes for the <img>, e.g. data hooks. */
+  attrs?: Record<string, string>;
+}
+
+const { src, alt, sizes, crop, eager: eagerProp = false, priority = false, fit = crop ? 'crop' : 'natural', class: cls, imgClass, attrs = {} } = Astro.props;
+const eager = eagerProp || priority;
+const fetchpriority = priority ? 'high' : undefined;
+const img = await tryStudyImage(src);
+const frameSizes = typeof sizes === 'function' ? (img ? sizes(cropRatio(crop, img.width, img.height)) : '100vw') : sizes;
+const imgSizes = scaleSizes(frameSizes, fit === 'crop' ? crop : undefined);
+/* A tight crop needs more of the file than any fixed step: offer the source itself. */
+const cropWidths = img ? widthsFor(img.width, [480, 720, 960, 1280, 1600, 1920, 2560, 3200, 3840]) : [];
+if (img && fit === 'crop' && (crop?.w ?? 1) < 1 && !cropWidths.includes(img.width)) cropWidths.push(img.width);
+---
+
+{
+  !img ? (
+    showPlaceholders && (
+      <div class:list={['cs-need', cls]}>
+        <span>[NEED — {src}]</span>
+      </div>
+    )
+  ) : fit === 'crop' ? (
+    <div class:list={['cs-crop', cls]} style={cropStyle(crop, img.width, img.height)}>
+      <Picture
+        src={img}
+        alt={alt}
+        formats={['avif']}
+        fallbackFormat="webp"
+        widths={cropWidths}
+        sizes={imgSizes}
+        loading={eager ? 'eager' : 'lazy'}
+        fetchpriority={fetchpriority}
+        pictureAttributes={{ class: 'contents' }}
+        class:list={['cs-crop__media', imgClass]}
+        {...attrs}
+      />
+    </div>
+  ) : (
+    <Picture
+      src={img}
+      alt={alt}
+      formats={['avif']}
+      fallbackFormat="webp"
+      widths={widthsFor(img.width)}
+      sizes={imgSizes}
+      loading={eager ? 'eager' : 'lazy'}
+      fetchpriority={fetchpriority}
+      pictureAttributes={{ class: cls ?? 'contents' }}
+      class:list={[fit === 'top' ? 'cs-fill-top' : 'cs-natural', imgClass]}
+      {...attrs}
+    />
+  )
+}

@@ -1,0 +1,221 @@
+---
+import * as snippets from '../home/snippets';
+import type { Snippet } from '../home/snippets';
+
+/*
+  The hard problem — "under the hood". The one band on a study page: it
+  takes the site's contrast tone (data-tone="dark"), so it reads as a
+  different room from the rest of the page at any brightness.
+
+  The punchline first, large. Then the five beats down the page with a
+  sticky index beside them on desktop (Problem → First assumption → What I
+  found → Fix → How I verified it), lit as each beat crosses the middle of
+  the screen (study-motion.ts, hardBeats). The fix carries the real code,
+  pulled by name from src/components/home/snippets.ts — one copy of each
+  excerpt for the whole site.
+*/
+
+interface Props {
+  title?: string;
+  punchlineHtml: string;
+  beats: Array<{ label: string; html: string; key: string }>;
+  code?: Array<{ snippet: string; caption?: string }>;
+  /* The Quick overview's condensed form: this prose in place of the five
+     beats and their index, followed by the code. */
+  condensedHtml?: string;
+}
+
+const { title = 'The hard problem', punchlineHtml, beats, code = [], condensedHtml } = Astro.props;
+/* A long punchline (two sentences' worth) is set smaller on phones, where at
+   the big size it filled most of a screen. */
+const longPunch = punchlineHtml.replace(/<[^>]+>/g, '').trim().length > 130;
+
+const library = snippets as unknown as Record<string, Snippet | undefined>;
+const panels = code.map((c) => {
+  const snip = library[c.snippet];
+  if (!snip || typeof snip !== 'object' || !('code' in snip)) {
+    throw new Error(`hardProblem.code: no snippet named "${c.snippet}" in src/components/home/snippets.ts`);
+  }
+  return { ...c, snip, tokens: snippets.highlight(snip.code) };
+});
+---
+
+<section class="cs-sec hp" data-tone="dark" aria-labelledby="hard-title" data-hard>
+  <div class="container-bleed">
+    <h2 id="hard-title" class="cs-h2" data-split>{title}</h2>
+    <div class:list={['hp-punch', longPunch && 'hp-punch--long']} set:html={punchlineHtml} data-reveal />
+
+    {condensedHtml !== undefined ? (
+      <div class="hp-condensed">
+        <div class="cs-prose" set:html={condensedHtml} data-reveal />
+        {panels.map((p) => (
+          <figure class="hp-code" data-reveal>
+            <figcaption class="hp-cap">
+              {p.caption && <span class="block text-small text-fg">{p.caption}</span>}
+              <span class="hp-lang text-small text-fg-muted">{p.snip.lang}</span>
+            </figcaption>
+            <pre class="hp-pre" data-lenis-prevent-horizontal><code>{p.tokens.map((t) => (t.role === 'plain' ? t.text : <span class={`tok-${t.role}`}>{t.text}</span>))}</code></pre>
+          </figure>
+        ))}
+      </div>
+    ) : (
+    <div class="hp-grid">
+      <ol class="cs-index hp-index" aria-hidden="true">
+        {
+          beats.map((b, i) => (
+            <li>
+              <span class="cs-index__item text-small" data-hard-index={i}>
+                <span class="tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+                <span class="ml-2 font-medium">{b.label}</span>
+              </span>
+            </li>
+          ))
+        }
+      </ol>
+
+      <div class="hp-beats">
+        {
+          beats.map((b, i) => (
+            <article class="hp-beat" data-hard-beat={i} aria-labelledby={`hard-beat-${i}`}>
+              <p class="text-small text-fg-muted tabular-nums" aria-hidden="true">
+                {String(i + 1).padStart(2, '0')}
+              </p>
+              <h3 id={`hard-beat-${i}`} class="mt-1 text-title text-fg">
+                {b.label}
+              </h3>
+              <div class="cs-prose mt-5" set:html={b.html} />
+              {b.key === 'fix' &&
+                panels.map((p) => (
+                  <figure class="hp-code" data-reveal>
+                    {/* The caption only when there is one; the language on its own
+                        line under it, so it's never said twice and never left
+                        dangling after a wrapped caption. */}
+                    <figcaption class="hp-cap">
+                      {p.caption && <span class="block text-small text-fg">{p.caption}</span>}
+                      <span class="hp-lang text-small text-fg-muted">{p.snip.lang}</span>
+                    </figcaption>
+                    <pre class="hp-pre" data-lenis-prevent-horizontal><code>{p.tokens.map((t) => (t.role === 'plain' ? t.text : <span class={`tok-${t.role}`}>{t.text}</span>))}</code></pre>
+                  </figure>
+                ))}
+            </article>
+          ))
+        }
+      </div>
+    </div>
+    )}
+  </div>
+</section>
+
+<style>
+  .hp-condensed {
+    margin-top: var(--spacing-block);
+    max-width: 44rem;
+  }
+  .hp-condensed .hp-code {
+    margin-top: var(--spacing-block);
+  }
+
+  .hp-punch {
+    margin-top: var(--spacing-stack);
+  }
+
+  .hp-punch :global(p) {
+    max-width: 24ch;
+    font-family: var(--font-body);
+    font-size: clamp(1.75rem, 1rem + 2.6vw, 3.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    font-weight: 600;
+    color: var(--color-fg);
+    text-wrap: balance;
+  }
+
+  @media (max-width: 47.999rem) {
+    .hp-punch--long :global(p) {
+      max-width: none;
+      font-size: var(--text-lead);
+      line-height: var(--text-lead--line-height);
+      letter-spacing: -0.015em;
+    }
+  }
+
+  .hp-grid {
+    margin-top: var(--spacing-block);
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+  }
+
+  .hp-index {
+    display: none;
+  }
+
+  .hp-beats {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .hp-beat {
+    padding-block: var(--spacing-block);
+    border-top: 1px solid var(--color-edge);
+  }
+
+  .hp-beat:first-child {
+    padding-top: var(--spacing-stack);
+  }
+
+  @media (min-width: 64rem) {
+    .hp-index {
+      display: block;
+      grid-column: 1 / span 3;
+      align-self: start;
+      position: sticky;
+      top: calc(var(--spacing-nav) + 2rem);
+    }
+    .hp-beats {
+      grid-column: 5 / -1;
+    }
+    .hp-index .cs-index__item {
+      cursor: default;
+    }
+  }
+
+  .hp-code {
+    margin-top: var(--spacing-stack);
+    max-width: var(--measure-code);
+  }
+
+  .hp-lang {
+    display: block;
+  }
+  .hp-cap > * + .hp-lang {
+    margin-top: 0.25rem;
+  }
+
+  .hp-pre {
+    margin-top: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    border: 1px solid var(--color-edge);
+    border-left: 3px solid var(--color-accent-fill);
+    border-radius: var(--radius-media);
+    background: var(--color-surface-sunken);
+    font-family: var(--font-mono);
+    font-size: clamp(0.8125rem, 0.6rem + 0.35vw, 0.9375rem);
+    line-height: 1.7;
+    color: var(--color-fg);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    tab-size: 2;
+  }
+
+  .tok-comment {
+    color: var(--color-fg-muted);
+    font-style: italic;
+  }
+
+  .tok-string {
+    color: var(--color-fg);
+    font-weight: 600;
+  }
+</style>

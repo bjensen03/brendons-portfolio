@@ -1,0 +1,531 @@
+---
+import BrowserFrame from './BrowserFrame.astro';
+import StudyImage from './StudyImage.astro';
+import StudyVideo from './StudyVideo.astro';
+import { tryStudyImage } from '../../lib/study-media';
+import type { CollectionEntry } from 'astro:content';
+
+/*
+  Page scroller — "scroll through the pages and see what I added".
+
+  One run per page. At 1024+ with motion on, study-motion.ts (pageScroller)
+  sets data-ready: each run becomes a sticky screen with a 16:10 browser
+  window on the right, and scrolling the run scrolls the full-page capture
+  inside the window. Numbered markers sit on the capture at each callout's
+  x / y; the list on the left lights the callout whose marker is in view and
+  shows its note. Clicking a callout scrolls straight to it.
+
+  `at` (0–1) is when a callout becomes active. Left out of the yaml, it is
+  worked out here so the callout activates as its marker reaches the middle
+  of the window — so moving a marker only means changing x / y.
+
+  Everywhere else (phones, tablets, reduced motion, no JS) the window
+  scrolls on its own — it is a focusable region — and every note is listed
+  under it. Recordings of the pages follow the runs.
+*/
+
+type Data = CollectionEntry<'studies'>['data'];
+type Scroller = NonNullable<Data['scroller']>;
+
+interface Props {
+  scroller: Scroller;
+  introHtml?: string;
+}
+
+const { scroller, introHtml } = Astro.props;
+
+/* The window is 16:10, so it shows 0.625 × the capture's width of its
+   height at a time. */
+const VIEW = 10 / 16;
+
+const pages = await Promise.all(
+  scroller.pages.map(async (page) => {
+    const img = await tryStudyImage(page.src);
+    const ratio = img ? img.height / img.width : 4;
+    const range = Math.max(ratio - VIEW, 0.001);
+    const notes = page.annotations.map((a, k) => ({
+      ...a,
+      n: k + 1,
+      at: a.at ?? Math.min(1, Math.max(0, (a.y * ratio - VIEW / 2) / range)),
+    }));
+    return { ...page, ratio, notes };
+  }),
+);
+
+const clips = pages.filter((p) => p.clip);
+---
+
+<section class="cs-sec ps" aria-labelledby="scroller-title" data-scroller>
+  <div class="container-bleed">
+    <h2 id="scroller-title" class="cs-h2" data-split>{scroller.heading}</h2>
+    {introHtml && <div class="cs-prose cs-intro" set:html={introHtml} data-reveal />}
+
+    {
+      pages.length > 1 && (
+        <ul class="ps-jump" aria-label="Pages">
+          {pages.map((p, i) => (
+            <li>
+              <a href={`#ps-${p.id}`} class="link-reveal text-small font-medium text-fg" data-ps-jump={i}>
+                {p.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+
+  {
+    pages.map((page, i) => (
+      <div class="ps-run" id={`ps-${page.id}`} data-ps-run={i} style={`--ps-ratio: ${page.ratio.toFixed(4)}`}>
+        <div class="ps-pin">
+          <div class="container-bleed ps-grid">
+            <div class="ps-side">
+              {pages.length > 1 && (
+                <p class="text-small text-fg-muted">
+                  Page {i + 1} of {pages.length}
+                </p>
+              )}
+              <h3 class="mt-1 text-title text-fg">{page.label}</h3>
+
+              {page.notes.length > 0 && (
+                <ol class="cs-index ps-notes" data-lenis-prevent-horizontal>
+                  {page.notes.map((note, k) => (
+                    <li>
+                      <button
+                        type="button"
+                        class="cs-index__item ps-note"
+                        data-ps-note={k}
+                        data-at={note.at.toFixed(4)}
+                        aria-describedby={`ps-${page.id}-b${k}`}
+                      >
+                        <span class="cs-marker" aria-hidden="true">{note.n}</span>
+                        <span class="ps-note__label text-small font-medium">{note.label}</span>
+                      </button>
+                      <p class="ps-note__body text-small text-fg-muted" id={`ps-${page.id}-b${k}`}>
+                        {note.body}
+                      </p>
+                    </li>
+                  ))}
+                </ol>
+              )}
+
+              {page.notes.length > 0 && (
+                <div class="ps-bodies" aria-hidden="true">
+                  {page.notes.map((note, k) => (
+                    <p class="ps-body text-body text-fg" data-ps-body={k}>
+                      <span class="ps-body__head">
+                        <span class="cs-marker">{note.n}</span>
+                        <span class="ps-body__label">{note.label}</span>
+                      </span>
+                      {note.body}
+                    </p>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div class="ps-stage">
+              <span class="ps-progress" aria-hidden="true"><span data-ps-progress></span></span>
+              <BrowserFrame
+                url={page.url}
+                viewClass="ps-view"
+                viewAttrs={{
+                  'data-ps-view': '',
+                  tabindex: 0,
+                  role: 'region',
+                  'aria-label': `${page.label}, full-page capture. Scroll to move down the page.`,
+                }}
+              >
+                <div class="ps-page" data-ps-page>
+                  <StudyImage src={page.src} alt={page.alt} sizes="(min-width: 64rem) 62vw, 100vw" fit="natural" />
+                  {page.notes.map((note, k) => (
+                    <span
+                      class="cs-marker ps-mark"
+                      style={`left: ${(note.x * 100).toFixed(2)}%; top: ${(note.y * 100).toFixed(2)}%`}
+                      data-ps-mark={k}
+                      aria-hidden="true"
+                    >
+                      {note.n}
+                    </span>
+                  ))}
+                </div>
+              </BrowserFrame>
+            </div>
+          </div>
+        </div>
+      </div>
+    ))
+  }
+
+  {
+    clips.length > 0 && (
+      <div class="container-bleed ps-clips">
+        {clips.map((p) => (
+          <figure class="ps-clip" data-reveal>
+            <StudyVideo video={p.clip!} class="ps-clip__video" />
+            <figcaption class="mt-3 text-small text-fg-muted">Recording: {p.label.toLowerCase()}</figcaption>
+          </figure>
+        ))}
+      </div>
+    )
+  }
+</section>
+
+<style>
+  .ps-jump {
+    margin-top: var(--spacing-stack);
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.75rem;
+  }
+
+  .ps-run {
+    padding-top: var(--spacing-block);
+  }
+
+  .ps-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+    row-gap: var(--spacing-stack);
+  }
+
+  .ps-side,
+  .ps-stage {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .ps-notes {
+    margin-top: 1rem;
+  }
+
+  .ps-note {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-block: 0.4rem;
+  }
+
+  .ps-note__body {
+    padding: 0 0 0.6rem 3.45rem;
+    max-width: var(--container-measure);
+  }
+
+  .ps-bodies {
+    display: none;
+  }
+
+  /* Static: the window scrolls on its own. */
+  .ps-view {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    aspect-ratio: 4 / 5 !important;
+  }
+
+  @media (min-width: 48rem) {
+    .ps-view {
+      aspect-ratio: 16 / 10 !important;
+    }
+  }
+
+  .ps-page {
+    position: relative;
+  }
+
+  .ps-mark {
+    position: absolute;
+    translate: -50% -50%;
+    box-shadow: 0 0 0 3px var(--color-surface);
+    transition: scale var(--duration-base) var(--ease-snap);
+  }
+
+  .ps-clips {
+    margin-top: var(--spacing-block);
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+    gap: var(--spacing-stack) var(--grid-gutter);
+  }
+
+  .ps-clip {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .ps-clip :global(.cs-crop),
+  .ps-clip :global(.cs-need) {
+    border-radius: var(--radius-media);
+    overflow: hidden;
+  }
+
+  @media (min-width: 64rem) {
+    .ps-clip {
+      grid-column: span 6;
+    }
+    .ps-side {
+      grid-column: 1 / span 4;
+    }
+    .ps-stage {
+      grid-column: 5 / -1;
+    }
+  }
+
+  /* Pinned (1024+, motion on — set by pageScroller). */
+  @media (min-width: 64rem) {
+    .ps[data-ready] .ps-run {
+      padding-top: 0;
+      /* One screen, plus the capture's height beyond the window at the
+         stage's width (~62vw), scrolled at about one to one. */
+      height: calc(100svh + 0.62 * 100vw * (var(--ps-ratio) - 0.625));
+    }
+    .ps[data-ready] .ps-pin {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      padding-top: var(--spacing-nav);
+      display: flex;
+      align-items: center;
+    }
+    .ps[data-ready] .ps-grid {
+      width: 100%;
+      align-items: center;
+      padding-inline-end: max(var(--grid-margin), 4rem);
+    }
+    .ps[data-ready] .ps-stage :global(.cs-browser) {
+      width: min(100%, calc((100svh - var(--spacing-nav) - 5rem) * 16 / 10));
+      margin-left: auto;
+    }
+    .ps[data-ready] .ps-view {
+      overflow: hidden;
+    }
+    .ps[data-ready] .ps-page {
+      will-change: transform;
+    }
+    .ps[data-ready] .ps-note__body {
+      display: none;
+    }
+    .ps[data-ready] .ps-bodies {
+      display: grid;
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--color-edge);
+      min-height: 7.5em;
+    }
+    .ps[data-ready] .ps-body {
+      grid-area: 1 / 1;
+      max-width: 34ch;
+      visibility: hidden;
+    }
+    .ps[data-ready] .ps-body.is-active {
+      visibility: visible;
+    }
+    .ps[data-ready] .ps-mark {
+      scale: 0.85;
+    }
+    .ps[data-ready] .ps-mark.is-active {
+      scale: 1.25;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ps-mark {
+      transition: none;
+    }
+  }
+
+  /* Shown only on phones and tablets (below). */
+  .ps-body__head,
+  .ps-progress {
+    display: none;
+  }
+
+  /*
+    ── Phones and tablets ─────────────────────────────────────────────────
+    The window is a tall frame you scroll with your thumb (native momentum;
+    it hands the scroll back to the page at either end). Under it, the
+    numbers are a row of round buttons, and the note for the marker
+    crossing the middle of the window shows beneath them, changing as you
+    scroll (scrollerMobile, mobile-motion.ts). A hairline over the frame
+    shows how far down the page you are. Tapping a number scrolls the
+    window to it (pageScroller). Without JS every note is listed.
+  */
+  @media (max-width: 63.999rem) {
+    /* The page jump links become 44px chips, like the filters on Projects:
+       a row of underlined words was a row of 24px targets. */
+    .ps-jump {
+      gap: 0.5rem;
+    }
+    .ps-jump a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 2.75rem;
+      padding: 0 1.1rem;
+      border: 1px solid var(--color-edge-strong);
+      border-radius: var(--radius-control);
+      background-image: none;
+    }
+    .ps-jump a:active {
+      background-color: var(--color-surface-raised);
+    }
+
+    .ps :global(.ps-view) {
+      aspect-ratio: auto !important;
+      height: min(62svh, 34rem);
+      overflow-y: auto;
+      overscroll-behavior-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    :global(html.js) .ps-side {
+      display: contents;
+    }
+    :global(html.js) .ps-side > * {
+      grid-column: 1 / -1;
+      min-width: 0;
+    }
+    :global(html.js) .ps-side > p {
+      order: 1;
+    }
+    :global(html.js) .ps-side > h3 {
+      order: 2;
+      margin-top: -1.25rem;
+    }
+    :global(html.js) .ps-stage {
+      order: 3;
+      position: relative;
+    }
+    /* One row; on the narrowest phones it scrolls rather than wrapping. */
+    :global(html.js) .ps-notes {
+      order: 4;
+      position: relative;
+      display: flex;
+      margin: -0.5rem calc(-1 * var(--grid-margin)) 0;
+      padding-inline: calc(var(--grid-margin) - 0.6rem);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    :global(html.js) .ps-notes::-webkit-scrollbar {
+      display: none;
+    }
+    :global(html.js) .ps-notes > li {
+      display: contents;
+    }
+    :global(html.js) .ps-note {
+      display: grid;
+      flex: none;
+      place-items: center;
+      width: 2.75rem;
+      height: 2.75rem;
+      padding: 0;
+    }
+    :global(html.js) .ps-note::before {
+      display: none;
+    }
+    :global(html.js) .ps-note .cs-marker {
+      background: transparent;
+      color: var(--color-fg-muted);
+      box-shadow: inset 0 0 0 1px var(--color-edge-strong);
+      transition:
+        background-color var(--duration-fast) var(--ease-out-soft),
+        color var(--duration-fast) var(--ease-out-soft),
+        scale var(--duration-base) var(--ease-snap);
+    }
+    :global(html.js) .ps-note.is-active .cs-marker {
+      background: var(--color-accent-fill);
+      color: var(--color-on-accent);
+      box-shadow: none;
+      scale: 1.15;
+    }
+    :global(html.js) .ps-note:active .cs-marker {
+      scale: 0.9;
+    }
+    /* The label is still the button's name, just not printed twice. */
+    :global(html.js) .ps-note__label,
+    :global(html.js) .ps-note__body {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    :global(html.js) .ps-bodies {
+      order: 5;
+      display: grid;
+      margin-top: -0.75rem;
+      min-height: 0;
+    }
+    :global(html.js) .ps-body {
+      grid-area: 1 / 1;
+      max-width: 34rem;
+      opacity: 0;
+      visibility: hidden;
+      translate: 0 0.5rem;
+      transition:
+        opacity var(--duration-base) var(--ease-out-soft),
+        translate var(--duration-base) var(--ease-out-soft),
+        visibility 0s linear var(--duration-base);
+    }
+    :global(html.js) .ps-body.is-active {
+      opacity: 1;
+      visibility: visible;
+      translate: 0 0;
+      transition:
+        opacity var(--duration-base) var(--ease-out-soft),
+        translate var(--duration-base) var(--ease-out-soft),
+        visibility 0s;
+    }
+    :global(html.js) .ps-body__head {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.4rem;
+      font-weight: 600;
+    }
+    :global(html.js) .ps-progress {
+      display: block;
+      position: absolute;
+      z-index: 1;
+      left: 0.75rem;
+      right: 0.75rem;
+      top: 0;
+      height: 2px;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    :global(html.js) .ps-progress span {
+      display: block;
+      height: 100%;
+      background: var(--color-accent-fill);
+      transform: scaleX(var(--ps-p, 0));
+      transform-origin: 0 50%;
+    }
+    /* The numbers wait for the capture: on an empty dark window they
+       floated over nothing. scrollerMobile marks the page loaded. */
+    :global(html.js) .ps-mark {
+      scale: 0.85;
+      opacity: 0;
+      transition:
+        scale var(--duration-base) var(--ease-snap),
+        opacity var(--duration-base) var(--ease-out-soft);
+    }
+    :global(html.js) .ps-page.is-loaded .ps-mark {
+      opacity: 1;
+    }
+    :global(html.js) .ps-mark.is-active {
+      scale: 1.3;
+    }
+  }
+
+  @media (max-width: 63.999rem) and (prefers-reduced-motion: reduce) {
+    :global(html.js) .ps-body,
+    :global(html.js) .ps-body.is-active,
+    :global(html.js) .ps-note .cs-marker {
+      transition: none;
+      translate: none;
+    }
+  }
+</style>

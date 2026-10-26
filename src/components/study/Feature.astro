@@ -1,0 +1,182 @@
+---
+import StudyImage from './StudyImage.astro';
+import StudyVideo from './StudyVideo.astro';
+import { md } from '../../lib/markdown';
+import { tryStudyImage } from '../../lib/study-media';
+import type { CollectionEntry } from 'astro:content';
+
+/*
+  Feature — a heading and the author's text beside one to three pieces of
+  media (feature:<id>).
+
+  `split` (default): heading and text on the left five columns, sticky on
+  desktop; the media on the right. `stack`: text first at reading width,
+  then the media centred under it — for one wide recording.
+
+  Several items sit side by side at the same height: each one grows in
+  proportion to its aspect ratio, so a tall newsletter and a square phone
+  clip line up top and bottom without cropping. On phones a set of two or
+  three becomes a swipe row (native scroll snap, no JS); a single item
+  takes the full content width.
+
+  Images go through StudyImage, recordings through StudyVideo (same play
+  rules as everywhere else). A missing file renders the usual [NEED …].
+*/
+
+type Data = CollectionEntry<'studies'>['data'];
+type Feature = NonNullable<Data['features']>[number];
+
+interface Props {
+  feature: Feature;
+}
+
+const { feature: f } = Astro.props;
+const bodyHtml = await md(f.body);
+const base = `ft-${f.id}`;
+
+const items = await Promise.all(
+  f.media.map(async (m) => {
+    if (m.video) {
+      const v = m.video;
+      const c = v.crop ?? { x: 0, y: 0, w: 1, h: 1 };
+      const ar = ((v.width ?? 1600) * c.w) / ((v.height ?? 900) * c.h);
+      return { ...m, ar };
+    }
+    const img = await tryStudyImage(m.src);
+    return { ...m, ar: img ? img.width / img.height : 16 / 10 };
+  }),
+);
+const many = items.length > 1;
+/* Total width of the row in "heights", so the row can be held to the
+   screen height on desktop (a set of tall screenshots never runs taller
+   than the viewport). */
+const rowAr = items.reduce((sum, m) => sum + m.ar, 0);
+---
+
+<section
+  class:list={['cs-sec ft', `ft--${f.layout}`, many && 'ft--many']}
+  aria-labelledby={`${base}-title`}
+  style={`--ft-row: ${rowAr.toFixed(4)}`}
+>
+  <div class="container-bleed ft-grid">
+    <div class="ft-text">
+      <h2 id={`${base}-title`} class="cs-h2" data-split>{f.heading}</h2>
+      {bodyHtml && <div class="cs-prose ft-body" set:html={bodyHtml} data-reveal />}
+    </div>
+
+    <ul class="ft-media" data-lenis-prevent-horizontal aria-label={many ? f.heading : undefined} tabindex={many ? 0 : undefined}>
+      {
+        items.map((m) => (
+          <li class="ft-item" style={`--ar: ${m.ar.toFixed(4)}`} data-reveal>
+            <div class="ft-frame">
+              {m.video ? (
+                <StudyVideo video={m.video} />
+              ) : (
+                <StudyImage src={m.src!} alt={m.alt ?? ''} sizes={many ? '(min-width: 64rem) 30vw, 80vw' : '(min-width: 64rem) 58vw, 100vw'} />
+              )}
+            </div>
+            {m.caption && <p class="mt-3 text-small text-fg-muted">{m.caption}</p>}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .ft-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+    row-gap: var(--spacing-block);
+    align-items: start;
+  }
+
+  .ft-text,
+  .ft-media {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .ft-body {
+    margin-top: var(--spacing-stack);
+  }
+
+  .ft-media {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    gap: var(--grid-gutter);
+    align-items: flex-start;
+  }
+
+  /* Equal heights: widths in proportion to each item's aspect ratio. */
+  .ft-item {
+    flex: var(--ar) 1 0;
+    min-width: 0;
+  }
+
+  /* A single item takes the row (a flex-grow under 1 would leave it short),
+     held to the screen height: a tall phone clip doesn't run off screen. */
+  .ft-item:only-child {
+    flex: 1 1 auto;
+    max-width: calc((100svh - 8rem) * var(--ar));
+    margin-inline: auto;
+  }
+
+  .ft-frame {
+    overflow: hidden;
+    border-radius: var(--radius-media);
+    background: var(--color-surface-raised);
+  }
+
+  .ft-frame :global(.cs-crop),
+  .ft-frame :global(.cs-video) {
+    border-radius: inherit;
+  }
+
+  @media (min-width: 64rem) {
+    .ft--split .ft-text {
+      grid-column: 1 / span 5;
+      position: sticky;
+      top: calc(var(--spacing-nav) + 1.5rem);
+    }
+    .ft--split .ft-media {
+      grid-column: 7 / -1;
+      /* Never taller than the screen. */
+      max-width: calc((100svh - 8rem) * var(--ft-row));
+      justify-self: end;
+      width: 100%;
+    }
+    .ft--stack .ft-media {
+      /* Leaves room for the heading above it in the same screen. */
+      max-width: min(100%, 64rem, (100svh - 16rem) * var(--ft-row));
+      justify-self: center;
+      width: 100%;
+    }
+  }
+
+  /* Phones: two or three items become a swipe row. */
+  @media (max-width: 47.999rem) {
+    .ft--many .ft-media {
+      margin-inline: calc(-1 * var(--grid-margin));
+      padding-inline: var(--grid-margin);
+      overflow-x: auto;
+      /* Its height follows the piece on screen (stripSwipe, mobile-motion.ts),
+         so a taller neighbour is cut at the bottom rather than scrolled. */
+      overflow-y: hidden;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--grid-margin);
+      scrollbar-width: none;
+    }
+    .ft--many .ft-media::-webkit-scrollbar {
+      display: none;
+    }
+    .ft--many .ft-item {
+      flex: 0 0 auto;
+      width: min(80vw, calc(70svh * var(--ar)));
+      scroll-snap-align: start;
+    }
+  }
+</style>

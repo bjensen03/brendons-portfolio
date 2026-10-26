@@ -1,0 +1,382 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import ExternalLink from '../ExternalLink.astro';
+import StudyVideo from './StudyVideo.astro';
+import StudyImage from './StudyImage.astro';
+import InShort from './InShort.astro';
+import { longestWordEm } from '../../lib/display-fit';
+
+/*
+  Hero. The study's name at the mega step, the one-line label under it,
+  then the facts (role, company, timeline, team, stack, live site) in a row.
+  Below, the hero visual: a recording or a still, visible from the first
+  paint and easing back from a slight zoom as the page scrolls
+  (data-study-zoom, skipped under reduced motion). `heroMedia.size` sets how
+  wide it runs — 'full' is edge to edge; 'large' and 'medium' are a centred,
+  rounded panel in the media's matte colour inside the page margins, with a
+  little of that colour round the media so the device has room. Phones
+  always get the full content width. `heroMedia.transparent` drops the
+  panel for an image on a transparent canvas.
+
+  A study's "In short" block, when it leads the layout, sits between the
+  facts and the media (the `inShort` prop, already rendered).
+
+  The name is the h1; the label is the line people remember. The live link
+  is plain fg type with the site's underline reveal — the accent is never a
+  text colour.
+*/
+
+interface Props {
+  data: CollectionEntry<'studies'>['data'];
+  parentHref?: string;
+  parentName?: string;
+  /* Rendered "In short" lines, when the block leads the layout. */
+  inShort?: string[];
+  /* The study has a Quick overview: the view switch (slot "switch") goes
+     between the facts and the media, and the header lays its parts out in
+     the article itself so the switch can stay sticky past the hero. */
+  split?: boolean;
+}
+
+const { data: d, parentHref, parentName, inShort, split = false } = Astro.props;
+
+const META = [
+  { label: 'Role', value: d.role },
+  { label: 'Company', value: d.company },
+  { label: 'Timeline', value: d.timeline },
+  { label: 'Team', value: d.team },
+  { label: 'Stack', value: d.stack },
+].filter((m) => m.value);
+
+/* Phones size the name so its longest word fills the column (CSS below). */
+const nameFit = longestWordEm(d.name);
+
+const liveLabel = d.live?.replace(/^https?:\/\//, '').replace(/\/$/, '');
+const media = d.heroMedia;
+const size = media?.size ?? 'full';
+const bare = !media?.video && media?.transparent === true;
+/* How wide the image is drawn — mirrors the panel caps in the CSS below
+   (share of the width, ceiling, viewport height × the crop's ratio).
+   StudyImage scales it up for the crop. */
+/* Below 48rem large and medium media sit inside the page margin
+   (--grid-margin, 1.25rem a side), not edge to edge. */
+const PHONE = 'calc(100vw - 2.5rem)';
+const imageSizes =
+  size === 'full'
+    ? '100vw'
+    : media?.crop
+      ? (r: number) =>
+          size === 'large'
+            ? `(min-width: 48rem) min(88vw, 100rem, (100vh - 9rem) * ${r.toFixed(4)}), ${PHONE}`
+            : `(min-width: 48rem) min(76vw, 80rem, (100vh - 11rem) * ${r.toFixed(4)}), ${PHONE}`
+      : { large: `(min-width: 48rem) 88vw, ${PHONE}`, medium: `(min-width: 48rem) 76vw, ${PHONE}` }[size];
+---
+
+<header class:list={['sh', split && 'sh--split']}>
+  <div class="sh-body container-bleed">
+    {
+      parentHref && (
+        <p class="sh-crumb text-small">
+          <a href={parentHref} class="link-reveal">{parentName}</a>
+          <span aria-hidden="true"> / </span>
+          {d.name}
+        </p>
+      )
+    }
+
+    <h1 class="sh-name text-mega" data-split="lines" style={`--sh-fit: ${nameFit}`}>{d.name}</h1>
+
+    <div class="sh-grid">
+      <p class="sh-label text-lead" data-reveal>{d.label}</p>
+
+      <dl class="sh-meta" data-reveal-group>
+        {
+          META.map((m) => (
+            <div data-reveal>
+              <dt class="text-small text-fg-muted">{m.label}</dt>
+              <dd class="text-small text-fg">{m.value}</dd>
+            </div>
+          ))
+        }
+        {
+          d.live && (
+            <div data-reveal>
+              <dt class="text-small text-fg-muted">Live site</dt>
+              <dd class="text-small text-fg">
+                <ExternalLink href={d.live} class="link-reveal font-medium">{liveLabel}</ExternalLink>
+              </dd>
+            </div>
+          )
+        }
+      </dl>
+    </div>
+
+    {
+      inShort && inShort.length > 0 && (
+        <div class="sh-short">
+          <InShort lines={inShort} />
+        </div>
+      )
+    }
+  </div>
+
+  <slot name="switch" />
+
+  {
+    media && (media.video || media.image) && (
+      <div class:list={['sh-media', `sh-media--${size}`, bare && 'sh-media--bare']}>
+        <div class="sh-media__stage" data-study-zoom>
+          {media.video ? (
+            <StudyVideo video={media.video} hero />
+          ) : (
+            media.image && (
+              <StudyImage
+                src={media.image.src}
+                alt={media.image.alt}
+                crop={media.crop}
+                sizes={imageSizes}
+                priority
+              />
+            )
+          )}
+        </div>
+      </div>
+    )
+  }
+</header>
+
+<style>
+  .sh {
+    padding-top: var(--spacing-section-sm);
+  }
+
+  /* With the view switch: the header's parts become the article's, so the
+     switch (between them) is a child of the article and stays sticky past
+     the hero. The top padding moves to the body. Phones: the article
+     orders them the way the plain header does (CaseStudy sets cs--views,
+     study.css lays the article out as a column), with the switch just
+     above the media. */
+  .sh--split {
+    display: contents;
+  }
+  .sh--split .sh-body {
+    padding-top: var(--spacing-section-sm);
+  }
+  @media (max-width: 39.999rem) {
+    .sh--split .sh-body {
+      padding-top: 0;
+    }
+    .sh--split .sh-crumb {
+      order: -10;
+      margin-top: var(--spacing-section-sm);
+    }
+    .sh--split .sh-name {
+      order: -9;
+      margin-top: var(--spacing-section-sm);
+    }
+    .sh--split .sh-crumb ~ .sh-name {
+      margin-top: 0;
+    }
+    .sh--split .sh-label {
+      order: -8;
+    }
+    .sh--split .sh-media {
+      order: -6;
+    }
+    .sh--split .sh-meta {
+      order: -5;
+    }
+    .sh--split .sh-short {
+      order: -4;
+    }
+  }
+
+  .sh-crumb {
+    margin-bottom: var(--spacing-stack);
+    color: var(--color-fg-muted);
+  }
+
+  .sh-crumb a {
+    color: var(--color-fg);
+  }
+
+  /* The longest word has to fit the column: MANUFACTURING is ~12.4em of
+     Archivo at 900 / 115%. */
+  .sh-name {
+    font-size: min(var(--text-mega), calc((100vw - 2 * var(--grid-margin)) / 12.6));
+    color: var(--color-fg);
+    overflow-wrap: normal;
+  }
+
+  /* Phones and tablets: the longest word of the name fills the column (--sh-fit is its
+     width in em, worked out above, with 4% kept back for kerning), up to
+     4.5rem. "MEAL PLANNER" lands at 55px instead of 28. */
+  @media (max-width: 63.999rem) {
+    .sh-name {
+      font-size: min(4.5rem, calc((100vw - 2 * var(--grid-margin)) / (var(--sh-fit, 12.6) * 1.04)));
+    }
+  }
+
+  .sh-grid {
+    margin-top: var(--spacing-block);
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+    row-gap: var(--spacing-block);
+  }
+
+  .sh-label {
+    grid-column: 1 / -1;
+    max-width: 30ch;
+    color: var(--color-fg);
+  }
+
+  .sh-meta {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem var(--grid-gutter);
+    align-content: start;
+  }
+
+  .sh-meta > div {
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--color-edge);
+  }
+
+  .sh-meta dd {
+    margin-top: 0.2rem;
+    overflow-wrap: anywhere;
+  }
+
+  @media (min-width: 64rem) {
+    .sh-label {
+      grid-column: 1 / span 6;
+    }
+    .sh-meta {
+      grid-column: 8 / -1;
+    }
+  }
+
+  .sh-short {
+    margin-top: var(--spacing-block);
+  }
+
+  .sh-media {
+    margin-top: var(--spacing-block);
+    overflow: hidden;
+  }
+
+  .sh-media :global(.cs-need) {
+    margin-inline: var(--grid-margin);
+  }
+
+  [data-study-zoom] {
+    transform-origin: 50% 0%;
+  }
+
+  /* The play/replay button is a 44px target on the hero. */
+  .sh-media :global(.cs-video__toggle) {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  /* Panel sizes. The media itself becomes the panel: centred inside the
+     margins, rounded, its own matte colour as the background (a clip on a
+     black matte reads as a black panel). The crop in the yaml sets how much
+     room the device has inside it. The width is capped three ways: a share
+     of the content width, an absolute ceiling, and the viewport height (via
+     the crop's aspect ratio) so the panel never runs taller than the screen.
+     Phones always get the full content width — the device is small there.
+     The play/replay button sits under the panel, right-aligned, so it never
+     lands on the device. */
+  .sh-media--large,
+  .sh-media--medium {
+    padding-inline: var(--grid-margin);
+  }
+
+  .sh-media--large .sh-media__stage > :global(*),
+  .sh-media--medium .sh-media__stage > :global(*) {
+    margin-inline: auto;
+  }
+
+  .sh-media--large :global(.cs-video),
+  .sh-media--medium :global(.cs-video) {
+    background: none;
+  }
+
+  .sh-media--large :global(.cs-crop),
+  .sh-media--medium :global(.cs-crop) {
+    border-radius: var(--radius-frame);
+    background: var(--matte, var(--color-surface-raised));
+  }
+
+  /* A transparent image (heroMedia.transparent): no panel behind it, the
+     device sits on the page. */
+  .sh-media--bare :global(.cs-crop) {
+    background: none;
+  }
+
+  .sh-media--large :global(.cs-video__toggle),
+  .sh-media--medium :global(.cs-video__toggle) {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    margin: 0.75rem 0 0 auto;
+  }
+
+  /* Phones: the work comes up into the first screen. Name, the line, then
+     the picture or recording, and the facts after it; before, the facts
+     filled the first screen and the work started below the
+     fold. The wrappers step aside (display: contents) so the pieces
+     can be reordered without touching the markup order screen readers get:
+     name, line, facts, media is still the reading order. */
+  @media (max-width: 39.999rem) {
+    .sh {
+      display: flex;
+      flex-direction: column;
+    }
+    .sh-body,
+    .sh-grid {
+      display: contents;
+    }
+    .sh-crumb,
+    .sh-name,
+    .sh-label,
+    .sh-meta,
+    .sh-short {
+      margin-inline: var(--grid-margin);
+    }
+    .sh-crumb {
+      order: 1;
+    }
+    .sh-name {
+      order: 2;
+    }
+    .sh-label {
+      order: 3;
+      margin-top: var(--spacing-stack);
+    }
+    .sh-media {
+      order: 4;
+      margin-top: var(--spacing-block);
+    }
+    .sh-meta {
+      order: 5;
+      margin-top: var(--spacing-block);
+    }
+    .sh-short {
+      order: 6;
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .sh-media--large .sh-media__stage > :global(*) {
+      max-width: min(86%, 100rem, (100svh - 9rem) * var(--crop-ratio, 1.6));
+    }
+
+    .sh-media--medium .sh-media__stage > :global(*) {
+      max-width: min(70%, 80rem, (100svh - 11rem) * var(--crop-ratio, 1.6));
+    }
+  }
+</style>

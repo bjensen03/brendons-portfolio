@@ -1,4 +1,6 @@
 ---
+import ExternalLink from '../ExternalLink.astro';
+
 /*
   Under the hood.
 
@@ -43,6 +45,16 @@ interface Props {
 const { data, stack } = Astro.props;
 const { problem, lighthouse, repo, liveUrl } = data;
 
+/* These are debugging stories with distinct beats — symptom, what it ruled out,
+   root cause, the fix and why not the obvious one — and running them together
+   as one twenty-five-line paragraph buries every one of them. A YAML folded
+   block keeps blank lines as newlines, so authoring a break is just leaving a
+   blank line in the frontmatter. Falls back to one paragraph if there are none. */
+const beats = problem
+  .split(/\n{2,}/)
+  .map((beat) => beat.trim())
+  .filter(Boolean);
+
 const scores = lighthouse
   ? [
       { label: 'Performance', value: lighthouse.performance },
@@ -64,94 +76,124 @@ const measuredOn = lighthouse
   : null;
 ---
 
-<section class="my-20 border-t border-edge pt-12 lg:-mx-24">
-  <h2
-    class="font-display text-4xl uppercase md:text-5xl"
-    style="letter-spacing: var(--tracking-display);"
-  >
-    Under the hood
-  </h2>
+{/*
+  Full-bleed and on ink. This is the section a hiring manager reads, and on
+  white at body size it looked like an appendix. The page now has three
+  registers — prose on paper, work at full width, evidence on ink — and this
+  belongs to the third.
+*/}
+<section data-tone="dark" class="relative left-1/2 mt-20 mb-0 w-screen -translate-x-1/2 bg-surface py-20 md:py-28">
+  <div class="container-bleed">
+    <p class="font-mono text-label tracking-widest text-fg-muted uppercase">The hard part</p>
 
-  <div class="mt-10 grid gap-12 lg:grid-cols-[1.4fr_0.6fr] lg:gap-16">
-    <div>
-      <h3 class="font-body text-2xs tracking-widest text-fg-faint uppercase">The hard part</h3>
-      <p class="mt-4 max-w-measure font-body text-lg text-fg">{problem}</p>
+    <h2
+      class="mt-5 max-w-[18ch] font-display text-heading leading-[1.02] font-extrabold text-fg md:text-display"
+      style="letter-spacing: var(--tracking-display);"
+    >
+      Under the hood
+    </h2>
 
-      {
-        /* The snippet, from the slot. Optional — not every hard problem is best
-           shown as code, and a contrived snippet is worse than none. */
-      }
-      <div class="mt-8 [&_pre]:overflow-x-auto [&_pre]:rounded-card [&_pre]:border [&_pre]:border-edge [&_pre]:p-5 [&_pre]:text-sm">
-        <slot />
-      </div>
-    </div>
-
-    <aside class="flex flex-col gap-10">
-      <div>
-        <h3 class="font-body text-2xs tracking-widest text-fg-faint uppercase">Stack</h3>
-        <ul class="mt-4 flex list-none flex-wrap gap-2 pl-0">
+    <div class="mt-14 grid gap-14 lg:grid-cols-[1.5fr_0.5fr] lg:gap-20">
+      {/* min-w-0 on phones: a grid item's min width defaults to its content's,
+          so a wide code sample stretched the column past the screen in WebKit
+          instead of scrolling inside its own box. */}
+      <div class="max-lg:min-w-0">
+        {/* Numbered beats. The count is the tell that this was a sequence of
+            deductions rather than a lucky guess, which is the whole point. */}
+        <ol class="grid list-none gap-8 pl-0">
           {
-            stack.map((item) => (
-              <li class="rounded-full border border-edge px-3 py-1 font-body text-2xs tracking-wide text-fg-muted">
-                {item}
+            beats.map((beat, index) => (
+              <li class="grid gap-4 sm:grid-cols-[3rem_1fr] sm:gap-6">
+                <span
+                  class="font-mono text-label text-fg-muted sm:pt-2"
+                  aria-hidden="true"
+                >
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <p class="max-w-measure font-body text-lead leading-relaxed text-fg">
+                  {beat}
+                </p>
               </li>
             ))
           }
-        </ul>
+        </ol>
+
+        {
+          /* The snippet, from the slot. Optional — not every hard problem is
+             best shown as code, and a contrived snippet is worse than none. */
+        }
+        <div data-lenis-prevent-horizontal class="mt-12 [&_pre]:overflow-x-auto [&_pre]:rounded-media [&_pre]:border [&_pre]:border-edge [&_pre]:bg-black/40 [&_pre]:p-6 [&_pre]:text-small">
+          <slot />
+        </div>
       </div>
 
-      {
-        scores.length > 0 && (
-          <div>
-            <h3 class="font-body text-2xs tracking-widest text-fg-faint uppercase">Lighthouse</h3>
-            <dl class="mt-4 grid grid-cols-2 gap-4">
-              {scores.map((score) => (
-                <div>
-                  <dt class="font-body text-2xs text-fg-faint">{score.label}</dt>
-                  <dd
-                    class:list={[
-                      'font-display text-3xl',
-                      score.value >= 90 ? 'text-fg-bright' : 'text-fg-muted',
-                    ]}
-                    style="letter-spacing: var(--tracking-display);"
-                  >
-                    {score.value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-            {/* Provenance, so the numbers are evidence rather than assertion. */}
-            <p class="mt-4 font-body text-2xs text-fg-faint">
-              Measured {measuredOn} on {lighthouse!.measuredUrl.replace(/^https?:\/\//, '')}
-            </p>
-          </div>
-        )
-      }
+      <aside class="flex flex-col gap-12">
+        <div>
+          <h3 class="font-mono text-label tracking-widest text-fg-muted uppercase">Stack</h3>
+          <ul class="mt-5 grid list-none gap-2 pl-0">
+            {
+              stack.map((item) => (
+                <li class="border-b border-edge pb-2 font-mono text-small text-fg">
+                  {item}
+                </li>
+              ))
+            }
+          </ul>
+        </div>
 
-      {
-        (repo || liveUrl) && (
-          <div class="flex flex-col gap-2">
-            {liveUrl && (
-              <a
-                href={liveUrl}
-                rel="noopener"
-                class="transition-soft font-body text-sm text-signal hover:text-signal-bright"
-              >
-                Visit the live site →
-              </a>
-            )}
-            {repo && (
-              <a
-                href={repo}
-                rel="noopener"
-                class="transition-soft font-body text-sm text-signal hover:text-signal-bright"
-              >
-                Read the source →
-              </a>
-            )}
-          </div>
-        )
-      }
-    </aside>
+        {
+          scores.length > 0 && (
+            <div>
+              <h3 class="font-mono text-label tracking-widest text-fg-muted uppercase">
+                Lighthouse
+              </h3>
+              <dl class="mt-5 grid grid-cols-2 gap-5">
+                {scores.map((score) => (
+                  <div>
+                    <dt class="font-mono text-label text-fg-muted">{score.label}</dt>
+                    <dd
+                      class:list={[
+                        'mt-1 font-display text-heading font-bold',
+                        score.value >= 90 ? 'text-fg' : 'text-fg-muted',
+                      ]}
+                      style="letter-spacing: var(--tracking-display);"
+                    >
+                      {score.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+              {/* Provenance, so the numbers are evidence rather than assertion. */}
+              <p class="mt-5 font-mono text-label text-fg-muted">
+                Measured {measuredOn} on {lighthouse!.measuredUrl.replace(/^https?:\/\//, '')}
+              </p>
+            </div>
+          )
+        }
+
+        {
+          (repo || liveUrl) && (
+            <div class="flex flex-col gap-3">
+              {liveUrl && (
+                <ExternalLink
+                  href={liveUrl}
+                  class="transition-soft font-body text-small text-fg underline decoration-edge-strong underline-offset-[6px] hover:decoration-current"
+                >
+                  Visit the live site
+                </ExternalLink>
+              )}
+              {repo && (
+                <ExternalLink
+                  href={repo}
+                  class="transition-soft font-body text-small text-fg underline decoration-edge-strong underline-offset-[6px] hover:decoration-current"
+                >
+                  Read the source
+                </ExternalLink>
+              )}
+            </div>
+          )
+        }
+      </aside>
+    </div>
   </div>
 </section>
