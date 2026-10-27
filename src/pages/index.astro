@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Opening from '../components/home/Opening.astro';
 import Hero from '../components/home/Hero.astro';
+import WhatIBuild from '../components/home/WhatIBuild.astro';
 import SelectedWork from '../components/home/SelectedWork.astro';
 import TechnicalSkills from '../components/home/TechnicalSkills.astro';
 import Testimonials from '../components/home/Testimonials.astro';
@@ -11,8 +12,8 @@ import TwilightSection from '../components/home/TwilightSection.astro';
   Home page.
 
   Opening (first visit of a session) → full-screen hero over the code field
-  → Selected work → Technical skills → What people say → The Twilight
-  Trekkers (short). The closing contact section (#contact) is the site
+  → What I build → Selected work → Technical skills → What people say →
+  The Twilight Trekkers (short). The closing contact section (#contact) is the site
   footer, from Base. Experience lives on the About page.
 
   Motion lives in src/scripts/home-motion.ts (the Twilight section's in
@@ -25,6 +26,7 @@ import TwilightSection from '../components/home/TwilightSection.astro';
 <Base preloadMono>
   <Opening />
   <Hero />
+  <WhatIBuild />
   <SelectedWork />
   <TechnicalSkills />
   <Testimonials />

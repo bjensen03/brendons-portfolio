@@ -1,12 +1,12 @@
 ---
 import { expertiseAreas, pad, textLink } from './data';
-import { buildLines, highlight, mealSwap } from './snippets';
+import { highlight, mealSwap } from './snippets';
 import { showPlaceholders } from '../../lib/placeholders';
 
 /*
-  Technical skills. What used to be two sections ("What I build" and
-  Expertise) in one: the skills as a single row, then the areas as tabs,
-  each with its tools and the projects that use them. The Frontend tab
+  Technical skills: the areas as tabs, each with its tools and the
+  projects that use them. The disciplines themselves are listed once, in
+  What I build above, so they aren't repeated here. The Frontend tab
   carries one real code excerpt, the swap button from Meal Planner.
 
   The tabs are a WAI-ARIA tabs pattern with a no-JS fallback: without
@@ -20,8 +20,6 @@ import { showPlaceholders } from '../../lib/placeholders';
 */
 
 const areas = await expertiseAreas();
-/* The skills from the old "What I build" lines, as one list. */
-const skills = buildLines.map((l) => l.label);
 ---
 
 <section id="skills" class="bg-white py-section" aria-labelledby="skills-title">
@@ -30,9 +28,6 @@ const skills = buildLines.map((l) => l.label);
       <div class="col-span-full lg:col-span-6">
         <h2 id="skills-title" class="text-section text-fg" data-split>Technical skills</h2>
       </div>
-      <ul class="skills-row col-span-full mt-stack lg:col-span-9" aria-label="Skills" data-reveal>
-        {skills.map((s) => <li class="text-lead text-fg">{s}</li>)}
-      </ul>
     </div>
 
     <div class="mt-block grid grid-cols-4 gap-x-(--grid-gutter) md:grid-cols-6 lg:grid-cols-12" data-tabs>
@@ -129,18 +124,6 @@ const skills = buildLines.map((l) => l.label);
 </section>
 
 <style>
-  /* The skills as one run of words with a muted dot between them. */
-  .skills-row {
-    display: flex;
-    flex-wrap: wrap;
-    row-gap: 0.25em;
-  }
-  .skills-row li:not(:last-child)::after {
-    content: '·';
-    margin-inline: 0.5em;
-    color: var(--color-fg-muted);
-  }
-
   /* The Meal Planner excerpt: the same code treatment the hero field and
      the case studies use. */
   .skill-code__pre {

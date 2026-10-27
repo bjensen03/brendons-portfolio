@@ -282,7 +282,7 @@ export const heroScroll = () => {
    (Hero.astro), switched on with .is-looping only while the hero is on
    screen and the tab is visible, so it costs nothing the rest of the time.
 
-   The cue is a plain link to #work, which is what it stays under
+   The cue is a plain link to #what-i-build, which is what it stays under
    reduced motion and without JS (an instant jump). Here the jump becomes a
    Lenis glide, and focus follows it so the next Tab carries on from the
    section rather than from the top of the page.
@@ -480,6 +480,156 @@ export const codeField = () => {
     hero.removeEventListener('pointerleave', leave);
     cancelAnimationFrame(raf);
     lit?.remove();
+  };
+};
+
+/* -------------------------------------------------------------------------
+   What I build — the line crossing the middle of the screen lights up, and
+   the panel types out the matching snippet.
+
+   Lighting is computed from the lines' positions on every scroll update
+   (one ScrollTrigger for the whole list) and written as a --lit variable the CSS mixes into the line's colour, so it
+   follows the live theme.
+
+   Typing walks the snippet's text nodes and reveals them in bursts of a few
+   dozen characters. Changing line cancels the current run and starts the
+   new one.
+   ---------------------------------------------------------------------- */
+
+export const whatIBuild = () => {
+  const section = document.querySelector<HTMLElement>('[data-build]');
+  if (!section) return;
+
+  const lines = Array.from(section.querySelectorAll<HTMLElement>('[data-build-line]'));
+  const panel = section.querySelector<HTMLElement>('[data-build-panel]');
+  const snippets = Array.from(section.querySelectorAll<HTMLElement>('[data-build-snippet]'));
+  if (!lines.length || !panel) return;
+
+  /* Each snippet's text nodes and their full text, captured once. */
+  const sources = snippets.map((fig) => {
+    const code = fig.querySelector('[data-build-code]');
+    const nodes: Text[] = [];
+    if (code) {
+      const walker = document.createTreeWalker(code, NodeFilter.SHOW_TEXT);
+      for (let n = walker.nextNode(); n; n = walker.nextNode()) nodes.push(n as Text);
+    }
+    return { nodes, full: nodes.map((n) => n.data) };
+  });
+
+  const restore = (i: number) => {
+    sources[i]?.nodes.forEach((n, j) => {
+      n.data = sources[i].full[j];
+    });
+    snippets[i]?.querySelector('[data-build-code]')?.classList.remove('is-typing');
+  };
+
+  let active = -1;
+  let typing = 0;
+
+  const type = (i: number) => {
+    cancelAnimationFrame(typing);
+    const src = sources[i];
+    if (!src) return;
+    src.nodes.forEach((n) => (n.data = ''));
+    const code = snippets[i]?.querySelector('[data-build-code]');
+    code?.classList.add('is-typing');
+    let node = 0;
+    let char = 0;
+    let last = 0;
+    const tick = (now: number) => {
+      /* Bursts of 25–40 characters roughly every 90ms (~350 a second): a
+         ten-line snippet lands in under a second and still reads as typed. */
+      if (now - last < 90) {
+        typing = requestAnimationFrame(tick);
+        return;
+      }
+      last = now;
+      let budget = 25 + Math.floor(Math.random() * 16);
+      while (budget > 0 && node < src.nodes.length) {
+        const full = src.full[node];
+        const take = Math.min(budget, full.length - char);
+        char += take;
+        budget -= take;
+        src.nodes[node].data = full.slice(0, char);
+        if (char >= full.length) {
+          node += 1;
+          char = 0;
+        }
+      }
+      if (node < src.nodes.length) {
+        typing = requestAnimationFrame(tick);
+      } else {
+        typing = 0;
+        code?.classList.remove('is-typing');
+      }
+    };
+    typing = requestAnimationFrame(tick);
+  };
+
+  const activate = (i: number) => {
+    if (i === active) return;
+    if (active >= 0) restore(active);
+    active = i;
+    snippets.forEach((fig, n) => fig.classList.toggle('is-active', n === i));
+    type(i);
+  };
+
+  const update = () => {
+    /* All reads first, then all writes, so this costs one layout per frame
+       rather than one per line. Cached document offsets were tried and went
+       stale whenever anything above (fonts, the hero's split) reflowed. */
+    /* Below 1024 the snippet panel is docked over the bottom of the screen,
+       so the middle is the middle of what's left above it. */
+    const dock = !matchMedia(desktopQuery).matches ? panel.offsetHeight : 0;
+    const mid = (innerHeight - dock) / 2;
+    const spread = (lines[0]?.offsetHeight || 100) * 1.1;
+    const lit = lines.map((line) => {
+      const r = line.getBoundingClientRect();
+      return Math.max(0, 1 - Math.abs(r.top + r.height / 2 - mid) / spread);
+    });
+    let best = 0;
+    lit.forEach((v, i) => {
+      lines[i].style.setProperty('--lit', v.toFixed(3));
+      if (v > lit[best]) best = i;
+    });
+    /* Phones: past the last line (or before the first) nothing is lit, and
+       the dock fell back to the first snippet under PERFORMANCE. Keep the
+       nearest line's snippet instead. */
+    if (dock && lit[best] === 0) {
+      const last = lines[lines.length - 1].getBoundingClientRect();
+      best = last.top + last.height / 2 < mid ? lines.length - 1 : 0;
+    }
+    /* Phones: the dock rises once the first line is on its way to the
+       reading line, not as soon as the section peeks in under the hero —
+       there it covered the list's first lines on the opening screen. */
+    if (dock) {
+      const first = lines[0].getBoundingClientRect();
+      panel.classList.toggle('is-docked', first.top < innerHeight * 0.45);
+    }
+    activate(best);
+  };
+
+  panel.classList.add('is-ready');
+
+  const ctx = gsap.context(() => {
+    ScrollTrigger.create({
+      trigger: section,
+      start: 'top bottom',
+      end: 'bottom top',
+      onRefresh: update,
+      onUpdate: update,
+    });
+  }, section);
+
+  update();
+
+  return () => {
+    cancelAnimationFrame(typing);
+    if (active >= 0) restore(active);
+    ctx.revert();
+    panel.classList.remove('is-ready', 'is-docked');
+    snippets.forEach((fig) => fig.classList.remove('is-active'));
+    lines.forEach((l) => l.style.removeProperty('--lit'));
   };
 };
 
