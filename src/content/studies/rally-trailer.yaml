@@ -74,6 +74,7 @@ layout:
   - role
   - glance
   - eras
+  - viewer:then-now
   - mockup:studio-display
   - decisions
   - mockup:ipad
@@ -245,6 +246,14 @@ scroller:
           x: 0.08
           y: 0.25
 
+# The strongest then/now pair, for the overview's before/after slider.
+beforeAfter:
+  before: rally-trailer/then-now/trailer-6-position-then.webp
+  after: rally-trailer/then-now/trailer-6-position-now.webp
+  beforeAlt: 'The 2025 EHRB-6P page: the title "6 Position Electric Hydraulic (EHRB-6P)" above a cropped photo of the trailer.'
+  afterAlt: 'The EHRB-6P page now: a full-width photo of the trailer with the model name and its GVWR, payload, reel width and reel diameter over it.'
+  caption: The same trailer page, before and after the rebuild.
+
 viewers:
   - id: buy-now
     heading: Buy Now and Rent to Own
@@ -341,6 +350,139 @@ viewers:
           - Update dealership information and branding
 
           The portal turned the website into ==a working tool for the dealer relationship== instead of just a public marketing site.
+
+  - id: then-now
+    heading: Then and now
+    intro: |
+      The same pages on the 2025 staging site and on the live site today. Contact details on the dealer pages are covered.
+    steps:
+      - tab: '2025'
+        group: Home
+        title: The 2025 home page
+        url: staging.rallytrailermfg.com
+        src: rally-trailer/then-now/home-then.webp
+        narrow: rally-trailer/then-now/home-then-phone.webp
+        alt: 'The 2025 home page: the Rally Trailer Manufacturing logo, a short menu with a cart icon, and "For crews who are out there every day" over a photo of part of a trailer.'
+        body: |
+          The same headline on the 2025 build, over a photo that shows only part of a trailer, with a cart icon in the header.
+      - tab: 'Now'
+        group: Home
+        title: The home page now
+        url: rallytrailermfg.com
+        src: rally-trailer/then-now/home-now.webp
+        narrow: rally-trailer/then-now/home-now-phone.webp
+        alt: 'The home page now: the RTM mark, a centered menu, a Dealer Login button and search, and the same headline over a full-width photo of a trailer in the field.'
+        body: |
+          Now the photo shows the whole trailer, and the header has a Dealer Login and search instead of a cart.
+      - tab: '2025'
+        group: Trailer page (EHRB-6P)
+        title: A trailer page in 2025
+        url: staging.rallytrailermfg.com/6-position-electric-hydraulic
+        src: rally-trailer/then-now/trailer-6-position-then.webp
+        narrow: rally-trailer/then-now/trailer-6-position-then-phone.webp
+        alt: 'The 2025 EHRB-6P page: the title "6 Position Electric Hydraulic (EHRB-6P)" above a cropped photo of the trailer.'
+        body: |
+          The trailer name as a page title, then a cropped photo. Nothing about the trailer itself on the first screen.
+      - tab: 'Now'
+        group: Trailer page (EHRB-6P)
+        title: A trailer page now
+        url: rallytrailermfg.com/trailers/6-position-electric-hydraulic
+        src: rally-trailer/then-now/trailer-6-position-now.webp
+        narrow: rally-trailer/then-now/trailer-6-position-now-phone.webp
+        alt: 'The EHRB-6P page now: a full-width photo of the trailer with "Power / Telecom", the model name and its GVWR, payload, reel width and reel diameter over it.'
+        body: |
+          The trailer fills the first screen, with its category and four key specs over the photo, and the Buy Now and Rent to Own buttons right under them.
+      - tab: '2025'
+        group: Trailer page (HL4P-48)
+        title: Another trailer page
+        url: staging.rallytrailermfg.com/hl4p-48
+        src: rally-trailer/then-now/trailer-hl4p-48-then.webp
+        narrow: rally-trailer/then-now/trailer-hl4p-48-then-phone.webp
+        alt: 'The 2025 HL4P-48 page: the title "Hydraulic Load 4 Place-48" above a mountain photo, with the trailer at its bottom edge.'
+        body: |
+          The same pattern: a title, then a landscape photo with the trailer at the bottom edge.
+      - tab: 'Now'
+        group: Trailer page (HL4P-48)
+        title: Another trailer page now
+        url: rallytrailermfg.com/trailers/hydraulic-load-4-place-48
+        src: rally-trailer/then-now/trailer-hl4p-48-now.webp
+        narrow: rally-trailer/then-now/trailer-hl4p-48-now-phone.webp
+        alt: 'The HL4P-48 page now: "Telecom", the model name, and 9,500 lbs GVWR, 7,000 lbs payload, 65 inch reel width and 120 inch reel diameter over a photo of the trailer.'
+        body: |
+          The same layout for every trailer: the specs a buyer compares are the first thing on the page.
+      - tab: '2025'
+        group: Telecom grid
+        title: The telecom trailers in 2025
+        url: staging.rallytrailermfg.com/telecom-trailers
+        src: rally-trailer/then-now/telecom-then.webp
+        narrow: rally-trailer/then-now/telecom-then-phone.webp
+        alt: 'The 2025 Telecom Trailers page: a heading and three trailer photos, with no names or details under them.'
+        body: |
+          Three photos with no trailer names, specs or filters.
+      - tab: 'Now'
+        group: Telecom grid
+        title: The telecom trailers now
+        url: rallytrailermfg.com/telecom-trailers
+        src: rally-trailer/then-now/telecom-now-tall.webp
+        crop: { x: 0, y: 0.32, w: 1, h: 0.5 }
+        narrow: rally-trailer/then-now/telecom-now-phone.webp
+        alt: 'The Telecom page now: filters for reel diameter, reel width, payload, features and options above a grid of named trailer cards, each with Compare and View More.'
+        body: |
+          Every telecom trailer as a named card with Compare, and filters across the top.
+      - tab: '2025'
+        group: Find a dealer
+        title: Finding a dealer in 2025
+        url: staging.rallytrailermfg.com/find-a-dealer
+        src: rally-trailer/then-now/find-a-dealer-then.webp
+        narrow: rally-trailer/then-now/find-a-dealer-then-phone.webp
+        alt: 'The 2025 Find a Rally Trailer Dealer page: a heading over a map of the United States with three red pins.'
+        body: |
+          A map with dealer pins, and you had to find yourself on it.
+      - tab: 'Now'
+        group: Find a dealer
+        title: Finding a dealer now
+        url: rallytrailermfg.com/find-a-dealer
+        src: rally-trailer/then-now/find-a-dealer-now.webp
+        narrow: rally-trailer/then-now/find-a-dealer-now-phone.webp
+        alt: 'The Find a Rally Trailer Dealer page now: a ZIP code box with a Find Nearest Dealer button above the dealer map.'
+        body: |
+          A ZIP code box above the map. Enter it, and the site finds the nearest dealer.
+      - tab: '2025'
+        group: Literature
+        title: The 2025 literature page
+        url: staging.rallytrailermfg.com/literature
+        src: rally-trailer/then-now/literature-then.webp
+        narrow: rally-trailer/then-now/literature-then-phone.webp
+        alt: 'The 2025 Literature page: a red "Literature" heading over two catalog covers, Product Catalog and Telecom Catalog.'
+        body: |
+          Two catalog covers side by side under a red heading.
+      - tab: 'Now'
+        group: Literature
+        title: The literature page now
+        url: rallytrailermfg.com/literature
+        src: rally-trailer/then-now/literature-now.webp
+        narrow: rally-trailer/then-now/literature-now-phone.webp
+        alt: 'The Literature page now: "Catalogs & spec sheets" above the Literature heading, then a Product Catalogs section.'
+        body: |
+          Catalogs and spec sheets, with the product catalogs in their own section.
+      - tab: '2025'
+        group: About
+        title: The 2025 about page
+        url: staging.rallytrailermfg.com/about
+        src: rally-trailer/then-now/about-then.webp
+        narrow: rally-trailer/then-now/about-then-phone.webp
+        alt: 'The 2025 About page: a "Family Built Tough" heading and a long paragraph beside a photo of the team in front of a trailer.'
+        body: |
+          A long block of text beside a team photo.
+      - tab: 'Now'
+        group: About
+        title: The about page now
+        url: rallytrailermfg.com/about
+        src: rally-trailer/then-now/about-now.webp
+        narrow: rally-trailer/then-now/about-now-phone.webp
+        alt: 'The About page now: "About Rally Trailers" and "Family built. Field tested. American made." over a full-width photo of a cable reel, with "Family Built Tough" starting below.'
+        body: |
+          A full-width opening over a cable reel, with the story moved below it.
 
 strips:
   - id: marketing
@@ -755,7 +897,7 @@ overview:
       body: |
         More than 30 trailer models have structured product pages, and marketing builds pages from 27 reusable modules without a developer. I don't own Rally's sales analytics, so I don't claim a sales number.
       labels: ['Performance', 'Reusable modules']
-      show: ['mockup:ipad']
+      show: ['beforeAfter']
     - heading: Reflection
       body: |
         Next time I'd start with a staging environment that matches production. The portal bug only showed up on production.
