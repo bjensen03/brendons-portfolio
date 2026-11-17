@@ -246,14 +246,6 @@ scroller:
           x: 0.08
           y: 0.25
 
-# The strongest then/now pair, for the overview's before/after slider.
-beforeAfter:
-  before: rally-trailer/then-now/trailer-6-position-then.webp
-  after: rally-trailer/then-now/trailer-6-position-now.webp
-  beforeAlt: 'The 2025 EHRB-6P page: the title "6 Position Electric Hydraulic (EHRB-6P)" above a cropped photo of the trailer.'
-  afterAlt: 'The EHRB-6P page now: a full-width photo of the trailer with the model name and its GVWR, payload, reel width and reel diameter over it.'
-  caption: The same trailer page, before and after the rebuild.
-
 viewers:
   - id: buy-now
     heading: Buy Now and Rent to Own
@@ -897,7 +889,7 @@ overview:
       body: |
         More than 30 trailer models have structured product pages, and marketing builds pages from 27 reusable modules without a developer. I don't own Rally's sales analytics, so I don't claim a sales number.
       labels: ['Performance', 'Reusable modules']
-      show: ['beforeAfter']
+      show: ['mockup:ipad']
     - heading: Reflection
       body: |
         Next time I'd start with a staging environment that matches production. The portal bug only showed up on production.
