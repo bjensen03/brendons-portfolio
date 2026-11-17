@@ -352,7 +352,7 @@ export const experience = async (): Promise<Role[]> => {
     dates: '2024 to Present',
     title: 'Web Designer & Developer',
     company: 'Freelance',
-    line: 'WordPress sites I designed and built for local businesses, including DeDona Restoration and American Legacy.',
+    line: 'WordPress sites I designed and built for local businesses, including DeDona Restoration, American Legacy and Riverca Pro.',
   });
 
   return rows;

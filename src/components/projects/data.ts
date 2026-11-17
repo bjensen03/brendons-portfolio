@@ -172,8 +172,9 @@ const fromStudy = async (s: Study, number: string, tags: Tag[], link = true): Pr
 
 /*
   Freelance client sites (2024 to present, alongside the jobs above), shown
-  together as one entry: DeDona Restoration and American Legacy, both live,
-  each linking to its site. The one line is the kind of business and job.
+  together as one entry: DeDona Restoration, American Legacy and Riverca
+  Pro, all live, each linking to its site. The one line is the kind of
+  business and job.
   An entry only shows once its image exists, so a missing file drops the
   tile rather than the build.
 */
@@ -197,6 +198,18 @@ const EARLIER: Array<Omit<SetItem, 'shot'> & { shot: string; alt: string }> = [
     linkLabel: 'Visit the site',
     shot: 'american-legacy/home.webp',
     alt: 'The top of the American Legacy Contracting home page on desktop: the logo, then a navy hero card reading "American Legacy Contracting" with Call Now and Get A Quote buttons and three value columns underneath.',
+  },
+  /* A WordPress site I built as the web developer in 2026, freelance, for a
+     construction and emergency restoration staffing company. Captured from
+     the live site. */
+  {
+    id: 'riverca-pro',
+    name: 'Riverca Pro',
+    line: 'Staffing company · site build · Live',
+    href: 'https://rivercapro.com/',
+    linkLabel: 'Visit the site',
+    shot: 'riverca-pro/home.webp',
+    alt: 'The top of the Riverca Pro home page on desktop: a 24/7 emergency dispatch bar, the Riverca logo and menu, then "Restoration & Construction Labor When You Need It." over a dark photo of a crew with drying equipment, with Build a Crew and Find Work buttons.',
   },
 ];
 
