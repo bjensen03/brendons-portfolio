@@ -7,26 +7,37 @@ import { longestWordEm } from '../../lib/display-fit';
   Every photo, once (/twilight-trekkers/, "The gallery"). 136 photographs
   from the library in seven groups, each opening in a lightbox.
 
-  Layout, per group:
+  Tabs: Best picks (the 20 Best-tier photos) first and open by default,
+  then one tab per group with its count. Only the open tab's panel is
+  shown; the others are display: none, so their lazy images aren't
+  requested until the tab is opened. Without JavaScript there are no tabs:
+  every group shows, stacked, and the Best picks panel (a repeat) is left
+  out. The lightbox steps through the open tab's photos only.
+
+  Layout, per panel:
     - The big tiles (Best picks with a large enough source, see
       gallery-data.ts) lead, side by side at one height (a justified row:
       each grows in proportion to its aspect ratio from a zero basis, so
-      they share a height and fill the width exactly). When they're too few
-      to fill a row at a sensible height (combined ratio under BIG_ROW_AR),
-      the group's label sits in the row beside them instead of above, so
-      the row is full rather than over-tall.
+      they share a height and fill the width exactly), split into rows of
+      about BIG_SPLIT_AR when there are many (Best picks). When they're too
+      few to fill a row at a sensible height (combined ratio under
+      BIG_ROW_AR), the label sits in the row beside them instead of above,
+      so the row is full rather than over-tall.
     - The rest, in justified rows fixed at build time, split so every row
       is about REST_ROW_AR heights wide: no short last row, no gaps.
-  Phones and tablets: the big tiles stack at full width and the rest
-  become two (three on tablets) columns at their own proportions.
+  Phones and tablets: the big tiles go two to a row (landscape ones full
+  width) and the rest become two (three on tablets) columns at their own
+  proportions.
 
-  Nothing is cropped: every tile has its photo's aspect ratio (so no
-  layout shift either). Tiles are 400/800px webp (big ones up to 1200,
-  never past the source), lazy and async. The lightbox image (1000/1600)
-  is only requested when a photo is opened.
+  Nothing is cropped (except a lone portrait big tile on phones, 4:5 on
+  its focus point): every tile has its photo's aspect ratio, so no layout
+  shift. Tiles are 400/800px webp (big ones up to 1200, never past the
+  source), lazy and async. The lightbox image (1000/1600) is only
+  requested when a photo is opened.
 */
 
 const BIG_ROW_AR = 2.6;
+const BIG_SPLIT_AR = 3.4;
 const REST_ROW_AR = 5.5;
 
 const FILES = import.meta.glob<ImageMetadata>(
@@ -39,19 +50,20 @@ const imageFor = (f: string): ImageMetadata => {
   return img;
 };
 
-/* Contiguous split into k rows with ratio sums as even as possible. Greedy
-   on cumulative ratio, which is exact enough here and linear. */
-const splitRows = <T extends { ar: number }>(items: T[]): T[][] => {
+/* Contiguous split into rows of about `target` ratio each, with ratio sums
+   as even as possible. Greedy on cumulative ratio, which is exact enough
+   here and linear. */
+const splitRows = <T extends { ar: number }>(items: T[], target = REST_ROW_AR): T[][] => {
   if (!items.length) return [];
   const total = items.reduce((s, i) => s + i.ar, 0);
-  const k = Math.max(1, Math.round(total / REST_ROW_AR));
+  const k = Math.max(1, Math.round(total / target));
   const rows: T[][] = [];
   let acc = 0;
   let row: T[] = [];
   for (const it of items) {
     const mid = acc + it.ar / 2;
-    const target = ((rows.length + 1) * total) / k;
-    if (row.length && mid > target && rows.length < k - 1) {
+    const goal = ((rows.length + 1) * total) / k;
+    if (row.length && mid > goal && rows.length < k - 1) {
       rows.push(row);
       row = [];
     }
@@ -64,32 +76,49 @@ const splitRows = <T extends { ar: number }>(items: T[]): T[][] => {
 
 type Tile = GalleryPhoto & { ar: number; img: ImageMetadata; full: string; fullSm: string; index: number; group: string };
 
-let index = 0;
+const groupLabel = (f: string) => GALLERY_GROUPS.find((g) => f.startsWith(`${g.id}/`))?.label ?? '';
+const tileFor = async (p: GalleryPhoto): Promise<Tile> => {
+  const img = imageFor(p.f);
+  const [lg, sm] = await Promise.all([
+    getImage({ src: img, width: Math.min(1600, img.width), format: 'webp' }),
+    getImage({ src: img, width: Math.min(1000, img.width), format: 'webp' }),
+  ]);
+  return { ...p, ar: p.w / p.h, img, full: lg.src, fullSm: sm.src, index: 0, group: groupLabel(p.f) };
+};
+
+const layout = (id: string, label: string, tab: string, tiles: Tile[]) => {
+  const big = tiles.filter((t) => t.big);
+  /* Phones: portrait big tiles go two to a row; a portrait left without a
+     partner is shown full width, cropped to 4:5 on its focus point. */
+  const portraits = big.filter((t) => t.ar < 1);
+  const solo = portraits.length % 2 === 1 ? portraits[portraits.length - 1] : undefined;
+  const rest = tiles.filter((t) => !t.big);
+  const bigAr = big.reduce((s, t) => s + t.ar, 0);
+  const bigRows = bigAr > BIG_SPLIT_AR * 1.5 ? splitRows(big, BIG_SPLIT_AR) : big.length ? [big] : [];
+  const rows = splitRows(rest);
+  /* Lightbox order = reading order within the panel. */
+  [...bigRows.flat(), ...rows.flat()].forEach((t, i) => (t.index = i));
+  return {
+    id,
+    label,
+    tab,
+    count: tiles.length,
+    bigRows,
+    bigAr,
+    solo,
+    labelInRow: bigRows.length === 1 && bigAr < BIG_ROW_AR,
+    rows,
+  };
+};
+
 const groups = await Promise.all(
-  GALLERY_GROUPS.map(async (g) => {
-    const photos = GALLERY_PHOTOS.filter((p) => p.f.startsWith(`${g.id}/`));
-    const tiles: Tile[] = [];
-    for (const p of photos) {
-      const img = imageFor(p.f);
-      const [lg, sm] = await Promise.all([
-        getImage({ src: img, width: Math.min(1600, img.width), format: 'webp' }),
-        getImage({ src: img, width: Math.min(1000, img.width), format: 'webp' }),
-      ]);
-      tiles.push({ ...p, ar: p.w / p.h, img, full: lg.src, fullSm: sm.src, index: 0, group: g.label });
-    }
-    const big = tiles.filter((t) => t.big);
-    /* Phones: portrait big tiles go two to a row; a portrait left without a
-       partner is shown full width, cropped to 4:5 on its focus point. */
-    const portraits = big.filter((t) => t.ar < 1);
-    const solo = portraits.length % 2 === 1 ? portraits[portraits.length - 1] : undefined;
-    const rest = tiles.filter((t) => !t.big);
-    const bigAr = big.reduce((s, t) => s + t.ar, 0);
-    return { ...g, count: tiles.length, big, bigAr, solo, labelInRow: big.length > 0 && bigAr < BIG_ROW_AR, rows: splitRows(rest) };
-  }),
+  GALLERY_GROUPS.map(async (g) =>
+    layout(g.id, g.label, g.tab, await Promise.all(GALLERY_PHOTOS.filter((p) => p.f.startsWith(`${g.id}/`)).map(tileFor))),
+  ),
 );
-/* Lightbox order = reading order: each group's big tiles, then its rows. */
-for (const g of groups) for (const t of [...g.big, ...g.rows.flat()]) t.index = index++;
-const total = index;
+const best = layout('best', 'Best picks', 'Best picks', await Promise.all(GALLERY_PHOTOS.filter((p) => p.best).map(tileFor)));
+const panels = [best, ...groups];
+const total = groups.reduce((s, g) => s + g.count, 0);
 
 const widths = (t: Tile, big: boolean) => [400, 800, ...(big ? [1200] : [])].filter((w) => w <= t.img.width);
 ---
@@ -101,52 +130,83 @@ const widths = (t: Tile, big: boolean) => [400, 800, ...(big ? [1200] : [])].fil
       Every photo in our library, once each: {total}, grouped by the kind of place. Tap one to see it larger.
     </p>
 
+    <div class="tg-tabs" data-reveal>
+      <div class="tg-tablist" role="tablist" aria-label="Photo groups" data-tg-tablist>
+        {
+          panels.map((p, i) => (
+            <button
+              type="button"
+              role="tab"
+              id={`tg-tab-${p.id}`}
+              class="tg-tab"
+              aria-selected={i === 0 ? 'true' : 'false'}
+              aria-controls={`tg-panel-${p.id}`}
+              tabindex={i === 0 ? 0 : -1}
+              data-tg-tab={p.id}
+            >
+              {p.tab}
+              <span class="tg-tab__count tabular-nums">{p.count}</span>
+            </button>
+          ))
+        }
+      </div>
+    </div>
+
     {
-      groups.map((g) => (
-        <div class="tg-group" role="group" aria-labelledby={`tg-${g.id}`}>
+      panels.map((g, i) => (
+        <div
+          class:list={['tg-group tg-panel', i === 0 && 'is-active', g.id === 'best' && 'tg-panel--best']}
+          id={`tg-panel-${g.id}`}
+          role="tabpanel"
+          aria-labelledby={`tg-tab-${g.id}`}
+          data-tg-panel={g.id}
+        >
           {!g.labelInRow && (
-            <h3 id={`tg-${g.id}`} class="tg-label" data-reveal>
+            <h3 id={`tg-${g.id}`} class="tg-label">
               <span class="text-sub text-fg">{g.label}</span>
               <span class="tg-count text-body text-fg-muted">{g.count} photos</span>
             </h3>
           )}
 
-          {g.big.length > 0 && (
+          {g.bigRows.length > 0 && (
             <div class:list={['tg-big', g.labelInRow && 'tg-big--label']}>
-              {g.labelInRow && (
-                <h3
-                  id={`tg-${g.id}`}
-                  class="tg-label tg-label--row"
-                  style={`--grow: ${Math.max(0.9, BIG_ROW_AR - g.bigAr).toFixed(3)}; --fit: ${longestWordEm(g.label)}`}
-                  data-reveal
-                >
-                  <span class="text-heading text-fg">{g.label}</span>
-                  <span class="tg-count text-body text-fg-muted">{g.count} photos</span>
-                </h3>
-              )}
-              {g.big.map((t) => (
-                <button
-                  type="button"
-                  class:list={['tg-tile', t.ar >= 1 && 'tg-tile--wide', t === g.solo && 'tg-tile--solo']}
-                  style={`--ar: ${t.ar.toFixed(4)}; --focus: ${t.focus ?? '50% 50%'}; aspect-ratio: ${t.w} / ${t.h}`}
-                  aria-haspopup="dialog"
-                  data-tg-tile={t.index}
-                  data-full={t.full}
-                  data-full-sm={t.fullSm}
-                  data-w={t.w}
-                  data-h={t.h}
-                  data-group={t.group}
-                >
-                  <Image
-                    src={t.img}
-                    alt={t.alt}
-                    widths={widths(t, true)}
-                    sizes="(min-width: 64rem) 45vw, 92vw"
-                    format="webp"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </button>
+              {g.bigRows.map((row, r) => (
+                <div class="tg-bigrow">
+                  {r === 0 && g.labelInRow && (
+                    <h3
+                      id={`tg-${g.id}`}
+                      class="tg-label tg-label--row"
+                      style={`--grow: ${Math.max(0.9, BIG_ROW_AR - g.bigAr).toFixed(3)}; --fit: ${longestWordEm(g.label)}`}
+                    >
+                      <span class="text-heading text-fg">{g.label}</span>
+                      <span class="tg-count text-body text-fg-muted">{g.count} photos</span>
+                    </h3>
+                  )}
+                  {row.map((t) => (
+                    <button
+                      type="button"
+                      class:list={['tg-tile', t.ar >= 1 && 'tg-tile--wide', t === g.solo && 'tg-tile--solo']}
+                      style={`--ar: ${t.ar.toFixed(4)}; --focus: ${t.focus ?? '50% 50%'}; aspect-ratio: ${t.w} / ${t.h}`}
+                      aria-haspopup="dialog"
+                      data-tg-tile={t.index}
+                      data-full={t.full}
+                      data-full-sm={t.fullSm}
+                      data-w={t.w}
+                      data-h={t.h}
+                      data-group={t.group}
+                    >
+                      <Image
+                        src={t.img}
+                        alt={t.alt}
+                        widths={widths(t, true)}
+                        sizes="(min-width: 64rem) 45vw, 92vw"
+                        format="webp"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </button>
+                  ))}
+                </div>
               ))}
             </div>
           )}
@@ -196,7 +256,7 @@ const widths = (t: Tile, big: boolean) => [400, 800, ...(big ? [1200] : [])].fil
       <p class="tg-lb__caption">
         <span class="block text-body text-fg" data-tg-alt></span>
         <span class="mt-1 block text-small text-fg-muted">
-          <span data-tg-group></span> · <span class="tabular-nums" data-tg-count></span> of {total}
+          <span data-tg-group></span> · <span class="tabular-nums" data-tg-count></span> of <span class="tabular-nums" data-tg-total>{best.count}</span>
         </span>
       </p>
       <div class="tg-lb__nav">
@@ -213,8 +273,102 @@ const widths = (t: Tile, big: boolean) => [400, 800, ...(big ? [1200] : [])].fil
 </section>
 
 <style>
+  /* ── Tabs ───────────────────────────────────────────────────────────
+     Bordered words in a row, the open one filled tan. Phones: one row
+     that scrolls sideways, running to the screen edge so the cut-off tab
+     says there's more. From tablets up the row wraps. */
+  .tg-tabs {
+    margin-top: var(--spacing-block);
+  }
+  .tg-tablist {
+    display: flex;
+    gap: 0.5rem;
+    margin-inline: calc(-1 * var(--grid-margin));
+    padding: 2px var(--grid-margin);
+    overflow-x: auto;
+    scroll-padding-inline: var(--grid-margin);
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .tg-tablist::-webkit-scrollbar {
+    display: none;
+  }
+  @media (min-width: 48rem) {
+    .tg-tablist {
+      flex-wrap: wrap;
+      margin-inline: 0;
+      padding-inline: 0;
+      overflow: visible;
+    }
+  }
+  .tg-tab {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0 1rem;
+    border: 1px solid var(--color-edge-strong);
+    border-radius: var(--radius-control);
+    color: var(--color-fg);
+    font-size: var(--text-small);
+    font-weight: 500;
+    white-space: nowrap;
+    transition:
+      background-color var(--duration-fast) var(--ease-out-soft),
+      border-color var(--duration-fast) var(--ease-out-soft),
+      color var(--duration-fast) var(--ease-out-soft);
+  }
+  .tg-tab__count {
+    color: var(--color-fg-muted);
+    font-weight: 400;
+  }
+  @media (hover: hover) {
+    .tg-tab:hover {
+      background: var(--color-surface-raised);
+    }
+  }
+  .tg-tab[aria-selected='true'] {
+    background: var(--color-accent-fill);
+    border-color: var(--color-accent-fill);
+    color: var(--color-on-accent);
+  }
+  .tg-tab[aria-selected='true'] .tg-tab__count {
+    color: inherit;
+    opacity: 0.75;
+  }
+  .tg-tab:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+  /* No script, no tabs: every group shows stacked, without the Best picks
+     repeat. */
+  :global(html:not(.js)) .tg-tabs,
+  :global(html:not(.js)) .tg-panel--best {
+    display: none;
+  }
+
   .tg-group {
     margin-top: var(--spacing-block);
+  }
+  /* With script, only the open panel shows (from first paint: the server
+     marks Best picks open). */
+  :global(html.js) .tg-panel {
+    margin-top: var(--spacing-stack);
+  }
+  :global(html.js) .tg-panel:not(.is-active) {
+    display: none;
+  }
+  .tg-panel:focus {
+    outline: none;
+  }
+  :global(html.motion-ok) .tg-panel.is-entering {
+    animation: tg-in var(--duration-base) var(--ease-out-soft) both;
+  }
+  @keyframes tg-in {
+    from {
+      opacity: 0;
+    }
   }
   .tg-label {
     display: flex;
@@ -256,8 +410,12 @@ const widths = (t: Tile, big: boolean) => [400, 800, ...(big ? [1200] : [])].fil
   .tg-big {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    grid-auto-flow: row dense;
     gap: 0.375rem;
     margin-bottom: 0.375rem;
+  }
+  .tg-bigrow {
+    display: contents;
   }
   .tg-big .tg-tile {
     width: 100%;
@@ -310,8 +468,13 @@ const widths = (t: Tile, big: boolean) => [400, 800, ...(big ? [1200] : [])].fil
   @media (min-width: 64rem) {
     .tg-big {
       display: flex;
+      flex-direction: column;
       gap: 0.5rem;
       margin-bottom: 0.5rem;
+    }
+    .tg-bigrow {
+      display: flex;
+      gap: 0.5rem;
     }
     .tg-big .tg-tile {
       flex: var(--ar) 1 0;
@@ -460,21 +623,89 @@ const widths = (t: Tile, big: boolean) => [400, 800, ...(big ? [1200] : [])].fil
 </style>
 
 <script>
-  import { registerMotion, motion } from '../../scripts/motion';
+  import { registerMotion, motion, prefersReducedMotion } from '../../scripts/motion';
 
-  /* The lightbox. Registered with reduced: true: it isn't motion. */
+  /* Tabs and the lightbox. Registered with reduced: true: neither is
+     motion (the panel fade is CSS, behind motion-ok). */
   const gallery = () => {
     const root = document.querySelector<HTMLElement>('[data-tg]');
     const lb = root?.querySelector<HTMLDialogElement>('[data-tg-lb]');
-    if (!root || !lb) return;
-    const tiles = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-tg-tile]')).sort(
-      (a, b) => Number(a.dataset.tgTile) - Number(b.dataset.tgTile),
-    );
+    const tablist = root?.querySelector<HTMLElement>('[data-tg-tablist]');
+    if (!root || !lb || !tablist) return;
+    const tabs = Array.from(tablist.querySelectorAll<HTMLButtonElement>('[data-tg-tab]'));
+    const panels = Array.from(root.querySelectorAll<HTMLElement>('[data-tg-panel]'));
     const img = lb.querySelector<HTMLImageElement>('[data-tg-img]')!;
     const altEl = lb.querySelector<HTMLElement>('[data-tg-alt]')!;
     const groupEl = lb.querySelector<HTMLElement>('[data-tg-group]')!;
     const countEl = lb.querySelector<HTMLElement>('[data-tg-count]')!;
+    const totalEl = lb.querySelector<HTMLElement>('[data-tg-total]')!;
     const stage = lb.querySelector<HTMLElement>('[data-tg-stage]')!;
+
+    /* The open panel's tiles, in reading order: the lightbox steps through
+       these only. */
+    let tiles: HTMLButtonElement[] = [];
+    const collect = (panel: HTMLElement) => {
+      tiles = Array.from(panel.querySelectorAll<HTMLButtonElement>('[data-tg-tile]')).sort(
+        (a, b) => Number(a.dataset.tgTile) - Number(b.dataset.tgTile),
+      );
+      totalEl.textContent = String(tiles.length);
+    };
+
+    /* ── Tabs ── */
+    let refreshTimer = 0;
+    const select = (tab: HTMLButtonElement, focus: boolean) => {
+      const id = tab.dataset.tgTab;
+      const panel = panels.find((p) => p.dataset.tgPanel === id);
+      if (!panel) return;
+      const changed = tab.getAttribute('aria-selected') !== 'true';
+      tabs.forEach((t) => {
+        const on = t === tab;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+      });
+      if (focus) tab.focus({ preventScroll: true });
+      /* Keep the open tab in view in the sideways-scrolling row. */
+      const tr = tab.getBoundingClientRect();
+      const lr = tablist.getBoundingClientRect();
+      if (tr.left < lr.left || tr.right > lr.right) {
+        tablist.scrollTo({ left: tablist.scrollLeft + tr.left - lr.left - 20, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+      }
+      if (!changed) return;
+      panels.forEach((p) => {
+        const on = p === panel;
+        p.classList.toggle('is-active', on);
+        p.classList.toggle('is-entering', on);
+      });
+      collect(panel);
+      /* If the tabs had scrolled off the top, bring them back so the new
+         panel starts in view (the old one may have been much taller). */
+      const top = tablist.getBoundingClientRect().top;
+      if (top < 0) {
+        const y = window.scrollY + top - 96;
+        if (motion.lenis) motion.lenis.scrollTo(y, { immediate: true, force: true });
+        else window.scrollTo(0, y);
+      }
+      /* The page below changed height. */
+      window.clearTimeout(refreshTimer);
+      refreshTimer = window.setTimeout(() => motion.ScrollTrigger.refresh(), 60);
+    };
+    const onTabClick = (e: Event) => select(e.currentTarget as HTMLButtonElement, false);
+    const onTabKey = (e: KeyboardEvent) => {
+      const i = tabs.indexOf(e.currentTarget as HTMLButtonElement);
+      let j = -1;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') j = (i + 1) % tabs.length;
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') j = (i - 1 + tabs.length) % tabs.length;
+      else if (e.key === 'Home') j = 0;
+      else if (e.key === 'End') j = tabs.length - 1;
+      if (j < 0) return;
+      e.preventDefault();
+      select(tabs[j], true);
+    };
+    const onAnimEnd = (e: AnimationEvent) => (e.target as HTMLElement).classList.remove('is-entering');
+
+    collect(panels.find((p) => p.classList.contains('is-active')) ?? panels[0]);
+
+    /* ── Lightbox ── */
     let current = 0;
     let opener: HTMLButtonElement | null = null;
 
@@ -495,7 +726,9 @@ const widths = (t: Tile, big: boolean) => [400, 800, ...(big ? [1200] : [])].fil
 
     const open = (t: HTMLButtonElement) => {
       opener = t;
-      show(Number(t.dataset.tgTile));
+      const panel = t.closest<HTMLElement>('[data-tg-panel]');
+      if (panel) collect(panel);
+      show(Math.max(0, tiles.indexOf(t)));
       motion.lenis?.stop();
       lb.showModal();
       lb.querySelector<HTMLButtonElement>('[data-tg-next]')?.focus();
@@ -540,13 +773,20 @@ const widths = (t: Tile, big: boolean) => [400, 800, ...(big ? [1200] : [])].fil
       const dy = e.clientY - sy;
       if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) (dx < 0 ? next : prev)();
     };
+    const cancel = () => (tracking = false);
 
+    const allTiles = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-tg-tile]'));
     const prevBtn = lb.querySelector('[data-tg-prev]')!;
     const nextBtn = lb.querySelector('[data-tg-next]')!;
     const closeBtn = lb.querySelector('[data-tg-close]')!;
     const close = () => lb.close();
 
-    tiles.forEach((t) => t.addEventListener('click', onTile));
+    tabs.forEach((t) => {
+      t.addEventListener('click', onTabClick);
+      t.addEventListener('keydown', onTabKey);
+    });
+    panels.forEach((p) => p.addEventListener('animationend', onAnimEnd));
+    allTiles.forEach((t) => t.addEventListener('click', onTile));
     prevBtn.addEventListener('click', prev);
     nextBtn.addEventListener('click', next);
     closeBtn.addEventListener('click', close);
@@ -555,10 +795,16 @@ const widths = (t: Tile, big: boolean) => [400, 800, ...(big ? [1200] : [])].fil
     stage.addEventListener('click', onStageClick);
     stage.addEventListener('pointerdown', down);
     stage.addEventListener('pointerup', up);
-    stage.addEventListener('pointercancel', () => (tracking = false));
+    stage.addEventListener('pointercancel', cancel);
 
     return () => {
-      tiles.forEach((t) => t.removeEventListener('click', onTile));
+      window.clearTimeout(refreshTimer);
+      tabs.forEach((t) => {
+        t.removeEventListener('click', onTabClick);
+        t.removeEventListener('keydown', onTabKey);
+      });
+      panels.forEach((p) => p.removeEventListener('animationend', onAnimEnd));
+      allTiles.forEach((t) => t.removeEventListener('click', onTile));
       prevBtn.removeEventListener('click', prev);
       nextBtn.removeEventListener('click', next);
       closeBtn.removeEventListener('click', close);
@@ -567,6 +813,7 @@ const widths = (t: Tile, big: boolean) => [400, 800, ...(big ? [1200] : [])].fil
       stage.removeEventListener('click', onStageClick);
       stage.removeEventListener('pointerdown', down);
       stage.removeEventListener('pointerup', up);
+      stage.removeEventListener('pointercancel', cancel);
       if (lb.open) lb.close();
     };
   };

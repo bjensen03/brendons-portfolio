@@ -30,14 +30,15 @@ export type GalleryPhoto = {
   alt: string;
 };
 
+/* `tab` is the short name on the gallery's tab; `label` heads the group. */
 export const GALLERY_GROUPS = [
-  { id: 'canyons', label: 'Canyons & slots' },
-  { id: 'desert', label: 'Desert, arches & overlooks' },
-  { id: 'mountains', label: 'Mountains, lakes & forests' },
-  { id: 'water', label: 'Waterfalls & water' },
-  { id: 'coast', label: 'Coast & islands' },
-  { id: 'aerial', label: 'Drone & aerial' },
-  { id: 'us', label: 'The two of us' },
+  { id: 'canyons', label: 'Canyons & slots', tab: 'Canyons & slots' },
+  { id: 'desert', label: 'Desert, arches & overlooks', tab: 'Desert' },
+  { id: 'mountains', label: 'Mountains, lakes & forests', tab: 'Mountains' },
+  { id: 'water', label: 'Waterfalls & water', tab: 'Water' },
+  { id: 'coast', label: 'Coast & islands', tab: 'Coast' },
+  { id: 'aerial', label: 'Drone & aerial', tab: 'Drone' },
+  { id: 'us', label: 'The two of us', tab: 'The two of us' },
 ] as const;
 
 export const GALLERY_PHOTOS: GalleryPhoto[] = [
